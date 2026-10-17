@@ -1,6 +1,6 @@
 # Dragon Vision
 
-A pixel-art, turn-based 5v5 fighter-collection RPG from Vision Creators. Collect fighters,
+A pixel-art, turn-based 5v5 fighter-collection RPG from NinefoldVision™. Collect fighters,
 level them with coins, evolve them with duplicates, and push through stages and bosses.
 Everything runs on the device; no internet connection or server is needed.
 

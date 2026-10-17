@@ -140,6 +140,7 @@ export function SettingsPanel({ save, update }: { save: SaveData; update: Update
         </button>
       </div>
       {message && <p className="small-text">{message}</p>}
+      <p className="studio-mark">Dragon Vision is a NinefoldVision™ game.</p>
     </section>
   );
 }
