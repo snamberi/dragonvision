@@ -1,7 +1,234 @@
-import { type Bonus, emptyBonus } from './bonus';
-import type { Unit } from './types';
+import { type Bonus, addBonus, emptyBonus } from './bonus';
+import { findUnit } from './progression';
+import type { SaveData, Unit } from './types';
 
-// Filled in with each character's own tree.
-export function awakeningBonus(_unit: Unit): Bonus {
-  return emptyBonus();
+/** Awakening points start at 9★: one per star, so a 21★ fighter has 13. */
+export const AWAKEN_FROM_STAR = 9;
+export const RESPEC_GEMS = 5;
+const TIER_COST = [1, 2, 3];
+
+export interface AwakenNode {
+  id: string;
+  name: string;
+  /** 1–3; tier 2 needs a tier-1 node, tier 3 needs a tier-2 node. */
+  tier: 1 | 2 | 3;
+  effect: Partial<Bonus>;
+}
+
+type Tree = [string, Partial<Bonus>][];
+
+// Six nodes per character: two per tier, in tier order. Every tree is its own.
+const TREES: Record<string, Tree> = {
+  kairo: [
+    ['Spark Training', { atk: 0.06 }],
+    ['Hungry Spirit', { hp: 0.08 }],
+    ['Ember Focus', { specialPower: 0.15 }],
+    ['Never Give Up', { lastStand: 0.25 }],
+    ['Zenith Surge', { chargeDiscount: 1 }],
+    ['Rise Again', { secondWind: 0.25 }],
+  ],
+  varek: [
+    ['Royal Pride', { atk: 0.08 }],
+    ["Prince's Guard", { def: 0.08 }],
+    ['Cannon Mastery', { specialPower: 0.2 }],
+    ["Rival's Fire", { firstStrike: 0.3 }],
+    ['Eclipse Will', { crit: 0.15 }],
+    ['Overcharge', { charge: 2 }],
+  ],
+  tobi: [
+    ['Light Feet', { spd: 3 }],
+    ['Monk Breathing', { ki: 20 }],
+    ['Flash Focus', { chargeDiscount: 1 }],
+    ['Cliff Discipline', { def: 0.12 }],
+    ['Thousand Palms', { crit: 0.15 }],
+    ['Brave Heart', { secondWind: 0.2 }],
+  ],
+  orrin: [
+    ['Horn Wisdom', { heal: 0.12 }],
+    ['Stone Skin', { hp: 0.1 }],
+    ['Deep Meditation', { ki: 25 }],
+    ['Sage Ward', { shield: 0.08 }],
+    ['Light of Ages', { heal: 0.25 }],
+    ['Quick Prayer', { chargeDiscount: 1 }],
+  ],
+  sora: [
+    ['Hidden Talent', { atk: 0.07 }],
+    ['Young Fury', { lastStand: 0.3 }],
+    ['Twin Comet Mastery', { specialPower: 0.2 }],
+    ['Mystic Insight', { crit: 0.08 }],
+    ['Awakened Potential', { atk: 0.12, hp: 0.08 }],
+    ['Prodigy Burst', { charge: 2 }],
+  ],
+  mei: [
+    ['Storm Step', { spd: 4 }],
+    ['Static Palm', { crit: 0.06 }],
+    ['Thunder Rhythm', { firstStrike: 0.35 }],
+    ['Lightning Reflex', { def: 0.1 }],
+    ['Eye of the Storm', { crit: 0.12, specialPower: 0.1 }],
+    ['Endless Storm', { charge: 1, ki: 20 }],
+  ],
+  vorg: [
+    ['Cold Tyranny', { atk: 0.07 }],
+    ['Pale Armor', { def: 0.1 }],
+    ['Death Ray Mastery', { specialPower: 0.18 }],
+    ['Hunger', { drain: 0.2 }],
+    ['Gilded Form', { hp: 0.15, def: 0.1 }],
+    ['Final Form', { secondWind: 0.3 }],
+  ],
+  nyx: [
+    ['Reinforced Frame', { hp: 0.1 }],
+    ['Targeting Chip', { crit: 0.06 }],
+    ['Infinite Core', { ki: 30 }],
+    ['Pulse Amplifier', { specialPower: 0.18 }],
+    ['Barrier Protocol', { shield: 0.15 }],
+    ['Overclock', { chargeDiscount: 1 }],
+  ],
+  mogra: [
+    ['Mountain Hide', { hp: 0.12 }],
+    ['Boulder Fists', { atk: 0.06 }],
+    ['Earthquake', { specialPower: 0.2 }],
+    ['Rage', { lastStand: 0.35 }],
+    ['Unbreakable', { def: 0.18, shield: 0.1 }],
+    ['Berserk Return', { secondWind: 0.3 }],
+  ],
+  jin: [
+    ['Sharp Edge', { crit: 0.06 }],
+    ['Swift Draw', { spd: 3 }],
+    ['First Cut', { firstStrike: 0.4 }],
+    ['Crescent Mastery', { specialPower: 0.18 }],
+    ['Ascended Blade', { crit: 0.12, atk: 0.06 }],
+    ['Iaido', { chargeDiscount: 1 }],
+  ],
+  aya: [
+    ['Petal Step', { spd: 4 }],
+    ['Blossom Grace', { hp: 0.08 }],
+    ['Petal Storm Mastery', { specialPower: 0.18 }],
+    ['Thorned Bloom', { edge: 0.15 }],
+    ['Full Bloom', { charge: 2 }],
+    ['Dance of Petals', { crit: 0.12, spd: 3 }],
+  ],
+  bruno: [
+    ['Iron Hide', { def: 0.12 }],
+    ['Big Frame', { hp: 0.12 }],
+    ['Bulwark Mastery', { shield: 0.1 }],
+    ['Stubborn', { lastStand: 0.2 }],
+    ['Iron Will', { secondWind: 0.35 }],
+    ['Fortress', { hp: 0.15, def: 0.12 }],
+  ],
+  kenji: [
+    ['Old Tricks', { ki: 20 }],
+    ['Hermit Health', { hp: 0.08 }],
+    ['Lesson Plan', { chargeDiscount: 1 }],
+    ['Turtle Shell', { shield: 0.1 }],
+    ['Max Power', { atk: 0.15, specialPower: 0.1 }],
+    ['Second Youth', { secondWind: 0.25 }],
+  ],
+  lyra: [
+    ['Star Map', { crit: 0.06 }],
+    ['Ranger Boots', { spd: 3 }],
+    ['Starfall Mastery', { specialPower: 0.2 }],
+    ['Nova Core', { ki: 25 }],
+    ['Supernova', { charge: 2 }],
+    ['Constellation', { edge: 0.2, atk: 0.06 }],
+  ],
+  zeno: [
+    ['Rift Sight', { hp: 0.1 }],
+    ['Rift Mend', { heal: 0.15 }],
+    ['Unseal', { ki: 30 }],
+    ['Veil', { shield: 0.12 }],
+    ['Quick Rebirth', { chargeDiscount: 2 }],
+    ['Undying Keeper', { secondWind: 0.35 }],
+  ],
+  grimm: [
+    ['Demon Blood', { hp: 0.1 }],
+    ['Hellfire', { atk: 0.07 }],
+    ['Soul Hunger', { drain: 0.25 }],
+    ["Lord's Wrath", { specialPower: 0.18 }],
+    ['True Demon', { lastStand: 0.4, atk: 0.08 }],
+    ['Undying King', { secondWind: 0.3 }],
+  ],
+  sylas: [
+    ['Regeneration', { hp: 0.12 }],
+    ['Absorb Cells', { drain: 0.15 }],
+    ['Adaptive Armor', { def: 0.12 }],
+    ['Perfect Form', { specialPower: 0.15 }],
+    ['Perfect Being', { atk: 0.1, hp: 0.1, def: 0.05 }],
+    ['Cell Rebirth', { secondWind: 0.4 }],
+  ],
+  kael: [
+    ['Void Touch', { atk: 0.08 }],
+    ['Dark Echo', { crit: 0.07 }],
+    ['Void Cannon Mastery', { specialPower: 0.22 }],
+    ['Corruption', { edge: 0.2 }],
+    ['Void Form', { chargeDiscount: 1, charge: 1 }],
+    ['Echo Never Ends', { lastStand: 0.4 }],
+  ],
+};
+
+export function awakeningTree(familyId: string): AwakenNode[] {
+  const tree = TREES[familyId] ?? [];
+  return tree.map(([name, effect], i) => ({
+    id: `${familyId}-${i}`,
+    name,
+    tier: (Math.floor(i / 2) + 1) as 1 | 2 | 3,
+    effect,
+  }));
+}
+
+/** Registers extra trees (fusion characters add theirs). */
+export function registerTree(familyId: string, tree: Tree): void {
+  TREES[familyId] = tree;
+}
+
+export function nodeCost(node: AwakenNode): number {
+  return TIER_COST[node.tier - 1];
+}
+
+export function awakenPoints(unit: Unit): number {
+  return Math.max(0, unit.star - AWAKEN_FROM_STAR + 1);
+}
+
+export function spentPoints(unit: Unit): number {
+  const tree = awakeningTree(unit.familyId);
+  return (unit.awakened ?? []).reduce((sum, id) => {
+    const node = tree.find((n) => n.id === id);
+    return sum + (node ? nodeCost(node) : 0);
+  }, 0);
+}
+
+export function canAwaken(unit: Unit, node: AwakenNode): { ok: boolean; reason?: string } {
+  const owned = new Set(unit.awakened ?? []);
+  if (owned.has(node.id)) return { ok: false, reason: 'Already awakened' };
+  if (awakenPoints(unit) === 0) return { ok: false, reason: `Awakening starts at ${AWAKEN_FROM_STAR}★` };
+  if (awakenPoints(unit) - spentPoints(unit) < nodeCost(node)) return { ok: false, reason: 'Not enough points' };
+  if (node.tier > 1) {
+    const below = awakeningTree(unit.familyId).filter((n) => n.tier === node.tier - 1);
+    if (!below.some((n) => owned.has(n.id))) return { ok: false, reason: `Unlock a tier ${node.tier - 1} node first` };
+  }
+  return { ok: true };
+}
+
+export function awaken(save: SaveData, uid: string, nodeId: string): SaveData {
+  const unit = findUnit(save, uid);
+  const node = awakeningTree(unit.familyId).find((n) => n.id === nodeId);
+  if (!node) throw new Error('Unknown awakening');
+  const check = canAwaken(unit, node);
+  if (!check.ok) throw new Error(check.reason);
+  return { ...save, units: save.units.map((u) => (u.uid === uid ? { ...u, awakened: [...(u.awakened ?? []), nodeId] } : u)) };
+}
+
+/** Refunds every awakening point for gems. */
+export function respecAwakening(save: SaveData, uid: string): SaveData {
+  const unit = findUnit(save, uid);
+  if (!unit.awakened?.length) throw new Error('Nothing to reset');
+  if (save.gems < RESPEC_GEMS) throw new Error('Not enough gems');
+  return { ...save, gems: save.gems - RESPEC_GEMS, units: save.units.map((u) => (u.uid === uid ? { ...u, awakened: [] } : u)) };
+}
+
+export function awakeningBonus(unit: Unit): Bonus {
+  const tree = awakeningTree(unit.familyId);
+  return (unit.awakened ?? []).reduce((total, id) => {
+    const node = tree.find((n) => n.id === id);
+    return node ? addBonus(total, node.effect) : total;
+  }, emptyBonus());
 }
