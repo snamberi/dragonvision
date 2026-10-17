@@ -78,6 +78,7 @@ export function newSave(): SaveData {
     items: [],
     nextItemId: 1,
     shop: { day: '', refreshes: 0, bought: [] },
+    seenScenes: [],
   };
 }
 

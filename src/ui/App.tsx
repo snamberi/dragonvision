@@ -48,6 +48,11 @@ export function App() {
 
   useEffect(() => writeSave(save), [save]);
 
+  // Every new screen starts at the top.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   // Start new bounty days and weeks on launch and while the game stays open.
   useEffect(() => {
     const sync = () => setSave((s) => syncBounties(s));
@@ -148,7 +153,7 @@ export function App() {
         ) : view.tab === 'inventory' ? (
           <InventoryScreen save={save} />
         ) : view.tab === 'stages' ? (
-          <StagesScreen save={save} onPlay={(stage, run = newRun('single')) => setView({ kind: 'battle', stage, run, seq: Date.now() })} />
+          <StagesScreen save={save} update={update} onPlay={(stage, run = newRun('single')) => setView({ kind: 'battle', stage, run, seq: Date.now() })} />
         ) : (
           <FightersScreen save={save} update={update} toast={setToast} onOpen={(uid) => setView({ kind: 'fighter', uid })} />
         )}

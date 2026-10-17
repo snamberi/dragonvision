@@ -128,6 +128,8 @@ export interface SaveData {
   items: GearItem[];
   nextItemId: number;
   shop: { day: string; refreshes: number; bought: number[] };
+  /** Story scenes already shown (chapter numbers and "ending"). */
+  seenScenes: string[];
 }
 
 export interface Counters {

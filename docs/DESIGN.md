@@ -149,3 +149,11 @@ Hitting the class you beat deals 25% more damage; hitting the class that beats y
 - **Armory** (City): 6 items a day, better rarities deeper in the story, Epic/Legendary also cost gems,
   new stock for 5 gems. Unworn gear can be sold.
 - Bosses drop a Rare-or-better piece on the first clear, mini-bosses Uncommon-or-better.
+
+## Stage map, arenas, weather, story
+- Stages are a winding road per chapter (stage 1 at the bottom), with mini-boss and boss stops shown with
+  their villain, your team leader standing on the next stage, and a sheet with details when a stop is tapped.
+- 18 arena themes, one per chapter, recolor the map and the battle landscape.
+- Each arena has weather: rain (healing +20%), sandstorm (crit −5%), snow (start with 10 less Ki),
+  ember winds (all damage +10%), thunderstorm (hit-all +20%), starlight (specials start 1 step charged).
+- Every chapter opens with a short skippable story scene the first time its first stage is played.

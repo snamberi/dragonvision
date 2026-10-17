@@ -15,6 +15,7 @@ import {
   stageCoinReward,
 } from './balance';
 import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
+import { type Weather, arenaForStage } from './arenas';
 import { FAMILIES } from './roster';
 import { type Rng, defaultRng, seededRng } from './rng';
 import type { SaveData } from './types';
@@ -39,6 +40,8 @@ export interface Stage {
   label?: string;
   /** Special battle rule (Rival Tower floors). */
   rule?: BattleRule;
+  /** Arena weather; story stages take it from their chapter. */
+  weather?: Weather;
 }
 
 /**
@@ -137,6 +140,7 @@ export function getStage(number: number): Stage {
     kind,
     enemies,
     coins: stageCoinReward(number),
+    weather: arenaForStage(number).weather,
   };
 }
 

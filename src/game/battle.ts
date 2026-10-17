@@ -30,6 +30,7 @@ import { isBackRow, statsFor, unitName } from './progression';
 import { type Combo, type Role, classEdge, combosWith, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
+import type { Weather } from './arenas';
 import { type Bonus, emptyBonus } from './bonus';
 import type { Special, Unit } from './types';
 
@@ -81,6 +82,7 @@ export interface BattleState {
   /** Fighters that already acted (or were stunned) during the current side's turn. */
   acted: string[];
   result: 'ongoing' | 'won' | 'lost';
+  weather: Weather;
 }
 
 export type HitKind = 'damage' | 'heal' | 'revive' | 'shield' | 'stun' | 'rally' | 'resist';
@@ -196,7 +198,14 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       shield: rule === 'enemyShields' ? Math.round(hp * 0.3) : 0,
     };
   });
-  return { fighters: [...players, ...enemies], turn: 'player', round: 1, acted: [], result: 'ongoing' };
+  const weather = stage.weather ?? 'clear';
+  // Snow chills everyone's starting Ki; starlight pre-charges every special.
+  const fighters = [...players, ...enemies].map((f) => ({
+    ...f,
+    ki: weather === 'snow' ? Math.max(0, f.ki - 10) : f.ki,
+    charge: weather === 'stars' ? Math.min(specialNeed(f), f.charge + 1) : f.charge,
+  }));
+  return { fighters, turn: 'player', round: 1, acted: [], result: 'ongoing', weather };
 }
 
 export function living(state: BattleState, side: Side): Fighter[] {
@@ -286,6 +295,7 @@ function damage(
   mult: number,
   wave: boolean,
   special: boolean,
+  weather: Weather,
   rng: Rng,
 ): { amount: number; crit: boolean } {
   const b = attacker.bonus;
@@ -302,7 +312,9 @@ function damage(
   if (special) base *= 1 + b.specialPower;
   if (!attacker.struck) base *= 1 + b.firstStrike;
   if (wave && defender.row === 'back') base *= BACK_ROW_WAVE_REDUCTION;
-  const crit = rng() < CRIT_CHANCE + b.crit;
+  if (weather === 'embers') base *= 1.1;
+  if (weather === 'storm' && wave) base *= 1.2;
+  const crit = rng() < CRIT_CHANCE + b.crit - (weather === 'sandstorm' ? 0.05 : 0);
   const variance = 0.9 + rng() * 0.2;
   let amount = base * variance * (crit ? CRIT_MULTIPLIER : 1);
   if (defender.guarding) amount *= GUARD_REDUCTION;
@@ -322,7 +334,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   const pick = (candidates: Fighter[]) => fighters.get((candidates.find((f) => f.id === action.targetId) ?? candidates[0]).id)!;
 
   const strike = (target: Fighter, mult: number, wave = false) => {
-    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', rng);
+    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', state.weather, rng);
     self.struck = true;
     const absorbed = Math.min(target.shield, amount);
     target.shield -= absorbed;
@@ -339,6 +351,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
     return dealt;
   };
   const restore = (target: Fighter, amount: number, kind: HitKind) => {
+    if (state.weather === 'rain' && kind === 'heal') amount = Math.round(amount * 1.2);
     target.hp = Math.min(target.maxHp, target.hp + amount);
     hits.push({ targetId: target.id, kind, amount, crit: false, absorbed: 0, ko: false });
   };

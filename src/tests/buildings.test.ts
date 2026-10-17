@@ -150,3 +150,20 @@ describe('rival tower', () => {
     expect(again).toBe(save);
   });
 });
+
+describe('arenas and weather', () => {
+  it('gives every chapter an arena and applies weather in battle', async () => {
+    const { arenaForChapter } = await import('../game/arenas');
+    const { CHAPTER_SCENES } = await import('../game/story');
+    for (let c = 1; c <= 38; c++) expect(arenaForChapter(c)).toBeDefined();
+    expect(CHAPTER_SCENES).toHaveLength(38);
+    // Chapter 20 is the Frozen Citadel: snow lowers starting Ki.
+    const snowy = getStage(195);
+    expect(snowy.weather).toBe('snow');
+    const battle = createBattle(teamSlots(newSave()), snowy);
+    expect(battle.fighters.every((f) => f.ki === 10)).toBe(true);
+    // Chapter 4 has starlight: specials start one step charged.
+    const starry = createBattle(teamSlots(newSave()), getStage(35));
+    expect(starry.fighters.every((f) => f.charge === 1)).toBe(true);
+  });
+});

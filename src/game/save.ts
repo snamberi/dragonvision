@@ -36,6 +36,7 @@ function migrate(save: SaveData): SaveData {
     items: save.items ?? [],
     nextItemId: save.nextItemId ?? 1,
     shop: save.shop ?? fresh.shop,
+    seenScenes: save.seenScenes ?? [],
   };
 }
 

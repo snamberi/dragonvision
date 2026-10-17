@@ -1,4 +1,5 @@
-import { WorldScene } from './WorldScene';
+import { WeatherLayer, WorldScene } from './WorldScene';
+import { WEATHER_TEXT, arenaForStage } from '../game/arenas';
 import { AttackEffect } from './AttackEffect';
 import { PixelIcon } from './PixelIcon';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
@@ -94,6 +95,7 @@ function fieldPosition(f: Fighter): CSSProperties {
 
 export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExit, onContinue }: Props) {
   const stage = useMemo(() => (towerFloor ? towerStage(towerFloor) : getStage(stageNumber)), [stageNumber, towerFloor]);
+  const arena = useMemo(() => arenaForStage(towerFloor ? 10 + towerFloor * 12 : stageNumber), [stageNumber, towerFloor]);
   const [battle, setBattle] = useState<BattleState>(() =>
     createBattle(teamSlots(save), stage, { bonusFor: (u) => unitBonus(save, u) }),
   );
@@ -260,11 +262,15 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
               {run.mode === 'farm' ? 'AUTO-FARM' : 'AUTO-PROGRESS'} · {run.wins} won
             </span>
           )}
-          <small>Round {battle.round}</small>
+          <small>
+            Round {battle.round} · {arena.name}
+            {battle.weather !== 'clear' && ` · ${WEATHER_TEXT[battle.weather]}`}
+          </small>
         </div>
       </div>
 
-      <div className={`field ${busy && (event?.data.kind === 'special' || event?.data.kind === 'combo') ? 'special-impact' : ''}`}><WorldScene />
+      <div className={`field ${busy && (event?.data.kind === 'special' || event?.data.kind === 'combo') ? 'special-impact' : ''}`}><WorldScene arena={arena} />
+        <WeatherLayer weather={battle.weather} />
         {battle.fighters.map((f) => (
           <button
             key={f.id}
