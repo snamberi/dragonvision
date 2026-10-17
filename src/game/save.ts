@@ -37,6 +37,12 @@ function migrate(save: SaveData): SaveData {
     nextItemId: save.nextItemId ?? 1,
     shop: save.shop ?? fresh.shop,
     seenScenes: save.seenScenes ?? [],
+    worldBoss: save.worldBoss ?? fresh.worldBoss,
+    survivalBest: save.survivalBest ?? 0,
+    achievements: save.achievements ?? [],
+    title: save.title ?? null,
+    seenForms: save.seenForms ?? [],
+    login: save.login ?? fresh.login,
   };
 }
 

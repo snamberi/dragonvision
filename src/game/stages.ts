@@ -27,6 +27,8 @@ export interface EnemySpec {
   star: number;
   level: number;
   rank: 'minion' | 'miniBoss' | 'boss';
+  /** Shared HP pool (world boss): max and what's left. */
+  hpPool?: { max: number; left: number };
 }
 
 export interface Stage {
@@ -42,6 +44,8 @@ export interface Stage {
   rule?: BattleRule;
   /** Arena weather; story stages take it from their chapter. */
   weather?: Weather;
+  /** Timed fights end after this many rounds. */
+  roundLimit?: number;
 }
 
 /**

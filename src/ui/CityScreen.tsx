@@ -1,13 +1,15 @@
 import { WorldScene } from './WorldScene';
-import { armoryUrl, boardUrl, dojoUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
+import { armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
+import { ACHIEVEMENTS, achievementState } from '../game/achievements';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
+import { attemptsLeft, bossProgress } from '../game/worldBoss';
 import { dojoProgress } from '../game/dojo';
 import { expeditionDone } from '../game/expedition';
 import { fortuneReady } from '../game/fortune';
 import { spareUnits } from '../game/fusion';
 import type { SaveData } from '../game/types';
 
-export type Building = 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory';
+export type Building = 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall';
 
 interface Props {
   save: SaveData;
@@ -24,6 +26,11 @@ export function CityScreen({ save, onOpen }: Props) {
     return !p.claimed && p.done >= b.goal;
   }).length;
 
+  const achievementsReady = ACHIEVEMENTS.filter((a) => {
+    const st = achievementState(save, a);
+    return st.complete && !st.claimed;
+  }).length;
+
   const buildings: { id: Building; name: string; art: string; badge?: string }[] = [
     { id: 'summon', name: 'Summoning Shrine', art: shrineUrl(), badge: save.spins > 0 ? `${save.spins} SPINS` : undefined },
     { id: 'fortune', name: 'Fortune Teller', art: tentUrl(), badge: fortuneReady(save) ? 'FREE' : undefined },
@@ -33,6 +40,9 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'port', name: 'Expedition Port', art: portUrl(), badge: tripsBack > 0 ? `${tripsBack} BACK` : undefined },
     { id: 'bounty', name: 'Bounty Board', art: boardUrl(), badge: bountiesReady > 0 ? `${bountiesReady} DONE` : undefined },
     { id: 'armory', name: 'Armory', art: armoryUrl() },
+    { id: 'colosseum', name: 'Colosseum', art: colosseumUrl(), badge: attemptsLeft(save) > 0 && bossProgress(save) < 1 ? 'BOSS' : undefined },
+    { id: 'gate', name: 'Survival Gate', art: gateUrl(), badge: save.survivalBest > 0 ? `BEST ${save.survivalBest}` : undefined },
+    { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
   ];
 

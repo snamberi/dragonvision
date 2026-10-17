@@ -1,11 +1,16 @@
 import { PixelIcon } from './PixelIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { recordForms } from '../game/achievements';
 import { syncBounties } from '../game/bounty';
+import { syncWorldBoss } from '../game/worldBoss';
 import { loadSave, writeSave } from '../game/save';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
 import { type Building, CityScreen } from './CityScreen';
 import { ArmoryScreen } from './ArmoryScreen';
+import { ColosseumScreen } from './ColosseumScreen';
+import { HallScreen } from './HallScreen';
+import { SurvivalScreen } from './SurvivalScreen';
 import { BountyScreen } from './BountyScreen';
 import { DojoScreen } from './DojoScreen';
 import { FortuneScreen } from './FortuneScreen';
@@ -33,7 +38,7 @@ const TAB_LABELS: Record<Tab, string> = {
 
 type View =
   | { kind: 'tab'; tab: Tab }
-  | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number }
+  | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number; mode?: 'boss' | 'survival' }
   | { kind: 'fighter'; uid: string }
   | { kind: 'building'; building: Building };
 
@@ -55,7 +60,7 @@ export function App() {
 
   // Start new bounty days and weeks on launch and while the game stays open.
   useEffect(() => {
-    const sync = () => setSave((s) => syncBounties(s));
+    const sync = () => setSave((s) => syncWorldBoss(syncBounties(recordForms(s))));
     sync();
     const id = setInterval(sync, 60_000);
     return () => clearInterval(id);
@@ -70,7 +75,8 @@ export function App() {
   /** Applies a rule change; rule errors become a toast instead of a crash. */
   const update: Updater = useCallback((change) => {
     try {
-      const next = change(saveRef.current);
+      // Every change also updates the collection log of forms ever owned.
+      const next = recordForms(change(saveRef.current));
       saveRef.current = next;
       setSave(next);
       return true;
@@ -109,9 +115,20 @@ export function App() {
             save={save}
             stageNumber={view.stage}
             towerFloor={view.towerFloor}
+            mode={view.mode}
             run={view.run}
             update={update}
-            onExit={() => setView(view.towerFloor ? { kind: 'building', building: 'tower' } : { kind: 'tab', tab: 'stages' })}
+            onExit={() =>
+              setView(
+                view.towerFloor
+                  ? { kind: 'building', building: 'tower' }
+                  : view.mode === 'boss'
+                    ? { kind: 'building', building: 'colosseum' }
+                    : view.mode === 'survival'
+                      ? { kind: 'building', building: 'gate' }
+                      : { kind: 'tab', tab: 'stages' },
+              )
+            }
             onContinue={continueRun}
           />
         ) : view.kind === 'fighter' ? (
@@ -135,6 +152,21 @@ export function App() {
             <PortScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'bounty' ? (
             <BountyScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'colosseum' ? (
+            <ColosseumScreen
+              save={save}
+              update={update}
+              onBack={toCity}
+              onFight={() => setView({ kind: 'battle', stage: 0, mode: 'boss', run: newRun('single'), seq: Date.now() })}
+            />
+          ) : view.building === 'gate' ? (
+            <SurvivalScreen
+              save={save}
+              onBack={toCity}
+              onStart={() => setView({ kind: 'battle', stage: 0, mode: 'survival', run: newRun('single'), seq: Date.now() })}
+            />
+          ) : view.building === 'hall' ? (
+            <HallScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'armory' ? (
             <ArmoryScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'fortune' ? (
@@ -147,7 +179,7 @@ export function App() {
             />
           )
         ) : view.tab === 'home' ? (
-          <HomeScreen save={save} onNavigate={(t) => setView({ kind: 'tab', tab: t })} onOpenSummon={openSummon} />
+          <HomeScreen save={save} update={update} onNavigate={(t) => setView({ kind: 'tab', tab: t })} onOpenSummon={openSummon} />
         ) : view.tab === 'city' ? (
           <CityScreen save={save} onOpen={(building) => setView({ kind: 'building', building })} />
         ) : view.tab === 'inventory' ? (

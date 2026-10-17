@@ -79,6 +79,12 @@ export function newSave(): SaveData {
     nextItemId: 1,
     shop: { day: '', refreshes: 0, bought: [] },
     seenScenes: [],
+    worldBoss: { week: '', damage: 0, day: '', attempts: 0, claimed: [] },
+    survivalBest: 0,
+    achievements: [],
+    title: null,
+    seenForms: ['kairo:0'],
+    login: { day: '', claims: 0 },
   };
 }
 

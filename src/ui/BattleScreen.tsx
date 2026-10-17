@@ -26,6 +26,9 @@ import {
 import { recordWin } from '../game/bounty';
 import { unitBonus } from '../game/fighterBonus';
 import { teamSlots } from '../game/progression';
+import { ARENAS } from '../game/arenas';
+import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
+import { bossStage, recordBossAttempt } from '../game/worldBoss';
 import { classEdge } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
 import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
@@ -41,6 +44,8 @@ interface Props {
   stageNumber: number;
   /** Set for a Rival Tower floor instead of a story stage. */
   towerFloor?: number;
+  /** World boss attempt or an Endless Survival run instead of a story stage. */
+  mode?: 'boss' | 'survival';
   run: Run;
   update: Updater;
   onExit: () => void;
@@ -93,11 +98,28 @@ function fieldPosition(f: Fighter): CSSProperties {
   return { left: `${x}%`, top: `${y}%`, zIndex: Math.round(y) };
 }
 
-export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExit, onContinue }: Props) {
-  const stage = useMemo(() => (towerFloor ? towerStage(towerFloor) : getStage(stageNumber)), [stageNumber, towerFloor]);
-  const arena = useMemo(() => arenaForStage(towerFloor ? 10 + towerFloor * 12 : stageNumber), [stageNumber, towerFloor]);
+export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update, onExit, onContinue }: Props) {
+  // The team and stage are fixed when the battle starts.
+  const [squad] = useState(() => teamSlots(save));
+  const [wave, setWave] = useState(1);
+  const [stage] = useState(() =>
+    mode === 'boss'
+      ? bossStage(save)
+      : mode === 'survival'
+        ? survivalWave(squad, 1)
+        : towerFloor
+          ? towerStage(towerFloor)
+          : getStage(stageNumber),
+  );
+  const [bossStart] = useState(() => (mode === 'boss' ? stage.enemies[0].hpPool!.left : 0));
+  const [bossDamage, setBossDamage] = useState<number | null>(null);
+  const [survivalDone, setSurvivalDone] = useState<number | null>(null);
+  const arena = useMemo(
+    () => (mode === 'boss' ? ARENAS.demon : mode === 'survival' ? ARENAS.void : arenaForStage(towerFloor ? 10 + towerFloor * 12 : stageNumber)),
+    [mode, stageNumber, towerFloor],
+  );
   const [battle, setBattle] = useState<BattleState>(() =>
-    createBattle(teamSlots(save), stage, { bonusFor: (u) => unitBonus(save, u) }),
+    createBattle(squad, stage, { bonusFor: (u) => unitBonus(save, u) }),
   );
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -153,7 +175,21 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
   // Pay out once when the battle ends, and decide whether an auto run continues.
   useEffect(() => {
     if (battle.result === 'ongoing' || rewarded.current) return;
+    // Survival waves roll on in their own effect below.
+    if (mode === 'survival' && battle.result === 'won') return;
     rewarded.current = true;
+    if (mode === 'boss') {
+      const left = battle.fighters.find((f) => f.side === 'enemy')?.hp ?? 0;
+      const dealt = Math.max(0, bossStart - left);
+      update((s) => recordBossAttempt(s, dealt));
+      setBossDamage(dealt);
+      return;
+    }
+    if (mode === 'survival') {
+      update((s) => finishSurvival(s, wave - 1));
+      setSurvivalDone(wave - 1);
+      return;
+    }
     if (battle.result === 'lost') {
       if (run.mode !== 'single') setRunAfter({ run, stop: 'Your team was defeated.' });
       return;
@@ -180,7 +216,18 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
     };
     const decision = nextInRun(total, stageNumber);
     setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
-  }, [battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run]);
+  }, [battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run, mode, bossStart, wave]);
+
+  // Survival: after a cleared wave, the next one starts with the same fighters and no healing.
+  useEffect(() => {
+    if (mode !== 'survival' || battle.result !== 'won') return;
+    const id = setTimeout(() => {
+      setWave(wave + 1);
+      setBattle((b) => nextWave(b, squad, wave + 1, { bonusFor: (u) => unitBonus(save, u) }));
+    }, 900);
+    return () => clearTimeout(id);
+    // Only the result and wave should restart this timer.
+  }, [mode, battle.result, wave]);
 
   // Auto runs roll into the next battle after a short pause.
   useEffect(() => {
@@ -256,7 +303,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
           ))}
         </div>
         <div className="battle-title">
-          {stage.label ?? `Stage ${stage.number}`}
+          {mode === 'survival' ? `Survival · Wave ${wave}` : (stage.label ?? `Stage ${stage.number}`)}
           {run.mode !== 'single' && (
             <span className="run-chip">
               {run.mode === 'farm' ? 'AUTO-FARM' : 'AUTO-PROGRESS'} · {run.wins} won
@@ -438,10 +485,37 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
         </div>
       )}
 
-      {battle.result !== 'ongoing' && runAfter?.next === undefined && (
+      {mode === 'survival' && battle.result === 'won' && (
+        <div className="run-toast">Wave {wave} cleared! Next wave coming, no healing…</div>
+      )}
+
+      {battle.result !== 'ongoing' && runAfter?.next === undefined && !(mode === 'survival' && battle.result === 'won') && (
         <div className="modal-backdrop">
           <div className="modal panel result">
-            <h2>{battle.result === 'won' ? 'VICTORY' : 'DEFEAT'}</h2>
+            <h2>
+              {mode === 'boss'
+                ? battle.result === 'won'
+                  ? 'BOSS DOWN!'
+                  : 'ATTEMPT OVER'
+                : mode === 'survival'
+                  ? 'RUN OVER'
+                  : battle.result === 'won'
+                    ? 'VICTORY'
+                    : 'DEFEAT'}
+            </h2>
+            {bossDamage !== null && (
+              <p className="boss-damage">
+                You dealt <b>{bossDamage.toLocaleString()}</b> damage to the world boss
+                {battle.result === 'timeout' ? ` before time ran out (${stage.roundLimit} rounds)` : ''}.
+              </p>
+            )}
+            {survivalDone !== null && (
+              <p className="boss-damage">
+                Waves cleared: <b>{survivalDone}</b> · ● {survivalCoins(survivalDone).toLocaleString()}
+                {Math.floor(survivalDone / 5) > 0 && ` · ✦ ${Math.floor(survivalDone / 5)}`}
+                {survivalDone > 0 && survivalDone >= save.survivalBest && ' · new best!'}
+              </p>
+            )}
             {battle.result === 'won' && !towerFloor && stageNumber === FINAL_STAGE && rewards?.firstClear && (
               <div className="the-end">
                 <b>THE END</b>

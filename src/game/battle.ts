@@ -81,7 +81,9 @@ export interface BattleState {
   round: number;
   /** Fighters that already acted (or were stunned) during the current side's turn. */
   acted: string[];
-  result: 'ongoing' | 'won' | 'lost';
+  /** Timed fights (world boss) end after this many rounds with "timeout". */
+  roundLimit?: number;
+  result: 'ongoing' | 'won' | 'lost' | 'timeout';
   weather: Weather;
 }
 
@@ -177,6 +179,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     const hpMul = e.rank === 'boss' ? BOSS_HP_MULTIPLIER : e.rank === 'miniBoss' ? MINI_BOSS_HP_MULTIPLIER : 1;
     const atkMul = e.rank === 'boss' ? BOSS_ATK_MULTIPLIER : e.rank === 'miniBoss' ? MINI_BOSS_ATK_MULTIPLIER : 1;
     const hp = Math.round(s.hp * hpMul * strength * (rule === 'tough' ? 1.5 : 1));
+    const pool = e.hpPool;
     const special = getFamily(e.familyId).special;
     return {
       id: `e-${i}`,
@@ -187,8 +190,8 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       name: unitName(e),
       rank: e.rank,
       ...placement(e.familyId, i),
-      maxHp: hp,
-      hp,
+      maxHp: pool ? pool.max : hp,
+      hp: pool ? pool.left : hp,
       atk: Math.round(s.atk * atkMul * strength),
       def: Math.round(s.def * strength),
       spd: s.spd,
@@ -205,7 +208,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     ki: weather === 'snow' ? Math.max(0, f.ki - 10) : f.ki,
     charge: weather === 'stars' ? Math.min(specialNeed(f), f.charge + 1) : f.charge,
   }));
-  return { fighters, turn: 'player', round: 1, acted: [], result: 'ongoing', weather };
+  return { fighters, turn: 'player', round: 1, acted: [], result: 'ongoing', weather, roundLimit: stage.roundLimit };
 }
 
 export function living(state: BattleState, side: Side): Fighter[] {
@@ -465,6 +468,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   if (living(next, 'enemy').length === 0) next = { ...next, result: 'won' };
   else if (living(next, 'player').length === 0) next = { ...next, result: 'lost' };
   else next = advance(next);
+  if (next.result === 'ongoing' && next.roundLimit && next.round > next.roundLimit) next = { ...next, result: 'timeout' };
 
   return { state: next, event: { actorId: actor.id, kind: action.kind, label, hits } };
 }

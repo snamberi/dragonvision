@@ -130,6 +130,15 @@ export interface SaveData {
   shop: { day: string; refreshes: number; bought: number[] };
   /** Story scenes already shown (chapter numbers and "ending"). */
   seenScenes: string[];
+  worldBoss: { week: string; damage: number; day: string; attempts: number; claimed: number[] };
+  survivalBest: number;
+  /** Achievement ids already claimed. */
+  achievements: string[];
+  title: string | null;
+  /** Every form ever owned, as "familyId:formIndex". */
+  seenForms: string[];
+  /** Daily login track: last day claimed and how many days claimed in total. */
+  login: { day: string; claims: number };
 }
 
 export interface Counters {

@@ -157,3 +157,20 @@ Hitting the class you beat deals 25% more damage; hitting the class that beats y
 - Each arena has weather: rain (healing +20%), sandstorm (crit −5%), snow (start with 10 less Ki),
   ember winds (all damage +10%), thunderstorm (hit-all +20%), starlight (specials start 1 step charged).
 - Every chapter opens with a short skippable story scene the first time its first stage is played.
+
+## Weekly world boss (Colosseum)
+- One boss a week (rotating villains and Grylas), scaled to your story progress, with an HP pool 40× its
+  normal HP. Each attempt is 8 rounds; the damage stays. 3 attempts a day.
+- Rewards at 25% (5 spins), 50% (10 gems), 75% (Epic gear + 5 spins), defeated (Legendary gear, 15 gems, 2 shards).
+
+## Endless Survival (Survival Gate)
+- Endless waves, 4 levels stronger each wave, mini-boss every 5th. HP, Ki and special bars carry over; no healing.
+- Pays coins per wave cleared and a spin every 5 waves; best wave is recorded.
+
+## Hall of Legends
+- 19 achievements paying gems/spins; most unlock a title shown on Home.
+- Collection log of every form ever owned (including fusions), shown as silhouettes until found.
+
+## Daily login
+- A 7-day track on Home (coins, spins, gems, Rare gear, shard + gems), one claim per day, loops forever,
+  and missing a day never resets it.

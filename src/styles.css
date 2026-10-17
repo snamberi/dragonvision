@@ -2765,3 +2765,23 @@ div.gear-open { cursor:default; }
   .map-boss .sprite { width:60px !important; height:60px !important; }
   .map-banner { font-size:9px; }
 }
+
+/* ---------- Colosseum, Survival, Hall, Login ---------- */
+.boss-panel { display:flex; flex-wrap:wrap; align-items:center; gap:18px; }
+.boss-info { flex:1; min-width:240px; display:flex; flex-direction:column; gap:6px; }
+.boss-bar { display:block; height:16px; background:#3a1220; border:2px solid #120b2e; }
+.boss-bar i { display:block; height:100%; background:linear-gradient(90deg,#ff4a3d,#ff8a1f); transition:width .4s steps(8); }
+.boss-damage { font-size:20px; }
+.survival-panel { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.collection-forms { display:flex; flex-wrap:wrap; gap:8px; }
+.collection-form { display:flex; flex-direction:column; align-items:center; width:96px; padding:4px; background:var(--bg-2); border:2px solid var(--line); text-align:center; line-height:1.05; }
+.collection-form small { font-size:13px; }
+.collection-form.unseen .sprite { filter:brightness(0) opacity(.45); }
+.login-track { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.login-day { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px; text-align:center; background:var(--bg-2); border:2px solid var(--line); font-size:15px; line-height:1.1; }
+.login-day b { font-family:var(--pixel); font-size:8px; }
+.login-day.done { opacity:.5; }
+.login-day.done::after { content:'✓'; color:var(--green); }
+.login-day.next { border-color:var(--gold); box-shadow:0 0 10px #ffd23f66; }
+.login-day.big { background:linear-gradient(135deg,#3b2a6b,#5b2fc0); }
+@media (max-width:700px) { .login-track { grid-template-columns:repeat(4,minmax(0,1fr)); } }
