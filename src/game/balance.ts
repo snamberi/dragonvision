@@ -80,3 +80,13 @@ export const BOSS_HP_MULTIPLIER = 2.5;
 export const BOSS_ATK_MULTIPLIER = 1.25;
 export const MINI_BOSS_HP_MULTIPLIER = 2;
 export const MINI_BOSS_ATK_MULTIPLIER = 1.1;
+
+// --- Formation and roles ---
+/** Back-row fighters take less damage from hit-all attacks. */
+export const BACK_ROW_WAVE_REDUCTION = 0.8;
+export const TANK_DAMAGE_TAKEN = 0.85;
+export const STRIKER_SINGLE_BONUS = 1.15;
+export const BLASTER_WAVE_BONUS = 1.15;
+export const SUPPORT_HEAL_BONUS = 1.2;
+export const DRAIN_SHARE = 0.5;
+export const DRAINER_DRAIN_SHARE = 0.75;

@@ -26,8 +26,11 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Costs 3 gems (*placeholder*). Returns the fighter to the level it was summoned at and refunds
   every coin spent on it. Summoned levels can never be refunded.
 
-## Team
-- 1 to 5 fighters. Only one version of each character per team.
+## Team and formation
+- 1 to 5 fighters on five pads. Only one version of each character per team.
+- Pads 1, 3, 5 are the **front row**; pads 2 and 4 are the **back row**. Enemies use the same layout
+  (first enemy on pad 1, and so on).
+- Move fighters on the Fighters screen by dragging, or by tapping a fighter and then another pad.
 
 ## Summoning
 - One shared pool of all characters. Each spin is one summon.
@@ -73,5 +76,14 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 | 16–20 | Mythic | red border, glow, sweep, flickering aura |
 | 21 | Ultimate | animated rainbow border plus all effects |
 
-Roles shown on cards and in the team arena come from each character: heal special → Support,
-drain special → Drainer, 120+ base HP → Tank, hit-all special → Blaster, otherwise Striker.
+Roles come from each character: heal special → Support, drain special → Drainer,
+120+ base HP → Tank, hit-all special → Blaster, otherwise Striker.
+
+## Formation and role rules in battle
+- Single-target attacks (Attack, Ki Blast, beam and drain specials) can only hit the front row while
+  anyone in it is standing. Once the front row falls, the back row is open.
+- A **Tank** in the front row draws every single-target attack aimed at its side, and takes 15% less damage.
+- Back-row fighters take 20% less damage from hit-all attacks.
+- **Striker:** +15% single-target damage. **Blaster:** +15% hit-all damage.
+- **Support:** heals 20% more. **Drainer:** drain heals 75% of damage dealt (others 50%).
+- Turn order inside a side is still fastest first.

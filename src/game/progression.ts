@@ -62,7 +62,7 @@ export function newSave(): SaveData {
     gems: STARTING_GEMS,
     spins: STARTING_SPINS,
     units: [{ uid: 'u1', familyId: STARTER_FAMILY_ID, star: 1, level: 1, baseLevel: 1, coinsSpent: 0 }],
-    team: ['u1'],
+    team: ['u1', null, null, null, null],
     clearedStage: 0,
     focusFamilyId: null,
     nextUid: 2,
@@ -185,33 +185,63 @@ export function evolveUnit(save: SaveData, uid: string): SaveData {
   if (!check.ok) throw new Error('Evolution requirements not met');
   const unit = findUnit(save, uid);
   const consumed = new Set(check.duplicates.map((d) => d.uid));
+  let team = save.team.map((t) => (t && consumed.has(t) ? null : t));
+  // A consumed copy may have been the only team member; the evolved fighter takes its pad.
+  if (!team.some(Boolean)) {
+    const pad = save.team.findIndex((t) => t !== null);
+    team = team.map((t, i) => (i === Math.max(0, pad) ? uid : t));
+  }
   return {
     ...save,
     units: save.units
       .filter((u) => !consumed.has(u.uid))
       .map((u) => (u.uid === uid ? { ...u, star: unit.star + 1 } : u)),
-    team: save.team.filter((t) => !consumed.has(t)),
+    team,
   };
 }
 
 // --- Team ---
 
+/** Fighters on the team in slot order, skipping empty pads. */
 export function teamUnits(save: SaveData): Unit[] {
-  return save.team.map((uid) => findUnit(save, uid));
+  return teamSlots(save).filter((u): u is Unit => u !== null);
+}
+
+/** The five formation pads, with null for empty ones. */
+export function teamSlots(save: SaveData): (Unit | null)[] {
+  return Array.from({ length: MAX_TEAM_SIZE }, (_, i) => {
+    const uid = save.team[i];
+    return uid ? findUnit(save, uid) : null;
+  });
+}
+
+export function isBackRow(slot: number): boolean {
+  return slot % 2 === 1;
+}
+
+/** Swaps two pads; moving onto an empty pad just moves the fighter. */
+export function moveTeamMember(save: SaveData, from: number, to: number): SaveData {
+  if (from === to) return save;
+  const team = Array.from({ length: MAX_TEAM_SIZE }, (_, i) => save.team[i] ?? null);
+  [team[from], team[to]] = [team[to], team[from]];
+  return { ...save, team };
 }
 
 export type TeamToggleResult = { ok: true; save: SaveData } | { ok: false; reason: string };
 
 export function toggleTeamMember(save: SaveData, uid: string): TeamToggleResult {
-  if (save.team.includes(uid)) {
-    if (save.team.length === 1) return { ok: false, reason: 'Your team needs at least one fighter.' };
-    return { ok: true, save: { ...save, team: save.team.filter((t) => t !== uid) } };
+  const team = Array.from({ length: MAX_TEAM_SIZE }, (_, i) => save.team[i] ?? null);
+  if (team.includes(uid)) {
+    if (team.filter(Boolean).length === 1) return { ok: false, reason: 'Your team needs at least one fighter.' };
+    return { ok: true, save: { ...save, team: team.map((t) => (t === uid ? null : t)) } };
   }
-  if (save.team.length >= MAX_TEAM_SIZE) return { ok: false, reason: 'Your team is full (5 fighters).' };
+  const pad = team.indexOf(null);
+  if (pad < 0) return { ok: false, reason: 'Your team is full (5 fighters).' };
   const unit = findUnit(save, uid);
   const clash = teamUnits(save).find((u) => u.familyId === unit.familyId);
   if (clash) {
     return { ok: false, reason: `${unitName(clash)} is already on the team. Only one version of a fighter can join.` };
   }
-  return { ok: true, save: { ...save, team: [...save.team, uid] } };
+  team[pad] = uid;
+  return { ok: true, save: { ...save, team } };
 }

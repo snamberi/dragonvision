@@ -823,6 +823,41 @@ div.card-open {
   border-color: var(--muted);
 }
 
+.arena-help {
+  margin: 0;
+  padding: 0 12px 8px;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.arena-slot.selected .sprite {
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px var(--gold));
+  translate: 0 -6px;
+}
+
+.arena-slot.drop-ok .arena-pad {
+  outline: 2px solid var(--gold);
+  animation: pulse 0.6s steps(2) infinite;
+}
+
+.arena-slot.empty:disabled {
+  cursor: default;
+}
+
+.arena-row-label {
+  margin-top: 3px;
+  font-family: var(--pixel);
+  font-size: 6px;
+  color: rgba(244, 236, 216, 0.7);
+  letter-spacing: 1px;
+}
+
+.hud-info {
+  margin-top: 4px;
+  padding: 2px 8px;
+  font-size: 15px;
+}
+
 .arena-ghost {
   width: 34px;
   height: 56px;
@@ -1177,6 +1212,58 @@ div.card-open {
   justify-content: center;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.side.row-back {
+  transform: scale(0.9);
+}
+
+.side:empty {
+  display: none;
+}
+
+.fighter.shielded {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fighter.shielded::after {
+  content: 'SHIELDED';
+  position: absolute;
+  top: 40%;
+  font-family: var(--pixel);
+  font-size: 7px;
+  padding: 2px 4px;
+  background: var(--blue);
+  color: #120b2e;
+}
+
+.taunt-tag {
+  position: absolute;
+  bottom: -9px;
+  z-index: 2;
+  font-family: var(--pixel);
+  font-size: 6px;
+  padding: 2px 4px;
+  background: var(--blue);
+  color: #120b2e;
+}
+
+.crash {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.crash .panel {
+  max-width: 460px;
+}
+
+.crash-detail {
+  white-space: pre-wrap;
+  font-size: 16px;
+  color: var(--muted);
 }
 
 .turn-banner {

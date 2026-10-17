@@ -1,5 +1,12 @@
 import {
   ATTACK_POWER,
+  BACK_ROW_WAVE_REDUCTION,
+  BLASTER_WAVE_BONUS,
+  DRAINER_DRAIN_SHARE,
+  DRAIN_SHARE,
+  STRIKER_SINGLE_BONUS,
+  SUPPORT_HEAL_BONUS,
+  TANK_DAMAGE_TAKEN,
   BOSS_ATK_MULTIPLIER,
   BOSS_HP_MULTIPLIER,
   CRIT_CHANCE,
@@ -16,14 +23,15 @@ import {
   SPECIAL_COST,
   enemyStrengthForStage,
 } from './balance';
-import { statsFor, unitName } from './progression';
-import { getFamily } from './roster';
+import { isBackRow, statsFor, unitName } from './progression';
+import { type Role, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
 import type { Unit } from './types';
 
 export type Side = 'player' | 'enemy';
 export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard';
+export type Row = 'front' | 'back';
 
 export interface Fighter {
   id: string;
@@ -33,6 +41,10 @@ export interface Fighter {
   level: number;
   name: string;
   rank: 'minion' | 'miniBoss' | 'boss';
+  role: Role;
+  /** Formation pad (0-4); odd pads are the back row. */
+  slot: number;
+  row: Row;
   maxHp: number;
   hp: number;
   atk: number;
@@ -71,11 +83,17 @@ export interface Action {
   targetId?: string;
 }
 
-export function createBattle(team: Unit[], stage: Stage): BattleState {
+function placement(familyId: string, slot: number) {
+  return { role: roleFor(getFamily(familyId)), slot, row: (isBackRow(slot) ? 'back' : 'front') as Row };
+}
+
+/** `team` is the five formation pads in order, with null for empty ones. */
+export function createBattle(team: (Unit | null)[], stage: Stage): BattleState {
   const strength = enemyStrengthForStage(stage.number);
-  const players: Fighter[] = team.map((u) => {
+  const players: Fighter[] = team.flatMap((u, slot) => {
+    if (!u) return [];
     const s = statsFor(u.familyId, u.star, u.level);
-    return {
+    const fighter: Fighter = {
       id: `p-${u.uid}`,
       side: 'player',
       familyId: u.familyId,
@@ -83,6 +101,7 @@ export function createBattle(team: Unit[], stage: Stage): BattleState {
       level: u.level,
       name: unitName(u),
       rank: 'minion',
+      ...placement(u.familyId, slot),
       maxHp: s.hp,
       hp: s.hp,
       atk: s.atk,
@@ -91,7 +110,9 @@ export function createBattle(team: Unit[], stage: Stage): BattleState {
       ki: KI_START,
       guarding: false,
     };
+    return [fighter];
   });
+  if (players.length === 0) throw new Error('Your team has no fighters');
   const enemies: Fighter[] = stage.enemies.map((e, i) => {
     const s = statsFor(e.familyId, e.star, e.level);
     const hpMul = e.rank === 'boss' ? BOSS_HP_MULTIPLIER : e.rank === 'miniBoss' ? MINI_BOSS_HP_MULTIPLIER : 1;
@@ -105,6 +126,7 @@ export function createBattle(team: Unit[], stage: Stage): BattleState {
       level: e.level,
       name: unitName(e),
       rank: e.rank,
+      ...placement(e.familyId, i),
       maxHp: hp,
       hp,
       atk: Math.round(s.atk * atkMul * strength),
@@ -149,9 +171,13 @@ export function needsTarget(fighter: Fighter, kind: ActionKind): boolean {
   return false;
 }
 
-function damage(attacker: Fighter, defender: Fighter, mult: number, rng: Rng): { amount: number; crit: boolean } {
+function damage(attacker: Fighter, defender: Fighter, mult: number, wave: boolean, rng: Rng): { amount: number; crit: boolean } {
   // atk / (atk + def) keeps fights the same length at every level when both sides are even.
-  const base = attacker.atk * (attacker.atk / (attacker.atk + defender.def)) * 0.9 * mult;
+  let base = attacker.atk * (attacker.atk / (attacker.atk + defender.def)) * 0.9 * mult;
+  if (attacker.role === 'Striker' && !wave) base *= STRIKER_SINGLE_BONUS;
+  if (attacker.role === 'Blaster' && wave) base *= BLASTER_WAVE_BONUS;
+  if (defender.role === 'Tank') base *= TANK_DAMAGE_TAKEN;
+  if (wave && defender.row === 'back') base *= BACK_ROW_WAVE_REDUCTION;
   const crit = rng() < CRIT_CHANCE;
   const variance = 0.9 + rng() * 0.2;
   let amount = base * variance * (crit ? CRIT_MULTIPLIER : 1);
@@ -163,9 +189,21 @@ function withFighters(state: BattleState, update: (f: Fighter) => Fighter): Batt
   return { ...state, fighters: state.fighters.map(update) };
 }
 
+/**
+ * Who a single-target attack may hit: the front row shields the back row while
+ * anyone in it stands, and a front-row Tank draws every single-target attack.
+ */
+export function legalTargets(state: BattleState, side: Side): Fighter[] {
+  const foes = living(state, opposite(side));
+  const front = foes.filter((f) => f.row === 'front');
+  if (front.length === 0) return foes;
+  const tanks = front.filter((f) => f.role === 'Tank');
+  return tanks.length > 0 ? tanks : front;
+}
+
 function resolveTarget(state: BattleState, actor: Fighter, targetId?: string): Fighter {
-  const foes = living(state, opposite(actor.side));
-  return foes.find((f) => f.id === targetId) ?? foes[0];
+  const legal = legalTargets(state, actor.side);
+  return legal.find((f) => f.id === targetId) ?? legal[0];
 }
 
 /** Applies one fighter's action and advances the turn when the whole side has acted. */
@@ -181,8 +219,8 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   const damageMap = new Map<string, number>();
   const healMap = new Map<string, number>();
 
-  const strike = (target: Fighter, mult: number) => {
-    const { amount, crit } = damage(actor, target, mult, rng);
+  const strike = (target: Fighter, mult: number, wave = false) => {
+    const { amount, crit } = damage(actor, target, mult, wave, rng);
     const dealt = Math.min(target.hp - (damageMap.get(target.id) ?? 0), amount);
     damageMap.set(target.id, (damageMap.get(target.id) ?? 0) + dealt);
     hits.push({ targetId: target.id, amount, crit, heal: false, ko: false });
@@ -216,15 +254,15 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       if (special.kind === 'beam') {
         strike(resolveTarget(state, actor, action.targetId), special.power);
       } else if (special.kind === 'wave') {
-        for (const foe of living(state, opposite(actor.side))) strike(foe, special.power);
+        for (const foe of living(state, opposite(actor.side))) strike(foe, special.power, true);
       } else if (special.kind === 'drain') {
         const dealt = strike(resolveTarget(state, actor, action.targetId), special.power);
-        const heal = Math.round(dealt * 0.5);
+        const heal = Math.round(dealt * (actor.role === 'Drainer' ? DRAINER_DRAIN_SHARE : DRAIN_SHARE));
         healMap.set(actor.id, heal);
         hits.push({ targetId: actor.id, amount: heal, crit: false, heal: true, ko: false });
       } else {
         for (const ally of living(state, actor.side)) {
-          const heal = Math.round(ally.maxHp * special.power);
+          const heal = Math.round(ally.maxHp * special.power * (actor.role === 'Support' ? SUPPORT_HEAL_BONUS : 1));
           healMap.set(ally.id, heal);
           hits.push({ targetId: ally.id, amount: heal, crit: false, heal: true, ko: false });
         }
@@ -267,7 +305,7 @@ export function chooseAction(state: BattleState, rng: Rng = defaultRng): Action 
   if (!actor) throw new Error('No fighter can act');
   const foes = living(state, opposite(actor.side));
   const allies = living(state, actor.side);
-  const weakest = [...foes].sort((a, b) => a.hp - b.hp)[0];
+  const weakest = [...legalTargets(state, actor.side)].sort((a, b) => a.hp - b.hp)[0];
   const special = getFamily(actor.familyId).special;
 
   if (canUse(actor, 'special')) {

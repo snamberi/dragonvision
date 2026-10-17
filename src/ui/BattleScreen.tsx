@@ -9,11 +9,12 @@ import {
   canUse,
   chooseAction,
   createBattle,
+  legalTargets,
   needsTarget,
   nextActor,
   performAction,
 } from '../game/battle';
-import { teamUnits } from '../game/progression';
+import { teamSlots } from '../game/progression';
 import { getFamily } from '../game/roster';
 import { type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
@@ -31,7 +32,7 @@ const STEP_MS = 650;
 
 export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
   const stage = useMemo(() => getStage(stageNumber), [stageNumber]);
-  const [battle, setBattle] = useState<BattleState>(() => createBattle(teamUnits(save), stage));
+  const [battle, setBattle] = useState<BattleState>(() => createBattle(teamSlots(save), stage));
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<ActionKind | null>(null);
@@ -39,6 +40,8 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
   const [log, setLog] = useState<string[]>([]);
   const [rewards, setRewards] = useState<Rewards | null>(null);
   const eventId = useRef(0);
+  // Blocks a second action from a fast double tap before React re-renders.
+  const acting = useRef(false);
   const rewarded = useRef(false);
 
   const actor = nextActor(battle);
@@ -46,7 +49,16 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
   const nameOf = (id: string) => battle.fighters.find((f) => f.id === id)?.name ?? '?';
 
   const act = (action: Action) => {
-    const { state, event: ev } = performAction(battle, action);
+    if (acting.current) return;
+    let result: ReturnType<typeof performAction>;
+    try {
+      result = performAction(battle, action);
+    } catch (error) {
+      console.error('Battle action failed', error);
+      return;
+    }
+    acting.current = true;
+    const { state, event: ev } = result;
     eventId.current += 1;
     setEvent({ id: eventId.current, data: ev });
     setBattle(state);
@@ -55,7 +67,10 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     const targets = ev.hits.filter((h) => !h.heal).map((h) => `${nameOf(h.targetId)} -${h.amount}${h.crit ? '!' : ''}`);
     const heals = ev.hits.filter((h) => h.heal).map((h) => `${nameOf(h.targetId)} +${h.amount}`);
     setLog((l) => [[nameOf(ev.actorId), ev.label, ...targets, ...heals].join(' · '), ...l].slice(0, 30));
-    setTimeout(() => setBusy(false), STEP_MS);
+    setTimeout(() => {
+      acting.current = false;
+      setBusy(false);
+    }, STEP_MS);
   };
 
   // Enemy turns and Auto mode play themselves one action at a time.
@@ -82,8 +97,10 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     else act({ kind });
   };
 
+  const legal = new Set(legalTargets(battle, 'player').map((f) => f.id));
+
   const clickFighter = (f: Fighter) => {
-    if (!pending || !playerControls || f.side !== 'enemy' || f.hp <= 0) return;
+    if (!pending || !playerControls || !legal.has(f.id)) return;
     act({ kind: pending, targetId: f.id });
   };
 
@@ -92,7 +109,9 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     const classes = ['fighter', f.side];
     if (f.hp <= 0) classes.push('ko');
     if (actor?.id === f.id && battle.result === 'ongoing') classes.push('active');
-    if (pending && f.side === 'enemy' && f.hp > 0) classes.push('targetable');
+    if (pending && legal.has(f.id)) classes.push('targetable');
+    if (pending && f.side === 'enemy' && f.hp > 0 && !legal.has(f.id)) classes.push('shielded');
+    if (f.row === 'back') classes.push('back-row');
     if (busy && ev?.actorId === f.id) classes.push(`do-${ev.kind}`);
     if (busy && ev?.hits.some((h) => h.targetId === f.id && !h.heal)) classes.push('hit');
     if (f.guarding) classes.push('guarding');
@@ -100,10 +119,11 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     return classes.join(' ');
   };
 
-  const renderSide = (side: 'player' | 'enemy') => (
-    <div className={`side side-${side}`}>
+  const renderRow = (side: 'player' | 'enemy', row: 'front' | 'back') => (
+    <div className={`side side-${side} row-${row}`}>
       {battle.fighters
-        .filter((f) => f.side === side)
+        .filter((f) => f.side === side && f.row === row)
+        .sort((a, b) => a.slot - b.slot)
         .map((f) => (
           <button key={f.id} className={fighterClasses(f)} onClick={() => clickFighter(f)} disabled={f.side === 'player'}>
             {busy &&
@@ -119,6 +139,7 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
               <span key={`fx-${event.id}`} className={`beam ${side}`} />
             )}
             {f.rank !== 'minion' && <span className="rank-tag">{f.rank === 'boss' ? 'BOSS' : 'MINI-BOSS'}</span>}
+            {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="taunt-tag">TAUNT</span>}
             <Sprite familyId={f.familyId} star={f.star} size={72} flip={side === 'enemy'} />
             <span className="f-name">{f.name}</span>
             <span className="f-meta">
@@ -152,9 +173,11 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
       </div>
 
       <div className="arena">
-        {renderSide('enemy')}
+        {renderRow('enemy', 'back')}
+        {renderRow('enemy', 'front')}
         <div className="turn-banner">{battle.result === 'ongoing' ? (battle.turn === 'player' ? 'YOUR TURN' : 'ENEMY TURN') : ''}</div>
-        {renderSide('player')}
+        {renderRow('player', 'front')}
+        {renderRow('player', 'back')}
       </div>
 
       {battle.result === 'ongoing' && (
@@ -162,7 +185,8 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
           {battle.turn === 'player' && actor && !auto ? (
             <>
               <div className="action-who">
-                {pending ? `${actor.name}: pick a target` : `${actor.name}'s move`} · Ki {actor.ki}
+                {pending ? `${actor.name}: pick a target — the front row shields the back row` : `${actor.name}'s move`} · Ki{' '}
+                {actor.ki}
               </div>
               <div className="button-row">
                 <button className="btn" disabled={!playerControls} onClick={() => choose('attack')}>

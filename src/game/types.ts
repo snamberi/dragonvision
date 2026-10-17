@@ -73,8 +73,11 @@ export interface SaveData {
   gems: number;
   spins: number;
   units: Unit[];
-  /** Up to five unit uids, at most one per family. */
-  team: string[];
+  /**
+   * Five formation slots (null = empty pad), at most one fighter per family.
+   * Slots 1, 3 and 5 are the front row; slots 2 and 4 are the back row.
+   */
+  team: (string | null)[];
   /** Highest stage cleared; the next stage is the only new one available. */
   clearedStage: number;
   focusFamilyId: string | null;

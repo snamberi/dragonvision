@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { checkEvolve, power, toggleTeamMember, unitName } from '../game/progression';
+import { checkEvolve, moveTeamMember, power, toggleTeamMember, unitName } from '../game/progression';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
@@ -32,7 +32,7 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
 
   return (
     <div className="fighters">
-      <TeamArena save={save} onOpen={onOpen} />
+      <TeamArena save={save} onOpen={onOpen} onMove={(from, to) => update((s) => moveTeamMember(s, from, to))} />
 
       <div className="section-head">
         <h2>Collection ({save.units.length})</h2>
