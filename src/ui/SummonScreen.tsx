@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { PixelIcon } from './PixelIcon';
+import { useEffect, useRef, useState } from 'react';
 import { FAMILIES } from '../game/roster';
 import { spinPrice } from '../game/balance';
 import { buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
@@ -15,13 +16,18 @@ interface Props {
 
 export function SummonScreen({ save, update, onBack }: Props) {
   const [results, setResults] = useState<Unit[]>([]);
+  const [spinning, setSpinning] = useState(false);
+  const rolling = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
   const odds = summonOdds(save);
   const price = spinPrice(save.clearedStage);
   const chanceOf = (familyId: string) => odds.filter((o) => o.familyId === familyId).reduce((sum, o) => sum + o.chance, 0);
 
   const pull = (count: number) => {
+    if (rolling.current) return;
     const pulled: Unit[] = [];
-    update((s) => {
+    const success = update((s) => {
       if (count === 10) {
         const result = summonTen(s);
         pulled.push(...result.units);
@@ -31,7 +37,11 @@ export function SummonScreen({ save, update, onBack }: Props) {
       pulled.push(result.unit);
       return result.save;
     });
-    setResults(pulled);
+    if (!success) return;
+    rolling.current = true;
+    setSpinning(true);
+    setResults([]);
+    timer.current = setTimeout(() => { setResults(pulled); setSpinning(false); rolling.current = false; }, 1900);
   };
 
   const setFocus = (familyId: string) =>
@@ -48,12 +58,18 @@ export function SummonScreen({ save, update, onBack }: Props) {
         <p className="muted">
           One shared pool. You can pull a fighter up to one star above your best version of them. Higher stars are rarer.
         </p>
-        <div className="spin-count">✦ {save.spins} spin{save.spins === 1 ? '' : 's'}</div>
+        <div className={`summon-portal ${spinning ? 'spinning' : ''}`} role="status" aria-label={spinning ? 'Summoning fighters' : 'Summoning portal ready'}>
+          <div className="portal-ring outer"/><div className="portal-ring inner"/>
+          {Array.from({length:8},(_,i)=><span key={i} className="portal-rune" style={{transform:`rotate(${i*45}deg) translateY(-78px) rotate(${-i*45}deg)`}}>✦</span>)}
+          <div className="portal-center"><PixelIcon kind="spin" size={56}/></div>
+          <span className="portal-caption">{spinning ? 'CALLING A FIGHTER…' : results.length ? 'SUMMON COMPLETE' : 'AWAKEN YOUR LEGEND'}</span>
+        </div>
+        <div className="spin-count"><PixelIcon kind="spin" /> {save.spins} spin{save.spins === 1 ? '' : 's'}</div>
         <div className="button-row">
-          <button className="btn primary big" disabled={save.spins < 1} onClick={() => pull(1)}>
+          <button className="btn primary big" disabled={spinning || save.spins < 1} onClick={() => pull(1)}>
             Summon ×1
           </button>
-          <button className="btn big" disabled={save.spins < 10} onClick={() => pull(10)}>
+          <button className="btn big" disabled={spinning || save.spins < 10} onClick={() => pull(10)}>
             Summon ×10
           </button>
         </div>
@@ -63,7 +79,7 @@ export function SummonScreen({ save, update, onBack }: Props) {
         </p>
         <div className="buy-spins">
           <span>
-            Buy spins: <span className="coin">● {price.toLocaleString()}</span> each
+            Buy spins: <span className="coin"><PixelIcon kind="coin" /> {price.toLocaleString()}</span> each
           </span>
           <div className="button-row">
             <button className="btn small" disabled={save.coins < price} onClick={() => update((s) => buySpins(s, 1))}>

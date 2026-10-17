@@ -1,3 +1,4 @@
+import { PixelIcon } from './PixelIcon';
 import type { SaveData } from '../game/types';
 
 interface Props {
@@ -21,7 +22,7 @@ export function InventoryScreen({ save }: Props) {
         <div className="resource-list">
           {resources.map((r) => (
             <div key={r.name} className="resource">
-              <span className={`resource-icon ${r.className}`}>{r.icon}</span>
+              <span className={`resource-icon ${r.className}`}><PixelIcon kind={r.className} size={42} /></span>
               <div className="resource-info">
                 <span className="resource-name">{r.name}</span>
                 <span className="muted small-text">{r.use}</span>

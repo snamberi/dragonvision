@@ -245,8 +245,8 @@ function paintAscii(key: string, rows: string[], palette: Record<string, string>
   const hit = cache.get(key);
   if (hit) return hit;
   const canvas = document.createElement('canvas');
-  canvas.width = Math.max(...rows.map((r) => r.length));
-  canvas.height = rows.length;
+  canvas.width = Math.max(...rows.map((r) => r.length)) * 3;
+  canvas.height = rows.length * 3;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
   rows.forEach((row, y) =>
@@ -254,7 +254,12 @@ function paintAscii(key: string, rows: string[], palette: Record<string, string>
       const color = palette[ch];
       if (!color) return;
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, 1, 1);
+      ctx.fillRect(x * 3, y * 3, 3, 3);
+      ctx.fillStyle = 'rgba(255,244,210,.19)';
+      if (rows[y-1]?.[x] !== ch) ctx.fillRect(x*3, y*3, 3, 1);
+      ctx.fillStyle = 'rgba(15,12,40,.22)';
+      ctx.fillRect(x*3+2, y*3+1, 1, 2);
+      if ((x+y)%3 === 0) ctx.fillRect(x*3, y*3+2, 2, 1);
     }),
   );
   const url = canvas.toDataURL();

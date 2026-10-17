@@ -1,3 +1,4 @@
+import { WorldScene } from './WorldScene';
 import { type CSSProperties, useState } from 'react';
 import { MAX_TEAM_SIZE } from '../game/balance';
 import { isBackRow, power, statsFor, teamSlots, teamUnits, unitName } from '../game/progression';
@@ -60,7 +61,7 @@ export function TeamArena({ save, onOpen, onMove, title = 'Your Team' }: Props) 
         </p>
       )}
 
-      <div className="arena-stage">
+      <div className="arena-stage"><WorldScene />
         {slots.map((u, i) => {
           const back = isBackRow(i);
           const tier = u ? tierFor(u.star) : null;

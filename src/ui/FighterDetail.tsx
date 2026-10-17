@@ -1,3 +1,4 @@
+import { PixelIcon } from './PixelIcon';
 import { useState } from 'react';
 import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap } from '../game/balance';
 import {
@@ -118,12 +119,12 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
               const cost = upgradeCost(unit.level, n);
               return (
                 <button key={n} className="btn" disabled={cost > save.coins} onClick={() => buy(n)}>
-                  +{n} <small>● {cost.toLocaleString()}</small>
+                  +{n} <small><PixelIcon kind="coin" /> {cost.toLocaleString()}</small>
                 </button>
               );
             })}
             <button className="btn primary" disabled={maxBuy === 0} onClick={() => buy(maxBuy)}>
-              Max +{maxBuy} <small>● {upgradeCost(unit.level, maxBuy).toLocaleString()}</small>
+              Max +{maxBuy} <small><PixelIcon kind="coin" /> {upgradeCost(unit.level, maxBuy).toLocaleString()}</small>
             </button>
           </div>
         )}

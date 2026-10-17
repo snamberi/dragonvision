@@ -1,3 +1,6 @@
+import { WorldScene } from './WorldScene';
+import { AttackEffect } from './AttackEffect';
+import { PixelIcon } from './PixelIcon';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KI_BLAST_COST, KI_MAX } from '../game/balance';
 import {
@@ -257,7 +260,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
         </div>
       </div>
 
-      <div className="field">
+      <div className={`field ${busy && event?.data.kind === 'special' ? 'special-impact' : ''}`}><WorldScene />
         {battle.fighters.map((f) => (
           <button
             key={f.id}
@@ -276,13 +279,15 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
                   </span>
                 ))}
             {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special') && (
-              <span key={`fx-${event.id}`} className={`beam-h ${f.side}`} />
+              <AttackEffect key={`fx-${event.id}`} familyId={f.familyId} side={f.side} special={event.data.kind === 'special'} support={event.data.kind === 'special' && ['heal','revive','shield','rally'].includes(specialOf(f).kind)} duration={step} />
             )}
             <span className="unit-hp">
               <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
               {f.shield > 0 && <i className="shield-bar" style={{ width: `${Math.min(100, (f.shield / f.maxHp) * 100)}%` }} />}
             </span>
             {f.rank !== 'minion' && <span className="rank-tag">{f.rank === 'boss' ? 'BOSS' : 'MINI-BOSS'}</span>}
+            {busy && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && <span key={`impact-${event.id}`} className="impact-burst" aria-hidden="true" />}
+            {busy && event?.data.actorId === f.id && event.data.kind === 'charge' && <span className="charge-aura" aria-hidden="true" />}
             <span className="unit-shadow" aria-hidden="true" />
             <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 112 : 88} flip={f.side === 'player'} />
             <span className="unit-tags">
@@ -314,14 +319,14 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
         </div>
         <div className="command-grid">
           <button className="cmd attack" disabled={!showControls || !playerControls} onClick={() => choose('attack')}>
-            <span className="cmd-icon">✊</span>Attack
+            <span className="cmd-icon"><PixelIcon kind="attack" size={26} /></span>Attack
           </button>
           <button
             className="cmd blast"
             disabled={!showControls || !playerControls || !actor || !canUse(battle, actor, 'kiBlast')}
             onClick={() => choose('kiBlast')}
           >
-            <span className="cmd-icon">✸</span>Ki Blast<small>{KI_BLAST_COST} Ki</small>
+            <span className="cmd-icon"><PixelIcon kind="spin" size={26} /></span>Ki Blast<small>{KI_BLAST_COST} Ki</small>
           </button>
           <button
             className={`cmd special ${showControls && actor && canUse(battle, actor, 'special') ? 'ready' : ''}`}
@@ -329,7 +334,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
             onClick={() => choose('special')}
             title={special ? describeSpecial(special) : undefined}
           >
-            <span className="cmd-icon">★</span>
+            <span className="cmd-icon"><PixelIcon kind="spin" size={26} /></span>
             {special?.name ?? 'Special'}
             <small>
               {actor && special
@@ -340,10 +345,10 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
             </small>
           </button>
           <button className="cmd charge" disabled={!showControls || !playerControls} onClick={() => choose('charge')}>
-            <span className="cmd-icon">↯</span>Charge<small>+Ki</small>
+            <span className="cmd-icon"><PixelIcon kind="charge" size={26} /></span>Charge<small>+Ki</small>
           </button>
           <button className="cmd guard" disabled={!showControls || !playerControls} onClick={() => choose('guard')}>
-            <span className="cmd-icon">⛨</span>Guard
+            <span className="cmd-icon"><PixelIcon kind="guard" size={26} /></span>Guard
           </button>
           {pending ? (
             <button className="cmd cancel" onClick={() => setPending(null)}>
@@ -423,16 +428,16 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
               </div>
             )}
             {battle.result === 'won' && towerFloor && towerRewards(towerFloor).shardStar && rewards?.firstClear && (
-              <p className="shard-chip">◇ {towerRewards(towerFloor).shardStar}★ evolution shard</p>
+              <p className="shard-chip"><PixelIcon kind="shard" /> {towerRewards(towerFloor).shardStar}★ evolution shard</p>
             )}
             {battle.result === 'won' && towerFloor && rewards && !rewards.firstClear && (
               <p className="muted">Floor already cleared: no rewards this time.</p>
             )}
             {battle.result === 'won' && rewards ? (
               <ul className="reward-list">
-                <li>● {rewards.coins.toLocaleString()} coins</li>
-                {rewards.spins > 0 && <li>✦ {rewards.spins} summon spin{rewards.spins === 1 ? '' : 's'}</li>}
-                {rewards.gems > 0 && <li>◆ {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
+                <li><PixelIcon kind="coin" /> {rewards.coins.toLocaleString()} coins</li>
+                {rewards.spins > 0 && <li><PixelIcon kind="spin" /> {rewards.spins} summon spin{rewards.spins === 1 ? '' : 's'}</li>}
+                {rewards.gems > 0 && <li><PixelIcon kind="gem" /> {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
                 {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (25% coins)</li>}
               </ul>
             ) : (

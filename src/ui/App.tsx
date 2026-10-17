@@ -1,3 +1,4 @@
+import { PixelIcon } from './PixelIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { syncBounties } from '../game/bounty';
 import { loadSave, writeSave } from '../game/save';
@@ -83,15 +84,15 @@ export function App() {
   );
 
   return (
-    <div className="app">
+    <div className={`app ${view.kind === 'tab' && view.tab === 'city' ? 'city-view' : ''}`}>
       <header className="topbar">
         <div className="logo">
           DRAGON<span>VISION</span>
         </div>
         <div className="wallet">
-          <span className="coin" title="Coins">● {save.coins.toLocaleString()}</span>
-          <span className="gem" title="Gems">◆ {save.gems}</span>
-          <span className="spin" title="Summon spins">✦ {save.spins}</span>
+          <span className="coin" title="Coins"><PixelIcon kind="coin" /> {save.coins.toLocaleString()}</span>
+          <span className="gem" title="Gems"><PixelIcon kind="gem" /> {save.gems}</span>
+          <span className="spin" title="Summon spins"><PixelIcon kind="spin" /> {save.spins}</span>
         </div>
       </header>
 
@@ -154,7 +155,7 @@ export function App() {
         <nav className="tabs">
           {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button key={t} className={t === tab ? 'active' : ''} onClick={() => setView({ kind: 'tab', tab: t })}>
-              {TAB_LABELS[t]}
+              <PixelIcon kind={t} size={22} />{TAB_LABELS[t]}
               {t === 'city' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
             </button>
           ))}

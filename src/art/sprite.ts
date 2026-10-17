@@ -177,6 +177,16 @@ export function paintFighter(look: Look): Grid {
       break;
   }
 
+  // Folded collar, embroidered chest badge, knuckles and boot cuffs.
+  rect(13, 18, 1, 3, outfitLight);
+  set(14, 19, outfitDark);
+  set(18, 19, look.accent);
+  set(18, 20, shade(look.accent, 0.5));
+  set(19, 21, outfitDark);
+  set(22, 21, shade(look.skin, 0.3));
+  rect(12, 28, 3, 1, look.accent);
+  rect(18, 28, 3, 1, look.accent);
+  set(18, 30, shade(look.boots, 0.35));
   // Light the top edge of the hair so it reads as volume.
   const hairLight = shade(hair, 0.3);
   for (let y = 1; y < SPRITE_SIZE; y++) {
@@ -205,15 +215,24 @@ export function spriteUrl(look: Look): string {
   const hit = cache.get(key);
   if (hit) return hit;
   const canvas = document.createElement('canvas');
-  canvas.width = SPRITE_SIZE;
-  canvas.height = SPRITE_SIZE;
+  canvas.width = SPRITE_SIZE * 2;
+  canvas.height = SPRITE_SIZE * 2;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
   paintFighter(look).forEach((row, y) =>
     row.forEach((color, x) => {
       if (!color) return;
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, 1, 1);
+      ctx.fillRect(x * 2, y * 2, 2, 2);
+      if (color !== OUTLINE && color !== EYE && color !== EYE_SHINE) {
+        ctx.fillStyle = shade(color, (x + y) % 3 === 0 ? 0.16 : -0.12);
+        ctx.fillRect(x * 2 + 1, y * 2 + 1, 1, 1);
+      }
+      // Deliberate hair strands, fabric seams and boot highlights.
+      if (color === look.hair && x % 3 === 0) {
+        ctx.fillStyle = shade(color, 0.28);
+        ctx.fillRect(x * 2, y * 2, 1, 2);
+      }
     }),
   );
   const url = canvas.toDataURL();

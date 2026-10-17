@@ -1,3 +1,4 @@
+import { WorldScene } from './WorldScene';
 import { boardUrl, dojoUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
 import { dojoProgress } from '../game/dojo';
@@ -42,9 +43,9 @@ export function CityScreen({ save, onOpen }: Props) {
         <p className="muted">Tap a building to go inside.</p>
       </section>
 
-      <div className="city-map">
+      <div className="city-map"><WorldScene city /><div className="city-location"><span>✦ VISION CITY</span><small>THE HIGHLAND SANCTUARY</small></div><div className="city-motes" aria-hidden="true">{Array.from({length:12},(_,i)=><i key={i} style={{left:`${(i*37)%100}%`,top:`${25+(i*13)%65}%`,animationDelay:`${i*.4}s`}} />)}</div>
         {buildings.map((b) => (
-          <button key={b.id} className={`building ${b.badge ? 'ready' : ''}`} onClick={() => onOpen(b.id)}>
+          <button key={b.id} data-building={b.id} className={`building ${b.badge ? 'ready' : ''}`} onClick={() => onOpen(b.id)}>
             <img className="building-art" src={b.art} alt="" draggable={false} />
             <span className="building-name">{b.name}</span>
             {b.badge && <span className="badge">{b.badge}</span>}
