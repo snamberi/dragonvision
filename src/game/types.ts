@@ -73,6 +73,14 @@ export interface Unit {
   baseLevel: number;
   /** Coins spent on purchased levels, refunded by a gem reset. */
   coinsSpent: number;
+  /** Free levels earned in the Training Dojo; kept through a gem reset. */
+  trainedLevels?: number;
+}
+
+/** A fighter training in the Dojo since `since` (ms timestamp). */
+export interface DojoSlot {
+  uid: string;
+  since: number;
 }
 
 export interface SaveData {
@@ -90,4 +98,8 @@ export interface SaveData {
   clearedStage: number;
   focusFamilyId: string | null;
   nextUid: number;
+  /** Fighters training in the Dojo. */
+  dojo: DojoSlot[];
+  /** Evolution shards by star: each counts as one duplicate when evolving a fighter of that star. */
+  shards: Record<number, number>;
 }

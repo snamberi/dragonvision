@@ -24,3 +24,23 @@ export function Sprite({ familyId, star, size = 96, flip = false, className = ''
 export function Stars({ star }: { star: number }) {
   return <span className="stars">{star}★</span>;
 }
+
+/** Head-and-shoulders crop of a fighter for small status cards. */
+export function Portrait({ familyId, star, size = 44, flip = false }: { familyId: string; star: number; size?: number; flip?: boolean }) {
+  const { look, name } = formForStar(getFamily(familyId), star);
+  return (
+    <span className="portrait" style={{ width: size, height: size }}>
+      <img
+        src={spriteUrl(look)}
+        alt={name}
+        draggable={false}
+        style={{
+          width: size * 1.9,
+          height: size * 1.9,
+          transform: flip ? 'scaleX(-1)' : undefined,
+          filter: look.aura ? `drop-shadow(0 0 2px ${look.aura})` : undefined,
+        }}
+      />
+    </span>
+  );
+}

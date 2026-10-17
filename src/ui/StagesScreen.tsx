@@ -3,17 +3,19 @@ import { REPLAY_COIN_SHARE, STAGES_PER_CHAPTER, TOTAL_STAGES, enemyStrengthForSt
 import { power, teamUnits, unitName } from '../game/progression';
 import { getStage, isUnlocked, stageKind } from '../game/stages';
 import type { SaveData } from '../game/types';
+import { type Run, newRun } from './run';
 import { Sprite, Stars } from './Sprite';
 
 interface Props {
   save: SaveData;
-  onPlay: (stage: number) => void;
+  onPlay: (stage: number, run?: Run) => void;
 }
 
 export function StagesScreen({ save, onPlay }: Props) {
   const next = Math.min(TOTAL_STAGES, save.clearedStage + 1);
   const [selected, setSelected] = useState(next);
   const [chapter, setChapter] = useState(Math.ceil(next / STAGES_PER_CHAPTER));
+  const [farmLimit, setFarmLimit] = useState<string>('10');
   const stage = getStage(selected);
   const replay = selected <= save.clearedStage;
   const team = teamUnits(save);
@@ -68,6 +70,32 @@ export function StagesScreen({ save, onPlay }: Props) {
         <button className="btn primary big" onClick={() => onPlay(selected)}>
           {replay ? 'Replay' : 'Fight'} with {team.length} fighter{team.length === 1 ? '' : 's'}
         </button>
+        <div className="auto-runs">
+          {replay ? (
+            <div className="auto-run">
+              <button className="btn" onClick={() => onPlay(selected, newRun('farm', farmLimit === 'all' ? null : Number(farmLimit)))}>
+                Auto-Farm
+              </button>
+              <select value={farmLimit} onChange={(e) => setFarmLimit(e.target.value)} aria-label="Auto-Farm runs">
+                <option value="5">5 runs</option>
+                <option value="10">10 runs</option>
+                <option value="25">25 runs</option>
+                <option value="50">50 runs</option>
+                <option value="all">Until I stop</option>
+              </select>
+              <span className="muted small-text">Replays this stage for 25% coins. Stops on a defeat.</span>
+            </div>
+          ) : stage.kind === 'normal' ? (
+            <div className="auto-run">
+              <button className="btn" onClick={() => onPlay(selected, newRun('progress'))}>
+                Auto-Progress
+              </button>
+              <span className="muted small-text">Keeps clearing new stages. Stops before mini-bosses, bosses, or on a defeat.</span>
+            </div>
+          ) : (
+            <span className="muted small-text">Bosses can't be auto-progressed. Beat this one yourself.</span>
+          )}
+        </div>
       </section>
 
       <div className="chapter-tabs">

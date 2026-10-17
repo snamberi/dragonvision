@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KI_BLAST_COST, KI_MAX } from '../game/balance';
 import {
   type Action,
@@ -10,6 +10,7 @@ import {
   canUse,
   chooseAction,
   createBattle,
+  living,
   nextActor,
   performAction,
   specialOf,
@@ -20,17 +21,32 @@ import { teamSlots } from '../game/progression';
 import { type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { Sprite, Stars } from './Sprite';
+import { type Run, nextInRun } from './run';
+import { Portrait, Sprite, Stars } from './Sprite';
 import { describeSpecial } from './specialText';
 
 interface Props {
   save: SaveData;
   stageNumber: number;
+  run: Run;
   update: Updater;
   onExit: () => void;
+  /** Starts the next battle of an auto run. */
+  onContinue: (stage: number, run: Run) => void;
 }
 
 const STEP_MS = 650;
+const SPEEDS = [1, 2, 4] as const;
+const SPEED_KEY = 'dragonvision.speed';
+
+function loadSpeed(): number {
+  try {
+    const v = Number(localStorage.getItem(SPEED_KEY));
+    return SPEEDS.includes(v as 1) ? v : 1;
+  } catch {
+    return 1;
+  }
+}
 
 /** Floating text over a fighter for one hit. */
 function hitText(h: Hit): string {
@@ -52,19 +68,34 @@ function hitText(h: Hit): string {
   }
 }
 
-export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
+/**
+ * Where a fighter stands on the field, as percentages of the field box.
+ * Enemies stand on the left facing right, the team on the right facing left;
+ * the front row stands nearer the middle.
+ */
+function fieldPosition(f: Fighter): CSSProperties {
+  const front = f.row === 'front';
+  const x = f.side === 'enemy' ? (front ? 31 : 12) : front ? 69 : 88;
+  const y = [42, 56, 70, 84, 98][f.slot] ?? 70;
+  return { left: `${x}%`, top: `${y}%`, zIndex: Math.round(y) };
+}
+
+export function BattleScreen({ save, stageNumber, run, update, onExit, onContinue }: Props) {
   const stage = useMemo(() => getStage(stageNumber), [stageNumber]);
   const [battle, setBattle] = useState<BattleState>(() => createBattle(teamSlots(save), stage));
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<ActionKind | null>(null);
-  const [auto, setAuto] = useState(false);
+  const [auto, setAuto] = useState(run.mode !== 'single');
+  const [speed, setSpeed] = useState(() => (run.mode === 'single' ? loadSpeed() : Math.max(2, loadSpeed())));
   const [log, setLog] = useState<string[]>([]);
   const [rewards, setRewards] = useState<Rewards | null>(null);
+  const [runAfter, setRunAfter] = useState<{ run: Run; next?: number; stop?: string } | null>(null);
   const eventId = useRef(0);
   // Blocks a second action from a fast double tap before React re-renders.
   const acting = useRef(false);
   const rewarded = useRef(false);
+  const step = STEP_MS / speed;
 
   const actor = nextActor(battle);
   const playerControls = battle.result === 'ongoing' && battle.turn === 'player' && !auto && !busy;
@@ -91,26 +122,47 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     setTimeout(() => {
       acting.current = false;
       setBusy(false);
-    }, STEP_MS);
+    }, step);
   };
 
   // Enemy turns and Auto mode play themselves one action at a time.
   useEffect(() => {
     if (busy || battle.result !== 'ongoing') return;
     if (battle.turn === 'enemy' || auto) {
-      const id = setTimeout(() => act(chooseAction(battle)), 250);
+      const id = setTimeout(() => act(chooseAction(battle)), 250 / speed);
       return () => clearTimeout(id);
     }
   });
 
-  // Pay out once when the battle is won.
+  // Pay out once when the battle ends, and decide whether an auto run continues.
   useEffect(() => {
-    if (battle.result !== 'won' || rewarded.current) return;
+    if (battle.result === 'ongoing' || rewarded.current) return;
     rewarded.current = true;
+    if (battle.result === 'lost') {
+      if (run.mode !== 'single') setRunAfter({ run, stop: 'Your team was defeated.' });
+      return;
+    }
     const earned = rewardsFor(save, stageNumber);
     update((s) => applyRewards(s, stageNumber, earned));
     setRewards(earned);
-  }, [battle.result, save, stageNumber, update]);
+    if (run.mode === 'single') return;
+    const total: Run = {
+      ...run,
+      wins: run.wins + 1,
+      coins: run.coins + earned.coins,
+      gems: run.gems + earned.gems,
+      spins: run.spins + earned.spins,
+    };
+    const decision = nextInRun(total, stageNumber);
+    setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
+  }, [battle.result, save, stageNumber, update, run]);
+
+  // Auto runs roll into the next battle after a short pause.
+  useEffect(() => {
+    if (runAfter?.next === undefined) return;
+    const id = setTimeout(() => onContinue(runAfter.next!, runAfter.run), 900 / speed);
+    return () => clearTimeout(id);
+  }, [runAfter, onContinue, speed]);
 
   const choose = (kind: ActionKind) => {
     if (!actor || !playerControls) return;
@@ -126,29 +178,79 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     act({ kind: pending, targetId: f.id });
   };
 
+  const cycleSpeed = () => {
+    const next = SPEEDS[(SPEEDS.indexOf(speed as 1) + 1) % SPEEDS.length];
+    setSpeed(next);
+    try {
+      localStorage.setItem(SPEED_KEY, String(next));
+    } catch {
+      // Speed just won't be remembered.
+    }
+  };
+
   const fighterClasses = (f: Fighter) => {
     const ev = event?.data;
-    const classes = ['fighter', f.side];
+    const classes = ['unit', f.side];
     if (f.hp <= 0) classes.push('ko');
     if (actor?.id === f.id && battle.result === 'ongoing') classes.push('active');
     if (targetIds.has(f.id)) classes.push('targetable');
     if (aimingAtEnemies && f.side === 'enemy' && f.hp > 0 && !targetIds.has(f.id)) classes.push('shielded');
-    if (f.stunned) classes.push('stunned');
-    if (f.row === 'back') classes.push('back-row');
     if (busy && ev?.actorId === f.id) classes.push(`do-${ev.kind}`);
     if (busy && ev?.hits.some((h) => h.targetId === f.id && h.kind === 'damage')) classes.push('hit');
     if (f.guarding) classes.push('guarding');
+    if (f.stunned) classes.push('stunned');
     if (f.rank !== 'minion') classes.push(f.rank);
     return classes.join(' ');
   };
 
-  const renderRow = (side: 'player' | 'enemy', row: 'front' | 'back') => (
-    <div className={`side side-${side} row-${row}`}>
-      {battle.fighters
-        .filter((f) => f.side === side && f.row === row)
-        .sort((a, b) => a.slot - b.slot)
-        .map((f) => (
-          <button key={f.id} className={fighterClasses(f)} onClick={() => clickFighter(f)} disabled={!targetIds.has(f.id)}>
+  // Turn order: who is still to move this turn, then the other side by speed.
+  const queue = useMemo(() => {
+    if (battle.result !== 'ongoing') return [];
+    const bySpeed = (a: Fighter, b: Fighter) => b.spd - a.spd;
+    const now = living(battle, battle.turn)
+      .filter((f) => !battle.acted.includes(f.id))
+      .sort(bySpeed);
+    const later = living(battle, battle.turn === 'player' ? 'enemy' : 'player').sort(bySpeed);
+    return [...now, ...later].slice(0, 7);
+  }, [battle]);
+
+  const special = actor ? specialOf(actor) : null;
+  const specialBlocked = actor && specialReady(actor) && !canUse(battle, actor, 'special') ? 'No fallen ally' : null;
+  const team = battle.fighters.filter((f) => f.side === 'player').sort((a, b) => a.slot - b.slot);
+  const showControls = battle.result === 'ongoing' && battle.turn === 'player' && actor !== null && !auto;
+
+  return (
+    <div className="battle">
+      <div className="battle-top">
+        <div className="turn-queue" aria-label="Turn order">
+          {queue.map((f, i) => (
+            <span key={f.id} className={`queue-slot ${f.side} ${i === 0 ? 'now' : ''}`}>
+              {i === 0 && <b>NEXT</b>}
+              <Portrait familyId={f.familyId} star={f.star} size={30} flip={f.side === 'player'} />
+            </span>
+          ))}
+        </div>
+        <div className="battle-title">
+          Stage {stage.number}
+          {run.mode !== 'single' && (
+            <span className="run-chip">
+              {run.mode === 'farm' ? 'AUTO-FARM' : 'AUTO-PROGRESS'} · {run.wins} won
+            </span>
+          )}
+          <small>Round {battle.round}</small>
+        </div>
+      </div>
+
+      <div className="field">
+        {battle.fighters.map((f) => (
+          <button
+            key={f.id}
+            className={fighterClasses(f)}
+            style={fieldPosition(f)}
+            onClick={() => clickFighter(f)}
+            disabled={!targetIds.has(f.id)}
+            aria-label={`${f.name}, ${f.hp} of ${f.maxHp} HP`}
+          >
             {busy &&
               event?.data.hits
                 .filter((h) => h.targetId === f.id)
@@ -158,110 +260,125 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
                   </span>
                 ))}
             {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special') && (
-              <span key={`fx-${event.id}`} className={`beam ${side}`} />
+              <span key={`fx-${event.id}`} className={`beam-h ${f.side}`} />
             )}
-            {f.rank !== 'minion' && <span className="rank-tag">{f.rank === 'boss' ? 'BOSS' : 'MINI-BOSS'}</span>}
-            {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="taunt-tag">TAUNT</span>}
-            <Sprite familyId={f.familyId} star={f.star} size={72} flip={side === 'enemy'} />
-            <span className="f-name">{f.name}</span>
-            <span className="f-meta">
-              Lv {f.level} <Stars star={f.star} />
-            </span>
-            <span className="bar hp">
+            <span className="unit-hp">
               <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
+              {f.shield > 0 && <i className="shield-bar" style={{ width: `${Math.min(100, (f.shield / f.maxHp) * 100)}%` }} />}
             </span>
-            <span className="bar ki">
-              <i style={{ width: `${(f.ki / KI_MAX) * 100}%` }} />
-            </span>
-            <span className="f-stats">
-              <span className="ki-text">Ki {f.ki}</span>
-              <ChargePips fighter={f} />
-            </span>
-            <span className="f-status">
-              {f.shield > 0 && <span className="status shield">SH {f.shield.toLocaleString()}</span>}
+            {f.rank !== 'minion' && <span className="rank-tag">{f.rank === 'boss' ? 'BOSS' : 'MINI-BOSS'}</span>}
+            <span className="unit-shadow" aria-hidden="true" />
+            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 112 : 88} flip={f.side === 'player'} />
+            <span className="unit-tags">
+              {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="status taunt">TAUNT</span>}
               {f.stunned && <span className="status stun">STUN</span>}
               {f.rallyTurns > 0 && <span className="status rally">ATK↑</span>}
             </span>
           </button>
         ))}
-    </div>
-  );
-
-  const special = actor ? specialOf(actor) : null;
-  const specialBlocked =
-    actor && special && specialReady(actor) && !canUse(battle, actor, 'special') ? 'No fallen ally' : null;
-
-  return (
-    <div className="battle">
-      <div className="battle-top">
-        <button className="btn ghost small" onClick={onExit} disabled={battle.result === 'won' && !rewards}>
-          {battle.result === 'ongoing' ? 'Retreat' : 'Leave'}
-        </button>
-        <div className="battle-title">
-          Stage {stage.number} · Round {battle.round}
+        <div className="turn-banner">
+          {battle.result === 'ongoing' ? (battle.turn === 'player' ? 'YOUR TURN' : 'ENEMY TURN') : ''}
         </div>
-        <button className={`btn small ${auto ? 'primary' : ''}`} onClick={() => setAuto((a) => !a)}>
-          Auto {auto ? 'ON' : 'OFF'}
-        </button>
       </div>
 
-      <div className="arena">
-        {renderRow('enemy', 'back')}
-        {renderRow('enemy', 'front')}
-        <div className="turn-banner">{battle.result === 'ongoing' ? (battle.turn === 'player' ? 'YOUR TURN' : 'ENEMY TURN') : ''}</div>
-        {renderRow('player', 'front')}
-        {renderRow('player', 'back')}
-      </div>
-
-      {battle.result === 'ongoing' && (
-        <div className="action-bar">
-          {battle.turn === 'player' && actor && !auto ? (
+      <div className="command-panel">
+        <div className="command-head">
+          {showControls && actor ? (
             <>
-              <div className="action-who">
-                {pending
-                  ? `${actor.name}: pick a target${aimingAtEnemies ? ' — the front row shields the back row' : ''}`
-                  : `${actor.name}'s move`}{' '}
-                · Ki {actor.ki}/{KI_MAX}
-              </div>
-              <div className="button-row">
-                <button className="btn" disabled={!playerControls} onClick={() => choose('attack')}>
-                  Attack
-                </button>
-                <button className="btn" disabled={!playerControls || !canUse(battle, actor, 'kiBlast')} onClick={() => choose('kiBlast')}>
-                  Ki Blast <small>{KI_BLAST_COST} Ki</small>
-                </button>
-                <button
-                  className={`btn special ${canUse(battle, actor, 'special') ? 'ready' : ''}`}
-                  disabled={!playerControls || !canUse(battle, actor, 'special')}
-                  onClick={() => choose('special')}
-                  title={special ? describeSpecial(special) : undefined}
-                >
-                  {special?.name}{' '}
-                  <small>
-                    {actor.specialSpent
-                      ? 'USED'
-                      : specialBlocked ?? (specialReady(actor) ? 'READY' : `${actor.charge}/${special?.charge}`)}
-                  </small>
-                </button>
-                <button className="btn" disabled={!playerControls} onClick={() => choose('charge')}>
-                  Charge
-                </button>
-                <button className="btn" disabled={!playerControls} onClick={() => choose('guard')}>
-                  Guard
-                </button>
-                {pending && (
-                  <button className="btn ghost" onClick={() => setPending(null)}>
-                    Cancel
-                  </button>
-                )}
-              </div>
-              {special && <div className="special-hint">{describeSpecial(special)}</div>}
+              <b>{actor.name}</b>
+              {pending
+                ? ` — pick a target${aimingAtEnemies ? ' (the front row shields the back row)' : ''}`
+                : ` · Ki ${actor.ki}/${KI_MAX}`}
             </>
+          ) : battle.result === 'ongoing' ? (
+            auto ? 'Auto battle…' : 'Enemy is moving…'
           ) : (
-            <div className="action-who">{auto ? 'Auto battle…' : 'Enemy is moving…'}</div>
+            ''
           )}
         </div>
-      )}
+        <div className="command-grid">
+          <button className="cmd attack" disabled={!showControls || !playerControls} onClick={() => choose('attack')}>
+            <span className="cmd-icon">✊</span>Attack
+          </button>
+          <button
+            className="cmd blast"
+            disabled={!showControls || !playerControls || !actor || !canUse(battle, actor, 'kiBlast')}
+            onClick={() => choose('kiBlast')}
+          >
+            <span className="cmd-icon">✸</span>Ki Blast<small>{KI_BLAST_COST} Ki</small>
+          </button>
+          <button
+            className={`cmd special ${showControls && actor && canUse(battle, actor, 'special') ? 'ready' : ''}`}
+            disabled={!showControls || !playerControls || !actor || !canUse(battle, actor, 'special')}
+            onClick={() => choose('special')}
+            title={special ? describeSpecial(special) : undefined}
+          >
+            <span className="cmd-icon">★</span>
+            {special?.name ?? 'Special'}
+            <small>
+              {actor && special
+                ? actor.specialSpent
+                  ? 'USED'
+                  : (specialBlocked ?? (specialReady(actor) ? 'READY' : `${actor.charge}/${special.charge}`))
+                : ''}
+            </small>
+          </button>
+          <button className="cmd charge" disabled={!showControls || !playerControls} onClick={() => choose('charge')}>
+            <span className="cmd-icon">↯</span>Charge<small>+Ki</small>
+          </button>
+          <button className="cmd guard" disabled={!showControls || !playerControls} onClick={() => choose('guard')}>
+            <span className="cmd-icon">⛨</span>Guard
+          </button>
+          {pending ? (
+            <button className="cmd cancel" onClick={() => setPending(null)}>
+              <span className="cmd-icon">✕</span>Cancel
+            </button>
+          ) : (
+            <button className="cmd retreat" onClick={onExit} disabled={battle.result === 'won' && !rewards}>
+              <span className="cmd-icon">⤺</span>
+              {battle.result === 'ongoing' ? 'Retreat' : 'Leave'}
+            </button>
+          )}
+          <button className={`cmd auto ${auto ? 'on' : ''}`} onClick={() => setAuto((a) => !a)}>
+            <span className="cmd-icon">»</span>Auto<small>{auto ? 'ON' : 'OFF'}</small>
+          </button>
+          <button className="cmd speed" onClick={cycleSpeed}>
+            <span className="cmd-icon">⏩</span>Speed<small>{speed}×</small>
+          </button>
+        </div>
+        {showControls && special && <div className="special-hint">{describeSpecial(special)}</div>}
+
+        <div className="team-status">
+          {team.map((f) => (
+            <button
+              key={f.id}
+              className={`status-card ${actor?.id === f.id ? 'active' : ''} ${f.hp <= 0 ? 'ko' : ''} ${targetIds.has(f.id) ? 'targetable' : ''}`}
+              onClick={() => clickFighter(f)}
+              disabled={!targetIds.has(f.id)}
+            >
+              <Portrait familyId={f.familyId} star={f.star} size={40} flip />
+              <span className="sc-body">
+                <span className="sc-name">
+                  {f.name} <Stars star={f.star} />
+                </span>
+                <span className="sc-row hp">
+                  <span>HP</span>
+                  <b>{f.hp.toLocaleString()}</b>
+                </span>
+                <span className="sc-bar hp">
+                  <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
+                </span>
+                <span className="sc-row ki">
+                  <span>Ki</span>
+                  <b>{f.ki}</b>
+                  <ChargePips fighter={f} />
+                </span>
+                {f.shield > 0 && <span className="sc-shield">Shield {f.shield.toLocaleString()}</span>}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <ol className="battle-log">
         {log.map((line, i) => (
@@ -269,7 +386,16 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
         ))}
       </ol>
 
-      {battle.result !== 'ongoing' && (
+      {runAfter?.next !== undefined && (
+        <div className="run-toast">
+          Win {runAfter.run.wins} · ● {runAfter.run.coins.toLocaleString()} total · next battle…
+          <button className="btn small" onClick={onExit}>
+            Stop
+          </button>
+        </div>
+      )}
+
+      {battle.result !== 'ongoing' && runAfter?.next === undefined && (
         <div className="modal-backdrop">
           <div className="modal panel result">
             <h2>{battle.result === 'won' ? 'VICTORY' : 'DEFEAT'}</h2>
@@ -282,6 +408,16 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
               </ul>
             ) : (
               <p className="muted">Level up your fighters or replay earlier stages for coins.</p>
+            )}
+            {runAfter && (
+              <div className="run-summary">
+                <b>{run.mode === 'farm' ? 'Auto-Farm' : 'Auto-Progress'} stopped.</b> {runAfter.stop}
+                <div>
+                  {runAfter.run.wins} win{runAfter.run.wins === 1 ? '' : 's'} · ● {runAfter.run.coins.toLocaleString()}
+                  {runAfter.run.spins > 0 && ` · ✦ ${runAfter.run.spins}`}
+                  {runAfter.run.gems > 0 && ` · ◆ ${runAfter.run.gems}`}
+                </div>
+              </div>
             )}
             <button className="btn primary" onClick={onExit}>
               Continue

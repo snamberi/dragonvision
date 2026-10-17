@@ -96,3 +96,20 @@ Roles come from each character: heal special → Support, drain special → Drai
 - **Striker:** +15% single-target damage. **Blaster:** +15% hit-all damage.
 - **Support:** heals 20% more. **Drainer:** drain heals 75% of damage dealt (others 50%).
 - Turn order inside a side is still fastest first.
+
+## Auto battles
+- **Auto-Farm** (cleared stages): replays the stage on Auto for 5/10/25/50 runs or until stopped, at
+  the normal 25% replay reward. Stops on a defeat.
+- **Auto-Progress** (the next new stage): clears new stages one after another on Auto. Stops before any
+  mini-boss or chapter boss, and on a defeat.
+- Battles have a 1×/2×/4× speed button; auto runs start at 2× or faster.
+
+## City buildings
+- **Summoning Shrine:** summon, focus, and buy spins with coins.
+- **Training Dojo:** 3 mats. Fighters not on the team gain 1 level per 10 real minutes, even while the
+  game is closed, up to their level wall. Trained levels are free and survive gem resets. Training
+  fighters can't join the team and are never used up as evolution copies.
+- **Fusion Lab:** works only on spare copies (not on the team, not in the Dojo, not a character's best copy).
+  Fuse 3 spares of the same star into an **evolution shard** of that star; a shard counts as one duplicate
+  when evolving any fighter of that star. Or sell spares for coins (20 × star² + 2 × level, plus any coins
+  spent leveling them).

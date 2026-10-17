@@ -59,6 +59,78 @@ const LOT_PALETTE: Record<string, string> = {
   G: '#5aa04f',
 };
 
+const DOJO = [
+  '.........F..............',
+  '.........FRR............',
+  '.........FRRR...........',
+  '.........F..............',
+  '...DDDDDDDDDDDDDDDDDD...',
+  '..DddddddddddddddddddD..',
+  '.DDDDDDDDDDDDDDDDDDDDDD.',
+  'DD....................DD',
+  '..WWWWWWWWWWWWWWWWWWWW..',
+  '..WPPWWWWWWWWWWWWWWPPW..',
+  '..WPPWWWYYYYYYYYWWWPPW..',
+  '..WPPWWWYkkkkkkYWWWPPW..',
+  '..WPPWWWYYYYYYYYWWWPPW..',
+  '..WPPWWWWWWWWWWWWWWPPW..',
+  '..WPPWWWBBBBBBBBWWWPPW..',
+  '..WPPWWWBbbbbbbBWWWPPW..',
+  '..WPPWWWBbbbbbbBWWWPPW..',
+  '..WPPWWWBbbbbbbBWWWPPW..',
+  '.SSSSSSSSSSSSSSSSSSSSSS.',
+  'SssssssssssssssssssssssS',
+];
+
+const DOJO_PALETTE: Record<string, string> = {
+  F: '#5a3a22',
+  R: '#d8432e',
+  D: '#3b2a6b',
+  d: '#5b3fa8',
+  W: '#e9d8b4',
+  P: '#8a5a30',
+  Y: '#ffd23f',
+  k: '#1b1530',
+  B: '#5a3a22',
+  b: '#2a1d12',
+  S: '#8f8aa8',
+  s: '#5f5a7a',
+};
+
+const LAB = [
+  '..........GGGG..........',
+  '........GGggggGG........',
+  '.......GggggggggG.......',
+  '......GggggwwgggggG.....',
+  '......GgggggwgggggG.....',
+  '.....MMMMMMMMMMMMMMM....',
+  '.....MmmmmmmmmmmmmmM....',
+  '..T..MmCCmmmmmmCCmmM..T.',
+  '..T..MmCCmmmmmmCCmmM..T.',
+  '.TtT.MmmmmmmmmmmmmmM.TtT',
+  '.TtT.MmmmmBBBBmmmmmM.TtT',
+  '.TtT.MmmmmBbbBmmmmmM.TtT',
+  '.TtT.MmmmmBbbBmmmmmM.TtT',
+  '.TTT.MmmmmBbbBmmmmmM.TTT',
+  '.SSSSSSSSSSSSSSSSSSSSSSS',
+  'SssssssssssssssssssssssS',
+];
+
+const LAB_PALETTE: Record<string, string> = {
+  G: '#3fc6ff',
+  g: '#9ae6ff',
+  w: '#ffffff',
+  M: '#3a3f4b',
+  m: '#6b7080',
+  C: '#4ade80',
+  B: '#22252d',
+  b: '#7fe7ff',
+  T: '#5f5a7a',
+  t: '#b6f28c',
+  S: '#8f8aa8',
+  s: '#5f5a7a',
+};
+
 const cache = new Map<string, string>();
 
 function paintAscii(key: string, rows: string[], palette: Record<string, string>): string {
@@ -84,3 +156,5 @@ function paintAscii(key: string, rows: string[], palette: Record<string, string>
 
 export const shrineUrl = () => paintAscii('shrine', SHRINE, SHRINE_PALETTE);
 export const lotUrl = () => paintAscii('lot', LOT, LOT_PALETTE);
+export const dojoUrl = () => paintAscii('dojo', DOJO, DOJO_PALETTE);
+export const labUrl = () => paintAscii('lab', LAB, LAB_PALETTE);

@@ -5,6 +5,8 @@ import {
   canReset,
   checkEvolve,
   evolveUnit,
+  freeLevel,
+  isTraining,
   power,
   purchasedLevels,
   resetUnit,
@@ -79,6 +81,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
           <div className="big-meta">
             Lv {unit.level} <Stars star={unit.star} />
             {save.team.includes(uid) && <span className="tag">ON TEAM</span>}
+            {isTraining(save, uid) && <span className="tag">IN DOJO</span>}
           </div>
           <div className="stat-grid">
             <span>HP {stats.hp.toLocaleString()}</span>
@@ -93,7 +96,8 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
             <div className="muted small-text">{describeSpecial(family.special)}</div>
           </div>
           <div className="muted small-text">
-            Summoned at Lv {unit.baseLevel} · {purchased} purchased level{purchased === 1 ? '' : 's'} ({unit.coinsSpent.toLocaleString()} coins)
+            Summoned at Lv {unit.baseLevel}
+            {(unit.trainedLevels ?? 0) > 0 && ` · ${unit.trainedLevels} trained in the Dojo`} · {purchased} purchased level{purchased === 1 ? '' : 's'} ({unit.coinsSpent.toLocaleString()} coins)
           </div>
         </div>
       </section>
@@ -136,7 +140,8 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
                 Reach level {evolve.levelNeeded} ({unit.level}/{evolve.levelNeeded})
               </li>
               <li className={evolve.duplicatesMet ? 'met' : ''}>
-                2 more copies of {unitName(unit)} {unit.star}★ ({evolve.duplicates.length}/2) — any level
+                2 more copies of {unitName(unit)} {unit.star}★ ({evolve.duplicates.length + evolve.shardsUsed}/2) — any level
+                {evolve.shardsUsed > 0 && ` (${evolve.shardsUsed} from shards)`}
               </li>
             </ul>
             {evolve.duplicates.length > 0 && (
@@ -159,7 +164,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
       <section className="panel">
         <h3>Reset purchased levels</h3>
         <p className="muted small-text">
-          Returns to Lv {unit.baseLevel} and refunds {unit.coinsSpent.toLocaleString()} coins. Summoned levels stay. Costs{' '}
+          Returns to Lv {freeLevel(unit)} and refunds {unit.coinsSpent.toLocaleString()} coins. Summoned levels stay. Costs{' '}
           {RESET_GEM_COST} gems.
         </p>
         <button className="btn" disabled={!canReset(save, unit)} onClick={() => update((s) => resetUnit(s, uid))}>

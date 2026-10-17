@@ -12,7 +12,9 @@ function migrate(save: SaveData): SaveData {
     return uid && save.units.some((u) => u.uid === uid) ? uid : null;
   });
   if (!team.some(Boolean)) team[0] = save.units[0].uid;
-  return { ...save, team };
+  // Dojo and shards arrived after the first saves.
+  const dojo = (save.dojo ?? []).filter((d) => save.units.some((u) => u.uid === d.uid));
+  return { ...save, team, dojo, shards: save.shards ?? {} };
 }
 
 function isValid(data: unknown): data is SaveData {

@@ -33,6 +33,24 @@ export function InventoryScreen({ save }: Props) {
       </section>
 
       <section className="panel">
+        <h3>Evolution shards</h3>
+        <p className="muted small-text">Made in the Fusion Lab. Each counts as one duplicate when evolving a fighter of that star.</p>
+        <div className="shard-row">
+          {Object.entries(save.shards).filter(([, n]) => n > 0).length === 0 ? (
+            <span className="muted">None yet.</span>
+          ) : (
+            Object.entries(save.shards)
+              .filter(([, n]) => n > 0)
+              .map(([star, n]) => (
+                <span key={star} className="shard-chip">
+                  ◇ {star}★ × {n}
+                </span>
+              ))
+          )}
+        </div>
+      </section>
+
+      <section className="panel">
         <h3>Items</h3>
         <p className="muted small-text">No items yet. Items you find will show up here.</p>
         <div className="item-grid">

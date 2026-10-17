@@ -67,6 +67,8 @@ export function newSave(): SaveData {
     clearedStage: 0,
     focusFamilyId: null,
     nextUid: 2,
+    dojo: [],
+    shards: {},
   };
 }
 
@@ -122,8 +124,13 @@ export function upgradeUnit(save: SaveData, uid: string, count: number): SaveDat
 
 // --- Gem reset ---
 
+/** Levels that can't be refunded: summoned levels plus Dojo training. */
+export function freeLevel(unit: Unit): number {
+  return unit.baseLevel + (unit.trainedLevels ?? 0);
+}
+
 export function purchasedLevels(unit: Unit): number {
-  return unit.level - unit.baseLevel;
+  return Math.max(0, unit.level - freeLevel(unit));
 }
 
 export function canReset(save: SaveData, unit: Unit): boolean {
@@ -135,7 +142,7 @@ export function resetUnit(save: SaveData, uid: string): SaveData {
   const unit = findUnit(save, uid);
   if (purchasedLevels(unit) <= 0) throw new Error('Nothing to reset');
   if (save.gems < RESET_GEM_COST) throw new Error('Not enough gems');
-  const next = replaceUnit(save, { ...unit, level: unit.baseLevel, coinsSpent: 0 });
+  const next = replaceUnit(save, { ...unit, level: freeLevel(unit), coinsSpent: 0 });
   return { ...next, coins: save.coins + unit.coinsSpent, gems: save.gems - RESET_GEM_COST };
 }
 
@@ -146,6 +153,8 @@ export interface EvolveCheck {
   levelNeeded: number;
   levelMet: boolean;
   duplicates: Unit[];
+  /** Evolution shards that will stand in for missing copies. */
+  shardsUsed: number;
   duplicatesMet: boolean;
   maxed: boolean;
   /** Chosen duplicates that carry purchased levels the player would lose. */
@@ -153,9 +162,14 @@ export interface EvolveCheck {
 }
 
 /** Same family and same star: the exact current form. */
+export function isTraining(save: SaveData, uid: string): boolean {
+  return save.dojo.some((d) => d.uid === uid);
+}
+
 export function duplicatesFor(save: SaveData, unit: Unit): Unit[] {
   return save.units
-    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star)
+    // Fighters training in the Dojo are never used up.
+    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !isTraining(save, u.uid))
     // Spend the cheapest copies first: not on the team, then fewest coins invested.
     .sort(
       (a, b) =>
@@ -170,13 +184,16 @@ export function checkEvolve(save: SaveData, uid: string): EvolveCheck {
   const maxed = unit.star >= MAX_STARS;
   const levelNeeded = evolveLevelRequirement(unit.star);
   const duplicates = duplicatesFor(save, unit).slice(0, DUPLICATES_TO_EVOLVE);
+  // Shards of the same star fill in for missing copies.
+  const shardsUsed = Math.min(save.shards[unit.star] ?? 0, DUPLICATES_TO_EVOLVE - duplicates.length);
   const levelMet = unit.level >= levelNeeded;
-  const duplicatesMet = duplicates.length >= DUPLICATES_TO_EVOLVE;
+  const duplicatesMet = duplicates.length + shardsUsed >= DUPLICATES_TO_EVOLVE;
   return {
     ok: !maxed && levelMet && duplicatesMet,
     levelNeeded,
     levelMet,
     duplicates,
+    shardsUsed,
     duplicatesMet,
     maxed,
     investedDuplicates: duplicates.filter((d) => d.coinsSpent > 0),
@@ -195,12 +212,14 @@ export function evolveUnit(save: SaveData, uid: string): SaveData {
     const pad = save.team.findIndex((t) => t !== null);
     team = team.map((t, i) => (i === Math.max(0, pad) ? uid : t));
   }
+  const shards = { ...save.shards, [unit.star]: (save.shards[unit.star] ?? 0) - check.shardsUsed };
   return {
     ...save,
     units: save.units
       .filter((u) => !consumed.has(u.uid))
       .map((u) => (u.uid === uid ? { ...u, star: unit.star + 1 } : u)),
     team,
+    shards,
   };
 }
 
@@ -241,6 +260,7 @@ export function toggleTeamMember(save: SaveData, uid: string): TeamToggleResult 
   }
   const pad = team.indexOf(null);
   if (pad < 0) return { ok: false, reason: 'Your team is full (5 fighters).' };
+  if (isTraining(save, uid)) return { ok: false, reason: 'This fighter is training in the Dojo. Collect them first.' };
   const unit = findUnit(save, uid);
   const clash = teamUnits(save).find((u) => u.familyId === unit.familyId);
   if (clash) {

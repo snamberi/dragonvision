@@ -107,3 +107,15 @@ export const MIN_SPIN_PRICE = 100;
 export function spinPrice(clearedStage: number): number {
   return Math.max(MIN_SPIN_PRICE, Math.round(stageCoinReward(Math.max(1, clearedStage)) * SPIN_PRICE_SHARE));
 }
+
+// --- Training Dojo ---
+export const DOJO_SLOTS = 3;
+/** Real minutes of training per level gained. */
+export const DOJO_MINUTES_PER_LEVEL = 10;
+
+// --- Fusion Lab ---
+export const SHARD_FUSION_COST = 3;
+/** Coins for selling a spare copy (plus any coins spent leveling it). */
+export function sellValue(star: number, level: number): number {
+  return Math.round(20 * star * star + level * 2);
+}

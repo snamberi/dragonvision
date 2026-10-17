@@ -1,15 +1,26 @@
-import { lotUrl, shrineUrl } from '../art/buildings';
+import { dojoUrl, labUrl, lotUrl, shrineUrl } from '../art/buildings';
+import { dojoProgress } from '../game/dojo';
+import { spareUnits } from '../game/fusion';
 import type { SaveData } from '../game/types';
+
+export type Building = 'summon' | 'dojo' | 'fusion';
 
 interface Props {
   save: SaveData;
-  onOpenSummon: () => void;
+  onOpen: (building: Building) => void;
 }
 
-// Empty lots mark where future City buildings will go.
-const LOTS = 3;
+export function CityScreen({ save, onOpen }: Props) {
+  const now = Date.now();
+  const dojoReady = save.dojo.reduce((sum, slot) => sum + dojoProgress(save, slot, now).ready, 0);
+  const spares = spareUnits(save).length;
 
-export function CityScreen({ save, onOpenSummon }: Props) {
+  const buildings: { id: Building; name: string; art: string; badge?: string }[] = [
+    { id: 'summon', name: 'Summoning Shrine', art: shrineUrl(), badge: save.spins > 0 ? `${save.spins} SPINS` : undefined },
+    { id: 'dojo', name: 'Training Dojo', art: dojoUrl(), badge: dojoReady > 0 ? `+${dojoReady} LV` : undefined },
+    { id: 'fusion', name: 'Fusion Lab', art: labUrl(), badge: spares > 0 ? `${spares} SPARE` : undefined },
+  ];
+
   return (
     <div className="city">
       <section className="panel">
@@ -19,17 +30,17 @@ export function CityScreen({ save, onOpenSummon }: Props) {
       </section>
 
       <div className="city-map">
-        <button className={`building ${save.spins > 0 ? 'ready' : ''}`} onClick={onOpenSummon}>
-          <img className="building-art" src={shrineUrl()} alt="" draggable={false} />
-          <span className="building-name">Summoning Shrine</span>
-          {save.spins > 0 && <span className="badge">{save.spins} SPINS</span>}
-        </button>
-        {Array.from({ length: LOTS }, (_, i) => (
-          <div key={i} className="building lot" aria-label="Empty lot">
-            <img className="building-art small" src={lotUrl()} alt="" draggable={false} />
-            <span className="building-name">Coming soon</span>
-          </div>
+        {buildings.map((b) => (
+          <button key={b.id} className={`building ${b.badge ? 'ready' : ''}`} onClick={() => onOpen(b.id)}>
+            <img className="building-art" src={b.art} alt="" draggable={false} />
+            <span className="building-name">{b.name}</span>
+            {b.badge && <span className="badge">{b.badge}</span>}
+          </button>
         ))}
+        <div className="building lot" aria-label="Empty lot">
+          <img className="building-art small" src={lotUrl()} alt="" draggable={false} />
+          <span className="building-name">Coming soon</span>
+        </div>
       </div>
     </div>
   );
