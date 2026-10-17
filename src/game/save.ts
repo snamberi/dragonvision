@@ -14,7 +14,19 @@ function migrate(save: SaveData): SaveData {
   if (!team.some(Boolean)) team[0] = save.units[0].uid;
   // Dojo and shards arrived after the first saves.
   const dojo = (save.dojo ?? []).filter((d) => save.units.some((u) => u.uid === d.uid));
-  return { ...save, team, dojo, shards: save.shards ?? {} };
+  const fresh = newSave();
+  return {
+    ...save,
+    team,
+    dojo,
+    shards: save.shards ?? {},
+    gravity: save.gravity ?? {},
+    expeditions: (save.expeditions ?? []).filter((e) => e.uids.every((uid) => save.units.some((u) => u.uid === uid))),
+    counters: { ...fresh.counters, ...save.counters },
+    bounties: save.bounties ?? fresh.bounties,
+    fortuneDay: save.fortuneDay ?? null,
+    towerFloor: save.towerFloor ?? 0,
+  };
 }
 
 function isValid(data: unknown): data is SaveData {

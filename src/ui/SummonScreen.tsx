@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FAMILIES } from '../game/roster';
 import { spinPrice } from '../game/balance';
-import { buySpins, summon, summonOdds, summonStarCap } from '../game/summon';
+import { buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
@@ -22,13 +22,14 @@ export function SummonScreen({ save, update, onBack }: Props) {
   const pull = (count: number) => {
     const pulled: Unit[] = [];
     update((s) => {
-      let next = s;
-      for (let i = 0; i < count && next.spins > 0; i++) {
-        const result = summon(next);
-        pulled.push(result.unit);
-        next = result.save;
+      if (count === 10) {
+        const result = summonTen(s);
+        pulled.push(...result.units);
+        return result.save;
       }
-      return next;
+      const result = summon(s);
+      pulled.push(result.unit);
+      return result.save;
     });
     setResults(pulled);
   };
@@ -56,6 +57,10 @@ export function SummonScreen({ save, update, onBack }: Props) {
             Summon ×10
           </button>
         </div>
+        <p className="muted small-text">
+          ×10 guarantees one fighter a star above your best copy of a character you own. Today's lucky fighter:{' '}
+          <b>{FAMILIES.find((f) => f.id === luckyFamilyId())?.name}</b>.
+        </p>
         <div className="buy-spins">
           <span>
             Buy spins: <span className="coin">● {price.toLocaleString()}</span> each
@@ -82,6 +87,7 @@ export function SummonScreen({ save, update, onBack }: Props) {
                 star={u.star}
                 level={u.level}
                 className="pull-card"
+                badge={results.length === 10 && i === 9 ? 'GUARANTEED' : undefined}
                 style={{ animationDelay: `${i * 90}ms` }}
               />
             ))}

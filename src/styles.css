@@ -1291,6 +1291,204 @@ div.card-open {
   color: #062b14;
 }
 
+/* ---------- Gravity, Port, Bounties, Fortune, Tower ---------- */
+
+.gravity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.gravity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  border-color: var(--role);
+}
+
+.gravity-level {
+  font-family: var(--pixel);
+  font-size: 16px;
+}
+
+.gravity-level small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.trip-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.trip.done {
+  border-color: var(--green);
+}
+
+.trip-party {
+  display: flex;
+  gap: 4px;
+}
+
+.trip-party .portrait {
+  background: var(--panel-2);
+}
+
+.trip-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.trip-reward {
+  color: var(--gold);
+}
+
+.trip-pick {
+  margin-top: 10px;
+}
+
+.bounty-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bounty-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+}
+
+.bounty-row.complete {
+  border-color: var(--green);
+}
+
+.bounty-row.claimed {
+  opacity: 0.55;
+}
+
+.bounty-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fortune-lucky {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.crystal {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e9e4ff, #9ae6ff 40%, #5b2fc0 100%);
+  box-shadow: 0 0 18px #b794ff;
+}
+
+.fortune-free {
+  text-align: center;
+}
+
+.fortune-free .pull-results {
+  max-width: 220px;
+  margin: 14px auto 0;
+  grid-template-columns: 1fr;
+}
+
+.floor-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.floor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.floor.cleared {
+  opacity: 0.6;
+}
+
+.floor.next {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 4px 4px 0 #0a0620;
+}
+
+.floor.locked {
+  opacity: 0.75;
+}
+
+.floor-num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 56px;
+  font-family: var(--pixel);
+  font-size: 14px;
+}
+
+.floor-num .tag {
+  margin: 0;
+}
+
+.floor-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.floor-squad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.floor-squad .portrait {
+  background: var(--panel-2);
+}
+
+.rule {
+  color: var(--orange-2);
+}
+
+.the-end {
+  margin: 8px 0 12px;
+  padding: 10px;
+  text-align: center;
+  color: var(--gold);
+  background: #3b2140;
+  border: 2px solid var(--gold);
+}
+
+.the-end b {
+  font-family: var(--pixel);
+  font-size: 16px;
+}
+
 /* ---------- Inventory ---------- */
 
 .resource-list {

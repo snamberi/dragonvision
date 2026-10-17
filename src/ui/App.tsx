@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { syncBounties } from '../game/bounty';
 import { loadSave, writeSave } from '../game/save';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
 import { type Building, CityScreen } from './CityScreen';
+import { BountyScreen } from './BountyScreen';
 import { DojoScreen } from './DojoScreen';
+import { FortuneScreen } from './FortuneScreen';
+import { GravityScreen } from './GravityScreen';
+import { PortScreen } from './PortScreen';
+import { TowerScreen } from './TowerScreen';
 import { FusionScreen } from './FusionScreen';
 import { FighterDetail } from './FighterDetail';
 import { FightersScreen } from './FightersScreen';
@@ -25,7 +31,7 @@ const TAB_LABELS: Record<Tab, string> = {
 
 type View =
   | { kind: 'tab'; tab: Tab }
-  | { kind: 'battle'; stage: number; run: Run; seq: number }
+  | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number }
   | { kind: 'fighter'; uid: string }
   | { kind: 'building'; building: Building };
 
@@ -39,6 +45,14 @@ export function App() {
   saveRef.current = save;
 
   useEffect(() => writeSave(save), [save]);
+
+  // Start new bounty days and weeks on launch and while the game stays open.
+  useEffect(() => {
+    const sync = () => setSave((s) => syncBounties(s));
+    sync();
+    const id = setInterval(sync, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -87,9 +101,10 @@ export function App() {
             key={view.seq}
             save={save}
             stageNumber={view.stage}
+            towerFloor={view.towerFloor}
             run={view.run}
             update={update}
-            onExit={() => setView({ kind: 'tab', tab: 'stages' })}
+            onExit={() => setView(view.towerFloor ? { kind: 'building', building: 'tower' } : { kind: 'tab', tab: 'stages' })}
             onContinue={continueRun}
           />
         ) : view.kind === 'fighter' ? (
@@ -105,8 +120,22 @@ export function App() {
             <SummonScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'dojo' ? (
             <DojoScreen save={save} update={update} onBack={toCity} />
-          ) : (
+          ) : view.building === 'fusion' ? (
             <FusionScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'gravity' ? (
+            <GravityScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'port' ? (
+            <PortScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'bounty' ? (
+            <BountyScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'fortune' ? (
+            <FortuneScreen save={save} update={update} onBack={toCity} />
+          ) : (
+            <TowerScreen
+              save={save}
+              onBack={toCity}
+              onChallenge={(floor) => setView({ kind: 'battle', stage: 0, towerFloor: floor, run: newRun('single'), seq: Date.now() })}
+            />
           )
         ) : view.tab === 'home' ? (
           <HomeScreen save={save} onNavigate={(t) => setView({ kind: 'tab', tab: t })} onOpenSummon={openSummon} />

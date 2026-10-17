@@ -1,5 +1,5 @@
 import { SHARD_FUSION_COST, sellValue } from './balance';
-import { isTraining, power } from './progression';
+import { isBusy, power } from './progression';
 import type { SaveData, Unit } from './types';
 
 /** The strongest copy of each character, which the Lab never touches. */
@@ -23,7 +23,7 @@ export function spareUnits(save: SaveData): Spare[] {
   const best = bestCopies(save);
   const bestStar = new Map(save.units.filter((u) => best.has(u.uid)).map((u) => [u.familyId, u.star]));
   return save.units
-    .filter((u) => !best.has(u.uid) && !save.team.includes(u.uid) && !isTraining(save, u.uid))
+    .filter((u) => !best.has(u.uid) && !save.team.includes(u.uid) && !isBusy(save, u.uid))
     .map((unit) => ({ unit, usefulForEvolving: bestStar.get(unit.familyId) === unit.star }))
     .sort((a, b) => a.unit.star - b.unit.star || Number(a.usefulForEvolving) - Number(b.usefulForEvolving) || a.unit.level - b.unit.level);
 }

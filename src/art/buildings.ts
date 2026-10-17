@@ -131,6 +131,114 @@ const LAB_PALETTE: Record<string, string> = {
   s: '#5f5a7a',
 };
 
+
+const GRAVITY = [
+  '........RRRRRRRR........',
+  '......RRrrrrrrrrRR......',
+  '.....RrrrrrrrrrrrrR.....',
+  '....RrrrrWWWWWWrrrrR....',
+  '....RrrrWWkkkkWWrrrR....',
+  '....RrrrWkWWWWWWrrrR....',
+  '....RrrrWkWWkkkWrrrR....',
+  '....RrrrWkWWWWkWrrrR....',
+  '....RrrrWWkkkkWWrrrR....',
+  '....RrrrrWWWWWWrrrrR....',
+  '...MMMMMMMMMMMMMMMMMM...',
+  '...MmmmmmmBBBBmmmmmmM...',
+  '...MmmmmmmBbbBmmmmmmM...',
+  '...MmmmmmmBbbBmmmmmmM...',
+  '..SSSSSSSSSSSSSSSSSSSS..',
+  '.SssssssssssssssssssssS.',
+];
+const GRAVITY_PALETTE: Record<string, string> = {
+  R: '#8a2418', r: '#d8432e', W: '#f4ecd8', k: '#1b1530', M: '#3a3f4b', m: '#6b7080',
+  B: '#22252d', b: '#ffb02e', S: '#8f8aa8', s: '#5f5a7a',
+};
+
+const PORT = [
+  '...........P............',
+  '..........WP............',
+  '.........WWP............',
+  '........WWWPRR..........',
+  '.......WWWWPRRR.........',
+  '......WWWWWPRRRR........',
+  '.....WWWWWWPRRRRR.......',
+  '...........P............',
+  '..BBBBBBBBBBBBBBBBBBBB..',
+  '...BbbbbbbbbbbbbbbbbB...',
+  '....BBBBBBBBBBBBBBBB....',
+  'ggggggggggggggggggggggg.',
+  'wGwGwGwGwGwGwGwGwGwGwGw.',
+  'GGGGGGGGGGGGGGGGGGGGGGG.',
+];
+const PORT_PALETTE: Record<string, string> = {
+  P: '#5a3a22', W: '#f4ecd8', R: '#d8432e', B: '#7a5230', b: '#a8763e',
+  g: '#3f8fd8', G: '#2b6cb0', w: '#9ae6ff',
+};
+
+const BOARD = [
+  '.PPPPPPPPPPPPPPPPPPPP...',
+  '.PbbbbbbbbbbbbbbbbbbP...',
+  '.PbWWWbbWWWWbbWWWbbbP...',
+  '.PbWkWbbWkkWbbWkWbbbP...',
+  '.PbWWWbbWWWWbbWWWbbbP...',
+  '.PbWkWbbWkkWbbWkWbbbP...',
+  '.PbWWWbbWWWWbbWWWbbbP...',
+  '.PbbbbbbbbbbbbbbbbbbP...',
+  '.PPPPPPPPPPPPPPPPPPPP...',
+  '...P..............P.....',
+  '...P..............P.....',
+  '...P..............P.....',
+  '.gggggggggggggggggggg...',
+];
+const BOARD_PALETTE: Record<string, string> = {
+  P: '#5a3a22', b: '#a8763e', W: '#f4ecd8', k: '#d8432e', g: '#3f7a3a',
+};
+
+const TENT = [
+  '...........YY...........',
+  '..........PPPP..........',
+  '.........PPppPP.........',
+  '........PPppppPP........',
+  '.......PPppYYppPP.......',
+  '......PPpppppppppP......',
+  '.....PPppppppppppPP.....',
+  '....PPppppppppppppPP....',
+  '...PPpppppBBBBpppppPP...',
+  '..PPppppppBCCBppppppPP..',
+  '..PppppppBCccCBpppppP...',
+  '..PppppppBCccCBpppppP...',
+  '..PppppppBBBBBBpppppP...',
+  '.SSSSSSSSSSSSSSSSSSSSS..',
+];
+const TENT_PALETTE: Record<string, string> = {
+  Y: '#ffd23f', P: '#3b1d6b', p: '#7a3fa8', B: '#1a1240', C: '#9ae6ff', c: '#e9e4ff', S: '#8f8aa8',
+};
+
+const TOWER = [
+  '..........RRRR..........',
+  '.........RRRRRR.........',
+  '........RRRRRRRR........',
+  '.........WWWWWW.........',
+  '.........WkWWkW.........',
+  '.........WWWWWW.........',
+  '........RRRRRRRR........',
+  '.........WWWWWW.........',
+  '.........WkWWkW.........',
+  '.........WWWWWW.........',
+  '........RRRRRRRR........',
+  '.........WWWWWW.........',
+  '.........WkWWkW.........',
+  '.........WWWWWW.........',
+  '........RRRRRRRR........',
+  '.........WWBBWW.........',
+  '.........WWBBWW.........',
+  '.......SSSSSSSSSS.......',
+];
+const TOWER_PALETTE: Record<string, string> = {
+  R: '#5b2fc0', W: '#c9c2e0', k: '#ffd23f', B: '#1a1240', S: '#8f8aa8',
+};
+
 const cache = new Map<string, string>();
 
 function paintAscii(key: string, rows: string[], palette: Record<string, string>): string {
@@ -158,3 +266,8 @@ export const shrineUrl = () => paintAscii('shrine', SHRINE, SHRINE_PALETTE);
 export const lotUrl = () => paintAscii('lot', LOT, LOT_PALETTE);
 export const dojoUrl = () => paintAscii('dojo', DOJO, DOJO_PALETTE);
 export const labUrl = () => paintAscii('lab', LAB, LAB_PALETTE);
+export const gravityUrl = () => paintAscii('gravity', GRAVITY, GRAVITY_PALETTE);
+export const portUrl = () => paintAscii('port', PORT, PORT_PALETTE);
+export const boardUrl = () => paintAscii('board', BOARD, BOARD_PALETTE);
+export const tentUrl = () => paintAscii('tent', TENT, TENT_PALETTE);
+export const towerUrl = () => paintAscii('tower', TOWER, TOWER_PALETTE);

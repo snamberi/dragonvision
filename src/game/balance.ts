@@ -33,9 +33,13 @@ export const RESET_GEM_COST = 3;
 export const SUMMON_STAR_DECAY = 0.55;
 /** Focused character's family weight multiplier (others stay at 1). */
 export const FOCUS_MULTIPLIER = 5;
+/** The Fortune Teller's lucky fighter of the day is this much more likely. */
+export const LUCKY_MULTIPLIER = 3;
 
 // --- Stages ---
-export const TOTAL_STAGES = 180;
+export const TOTAL_STAGES = 380;
+/** Enemies hit the level 400 cap here; later stages grow through stars and raw strength instead. */
+export const LEVEL_CAP_STAGE = 180;
 export const STAGES_PER_CHAPTER = 10;
 export const SPINS_NORMAL = 1;
 export const SPINS_MINI_BOSS = 5;
@@ -55,9 +59,18 @@ export function enemyStarForLevel(level: number): number {
   return Math.max(1, Math.min(MAX_STARS, Math.floor(level / 30)));
 }
 
+/** Past the level cap, enemies gain a star every 25 stages, reaching 21★ by the end. */
+export function enemyStarForStage(stage: number): number {
+  const fromLevel = enemyStarForLevel(enemyLevelForStage(stage));
+  if (stage <= LEVEL_CAP_STAGE) return fromLevel;
+  return Math.min(MAX_STARS, fromLevel + 1 + Math.floor((stage - LEVEL_CAP_STAGE - 1) / 25));
+}
+
 /** The first stages are gentler while the player only has one or two fighters. */
 export function enemyStrengthForStage(stage: number): number {
   if (stage <= 5) return 0.6 + stage * 0.06;
+  // Post-game stages keep getting tougher after enemies max out.
+  if (stage > LEVEL_CAP_STAGE) return 1 + (stage - LEVEL_CAP_STAGE) * 0.003;
   return 1;
 }
 
@@ -66,7 +79,8 @@ export function enemyCountForStage(stage: number): number {
 }
 
 export function stageCoinReward(stage: number): number {
-  return Math.round(6 * levelUpCost(enemyLevelForStage(stage)) + 40);
+  const postGame = 1 + Math.max(0, stage - LEVEL_CAP_STAGE) * 0.01;
+  return Math.round((6 * levelUpCost(enemyLevelForStage(stage)) + 40) * postGame);
 }
 
 // --- Battle ---
@@ -119,3 +133,19 @@ export const SHARD_FUSION_COST = 3;
 export function sellValue(star: number, level: number): number {
   return Math.round(20 * star * star + level * 2);
 }
+
+// --- Gravity Chamber ---
+export const GRAVITY_MAX_LEVEL = 25;
+/** HP, attack and defense bonus per Gravity level for every fighter of that role. */
+export const GRAVITY_PER_LEVEL = 0.02;
+export function gravityCost(level: number): number {
+  return Math.round(2000 * Math.pow(1.3, level));
+}
+
+// --- Expedition Port ---
+export const EXPEDITION_SLOTS = 2;
+export const EXPEDITION_HOURS = [1, 4, 8] as const;
+export const EXPEDITION_MAX_PARTY = 3;
+
+// --- Rival Tower ---
+export const TOWER_FLOORS = 30;

@@ -11,7 +11,7 @@ import {
   TOTAL_STAGES,
   enemyCountForStage,
   enemyLevelForStage,
-  enemyStarForLevel,
+  enemyStarForStage,
   stageCoinReward,
 } from './balance';
 import { FAMILIES } from './roster';
@@ -34,9 +34,21 @@ export interface Stage {
   kind: StageKind;
   enemies: EnemySpec[];
   coins: number;
+  /** Shown instead of "Stage N" (Rival Tower floors). */
+  label?: string;
+  /** Special battle rule (Rival Tower floors). */
+  rule?: BattleRule;
 }
 
+/**
+ * max3: only your first three fighters (by pad) take part · fullSpecials: enemies start with full special bars
+ * enemyShields: enemies start shielded · tough: enemies have 50% more HP
+ */
+export type BattleRule = 'max3' | 'fullSpecials' | 'enemyShields' | 'tough';
+
+/** One name per chapter; the last chapter ends the game at the Vision Gate. */
 export const CHAPTER_NAMES = [
+  // Act I: The Wandering Spark
   'Cliffside Trials',
   'Red Dune Raiders',
   'Iron Legion',
@@ -46,8 +58,41 @@ export const CHAPTER_NAMES = [
   'Shattered Moon',
   'Tyrant Ascendant',
   'Rift of Echoes',
+  'Demon Gate Siege',
+  // Act II: The Perfect Organism
+  'Swamp of Larvae',
+  'Hive Cathedral',
+  'The Perfect Games Arena',
+  'Blossom Valley Raid',
+  'Thunder Peaks',
+  'Tournament of Masters',
+  'Echo Kael Rising',
+  'Crimson Throne',
+  // Act III: Beyond the Cap
+  'Starfall Expanse',
+  'Frozen Citadel',
+  'Gravity Wells',
+  'Island of Old Masters',
+  'Void Shores',
+  'Clockwork Empire',
+  'Sky Temple Ruins',
+  'Abyssal Colosseum',
+  'Twin Sun Desert',
+  'Grimm Reborn',
+  // Act IV: The Vision Gate
+  'Dimension Rift',
+  'Mirror Realm',
+  'Hall of Fallen Kings',
+  'Instinct Peaks',
+  'Eclipse Fortress',
+  'Zenith Trial',
+  'Edge of Creation',
+  'The Last Tournament',
+  'Gate Guardians',
   'The Vision Gate',
 ];
+
+export const FINAL_STAGE = TOTAL_STAGES;
 
 export function stageKind(stage: number): StageKind {
   const pos = ((stage - 1) % STAGES_PER_CHAPTER) + 1;
@@ -64,12 +109,13 @@ export function getStage(number: number): Stage {
   const chapter = Math.ceil(number / STAGES_PER_CHAPTER);
   const kind = stageKind(number);
   const level = enemyLevelForStage(number);
-  const star = enemyStarForLevel(level);
+  const star = enemyStarForStage(number);
   const count = enemyCountForStage(number);
   const enemies: EnemySpec[] = [];
 
   if (kind !== 'normal') {
-    const leader = villains[(chapter - 1) % villains.length];
+    // The last stage is always Kael, the Corrupted Echo, guarding the Vision Gate.
+    const leader = number === TOTAL_STAGES ? villains.find((v) => v.id === 'kael')! : villains[(chapter - 1) % villains.length];
     enemies.push({
       familyId: leader.id,
       star: Math.min(21, star + (kind === 'boss' ? 1 : 0)),

@@ -105,12 +105,23 @@ function placement(familyId: string, slot: number) {
 
 const FRESH = { ki: KI_START, guarding: false, charge: 0, specialSpent: false, shield: 0, stunned: false, rallyTurns: 0, rallyBonus: 0 };
 
+export interface BattleOptions {
+  /** Gravity Chamber stat multiplier per role, for the player's fighters. */
+  roleBonus?: Partial<Record<Role, number>>;
+}
+
 /** `team` is the five formation pads in order, with null for empty ones. */
-export function createBattle(team: (Unit | null)[], stage: Stage): BattleState {
+export function createBattle(team: (Unit | null)[], stage: Stage, options: BattleOptions = {}): BattleState {
   const strength = enemyStrengthForStage(stage.number);
+  const rule = stage.rule;
+  // "max3" keeps only the first three fighters by pad.
+  let allowed = rule === 'max3' ? 3 : Infinity;
   const players: Fighter[] = team.flatMap((u, slot) => {
-    if (!u) return [];
-    const s = statsFor(u.familyId, u.star, u.level);
+    if (!u || allowed <= 0) return [];
+    allowed--;
+    const base = statsFor(u.familyId, u.star, u.level);
+    const bonus = options.roleBonus?.[roleFor(getFamily(u.familyId))] ?? 1;
+    const s = { ...base, hp: Math.round(base.hp * bonus), atk: Math.round(base.atk * bonus), def: Math.round(base.def * bonus) };
     const fighter: Fighter = {
       id: `p-${u.uid}`,
       side: 'player',
@@ -134,7 +145,8 @@ export function createBattle(team: (Unit | null)[], stage: Stage): BattleState {
     const s = statsFor(e.familyId, e.star, e.level);
     const hpMul = e.rank === 'boss' ? BOSS_HP_MULTIPLIER : e.rank === 'miniBoss' ? MINI_BOSS_HP_MULTIPLIER : 1;
     const atkMul = e.rank === 'boss' ? BOSS_ATK_MULTIPLIER : e.rank === 'miniBoss' ? MINI_BOSS_ATK_MULTIPLIER : 1;
-    const hp = Math.round(s.hp * hpMul * strength);
+    const hp = Math.round(s.hp * hpMul * strength * (rule === 'tough' ? 1.5 : 1));
+    const special = getFamily(e.familyId).special;
     return {
       id: `e-${i}`,
       side: 'enemy',
@@ -150,6 +162,8 @@ export function createBattle(team: (Unit | null)[], stage: Stage): BattleState {
       def: Math.round(s.def * strength),
       spd: s.spd,
       ...FRESH,
+      charge: rule === 'fullSpecials' ? special.charge : 0,
+      shield: rule === 'enemyShields' ? Math.round(hp * 0.3) : 0,
     };
   });
   return { fighters: [...players, ...enemies], turn: 'player', round: 1, acted: [], result: 'ongoing' };

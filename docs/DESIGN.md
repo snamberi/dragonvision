@@ -38,6 +38,8 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - For each character you can roll up to **one star above your best copy** of that character.
   Characters you don't own yet can only roll at 1★.
 - Higher stars are rarer: each star is 0.55× as likely as the one below (*placeholder*).
+- **10× summon guarantee:** the 10th pull is always one star above your best copy of a character you
+  owned before the 10× started.
 - Focusing a character makes it 5× as likely as each other character (*placeholder*). Never guaranteed.
 
 ## Spins, coins and gems
@@ -49,7 +51,11 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Replays pay 25% of the stage's coins and nothing else.
 
 ## Stages
-- 180 generated stages in chapters of 10. Stage 5 of each chapter is a mini-boss, stage 10 a boss.
+- **380 stages** in 38 named chapters of 10, in four acts. Stage 5 of each chapter is a mini-boss, stage 10 a boss.
+- **The end:** stage 380, *The Vision Gate*, a 21★ Kael boss. Clearing it shows the ending.
+- Enemies reach level 400 around stage 180. After that they gain a star every 25 stages (21★ by the end) and
+  get up to 54% stronger. In simulation a fully maxed 21★ team clears stage 300+ only with Gravity Chamber
+  upgrades, and beats the final boss about 70% of the time with everything maxed.
 - Stages 1–4 have 1–4 enemies so a new player with only Kairo can progress. From stage 5 on, there are 5 enemies.
 - Enemy level grows about 2.2 per stage.
 
@@ -113,3 +119,14 @@ Roles come from each character: heal special → Support, drain special → Drai
   Fuse 3 spares of the same star into an **evolution shard** of that star; a shard counts as one duplicate
   when evolving any fighter of that star. Or sell spares for coins (20 × star² + 2 × level, plus any coins
   spent leveling them).
+
+- **Fortune Teller:** one free summon per day, and a daily lucky fighter who is 3× as likely in every summon.
+- **Gravity Chamber:** coins buy permanent role upgrades, +2% HP/attack/defense per level for every
+  fighter of that role, up to level 25 (cost 2,000 × 1.3^level).
+- **Expedition Port:** send 1–3 idle fighters on 1, 4 or 8 hour trips for coins, spins on longer trips, and a
+  chance of gems. Two trips at once. Rewards are rolled when they leave. Recalling early gives nothing.
+- **Bounty Board:** 3 daily and 4 weekly tasks (wins, summons, new clears, evolutions, boss wins, a flawless
+  boss win) paying spins and gems. Days reset at local midnight, weeks on Monday.
+- **Rival Tower:** 30 floors of themed rival squads, each with a rule (only 3 fighters, enemies start
+  charged, enemies start shielded, or enemies have 50% more HP). Each floor pays once: coins and 2 spins,
+  plus 5 gems and an evolution shard (3★ up to 8★) every 5th floor.

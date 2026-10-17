@@ -102,4 +102,45 @@ export interface SaveData {
   dojo: DojoSlot[];
   /** Evolution shards by star: each counts as one duplicate when evolving a fighter of that star. */
   shards: Record<number, number>;
+  /** Gravity Chamber level per role. */
+  gravity: Record<string, number>;
+  expeditions: Expedition[];
+  /** Lifetime totals that Bounty Board tasks measure progress against. */
+  counters: Counters;
+  bounties: BountyState;
+  /** Day key of the last free Fortune Teller summon. */
+  fortuneDay: string | null;
+  /** Highest Rival Tower floor cleared. */
+  towerFloor: number;
+}
+
+export interface Counters {
+  wins: number;
+  firstClears: number;
+  bossWins: number;
+  flawlessBossWins: number;
+  summons: number;
+  evolves: number;
+}
+
+export interface Expedition {
+  id: number;
+  uids: string[];
+  start: number;
+  hours: number;
+  /** Rolled when the party leaves, so reopening the game can't reroll them. */
+  reward: { coins: number; spins: number; gems: number };
+}
+
+export interface BountyPeriod {
+  /** Day or week this period covers, e.g. "2026-10-17" or "2026-W42". */
+  key: string;
+  /** Counter values when the period began; progress is the difference. */
+  start: Counters;
+  claimed: string[];
+}
+
+export interface BountyState {
+  daily: BountyPeriod | null;
+  weekly: BountyPeriod | null;
 }

@@ -17,8 +17,11 @@ import {
   specialReady,
   targetsFor,
 } from '../game/battle';
+import { recordWin } from '../game/bounty';
+import { roleBonuses } from '../game/gravity';
 import { teamSlots } from '../game/progression';
-import { type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
+import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
+import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { type Run, nextInRun } from './run';
@@ -28,6 +31,8 @@ import { describeSpecial } from './specialText';
 interface Props {
   save: SaveData;
   stageNumber: number;
+  /** Set for a Rival Tower floor instead of a story stage. */
+  towerFloor?: number;
   run: Run;
   update: Updater;
   onExit: () => void;
@@ -80,9 +85,11 @@ function fieldPosition(f: Fighter): CSSProperties {
   return { left: `${x}%`, top: `${y}%`, zIndex: Math.round(y) };
 }
 
-export function BattleScreen({ save, stageNumber, run, update, onExit, onContinue }: Props) {
-  const stage = useMemo(() => getStage(stageNumber), [stageNumber]);
-  const [battle, setBattle] = useState<BattleState>(() => createBattle(teamSlots(save), stage));
+export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExit, onContinue }: Props) {
+  const stage = useMemo(() => (towerFloor ? towerStage(towerFloor) : getStage(stageNumber)), [stageNumber, towerFloor]);
+  const [battle, setBattle] = useState<BattleState>(() =>
+    createBattle(teamSlots(save), stage, { roleBonus: roleBonuses(save) }),
+  );
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<ActionKind | null>(null);
@@ -142,8 +149,17 @@ export function BattleScreen({ save, stageNumber, run, update, onExit, onContinu
       if (run.mode !== 'single') setRunAfter({ run, stop: 'Your team was defeated.' });
       return;
     }
+    const boss = stage.kind !== 'normal';
+    const flawless = battle.fighters.every((f) => f.side !== 'player' || f.hp > 0);
+    if (towerFloor) {
+      const firstClear = towerFloor === save.towerFloor + 1;
+      const r = towerRewards(towerFloor);
+      update((s) => recordWin(applyTowerWin(s, towerFloor), { firstClear: false, boss, flawless }));
+      setRewards(firstClear ? { firstClear, coins: r.coins, gems: r.gems, spins: r.spins } : { firstClear, coins: 0, gems: 0, spins: 0 });
+      return;
+    }
     const earned = rewardsFor(save, stageNumber);
-    update((s) => applyRewards(s, stageNumber, earned));
+    update((s) => recordWin(applyRewards(s, stageNumber, earned), { firstClear: earned.firstClear, boss, flawless }));
     setRewards(earned);
     if (run.mode === 'single') return;
     const total: Run = {
@@ -155,7 +171,7 @@ export function BattleScreen({ save, stageNumber, run, update, onExit, onContinu
     };
     const decision = nextInRun(total, stageNumber);
     setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
-  }, [battle.result, save, stageNumber, update, run]);
+  }, [battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run]);
 
   // Auto runs roll into the next battle after a short pause.
   useEffect(() => {
@@ -231,7 +247,7 @@ export function BattleScreen({ save, stageNumber, run, update, onExit, onContinu
           ))}
         </div>
         <div className="battle-title">
-          Stage {stage.number}
+          {stage.label ?? `Stage ${stage.number}`}
           {run.mode !== 'single' && (
             <span className="run-chip">
               {run.mode === 'farm' ? 'AUTO-FARM' : 'AUTO-PROGRESS'} · {run.wins} won
@@ -399,12 +415,25 @@ export function BattleScreen({ save, stageNumber, run, update, onExit, onContinu
         <div className="modal-backdrop">
           <div className="modal panel result">
             <h2>{battle.result === 'won' ? 'VICTORY' : 'DEFEAT'}</h2>
+            {battle.result === 'won' && !towerFloor && stageNumber === FINAL_STAGE && rewards?.firstClear && (
+              <div className="the-end">
+                <b>THE END</b>
+                <p>Kael falls and the Vision Gate opens. You have conquered Dragon Vision!</p>
+                <p className="muted">Keep growing your fighters in the City, or climb the Rival Tower.</p>
+              </div>
+            )}
+            {battle.result === 'won' && towerFloor && towerRewards(towerFloor).shardStar && rewards?.firstClear && (
+              <p className="shard-chip">◇ {towerRewards(towerFloor).shardStar}★ evolution shard</p>
+            )}
+            {battle.result === 'won' && towerFloor && rewards && !rewards.firstClear && (
+              <p className="muted">Floor already cleared: no rewards this time.</p>
+            )}
             {battle.result === 'won' && rewards ? (
               <ul className="reward-list">
                 <li>● {rewards.coins.toLocaleString()} coins</li>
                 {rewards.spins > 0 && <li>✦ {rewards.spins} summon spin{rewards.spins === 1 ? '' : 's'}</li>}
                 {rewards.gems > 0 && <li>◆ {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
-                {!rewards.firstClear && <li className="muted">Replay reward (25% coins)</li>}
+                {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (25% coins)</li>}
               </ul>
             ) : (
               <p className="muted">Level up your fighters or replay earlier stages for coins.</p>

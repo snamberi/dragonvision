@@ -14,7 +14,7 @@ import {
   levelUpCost,
 } from './balance';
 import { STARTER_FAMILY_ID, formForStar, getFamily } from './roster';
-import type { SaveData, Unit } from './types';
+import type { Counters, SaveData, Unit } from './types';
 
 export interface Stats {
   hp: number;
@@ -69,6 +69,12 @@ export function newSave(): SaveData {
     nextUid: 2,
     dojo: [],
     shards: {},
+    gravity: {},
+    expeditions: [],
+    counters: emptyCounters(),
+    bounties: { daily: null, weekly: null },
+    fortuneDay: null,
+    towerFloor: 0,
   };
 }
 
@@ -162,14 +168,31 @@ export interface EvolveCheck {
 }
 
 /** Same family and same star: the exact current form. */
+export function emptyCounters(): Counters {
+  return { wins: 0, firstClears: 0, bossWins: 0, flawlessBossWins: 0, summons: 0, evolves: 0 };
+}
+
+export function bump(save: SaveData, counter: keyof Counters, by = 1): SaveData {
+  return { ...save, counters: { ...save.counters, [counter]: save.counters[counter] + by } };
+}
+
 export function isTraining(save: SaveData, uid: string): boolean {
   return save.dojo.some((d) => d.uid === uid);
+}
+
+export function isOnExpedition(save: SaveData, uid: string): boolean {
+  return save.expeditions.some((e) => e.uids.includes(uid));
+}
+
+/** Training or away on an expedition: can't fight, be fused, or be used up. */
+export function isBusy(save: SaveData, uid: string): boolean {
+  return isTraining(save, uid) || isOnExpedition(save, uid);
 }
 
 export function duplicatesFor(save: SaveData, unit: Unit): Unit[] {
   return save.units
     // Fighters training in the Dojo are never used up.
-    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !isTraining(save, u.uid))
+    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !isBusy(save, u.uid))
     // Spend the cheapest copies first: not on the team, then fewest coins invested.
     .sort(
       (a, b) =>
@@ -213,14 +236,17 @@ export function evolveUnit(save: SaveData, uid: string): SaveData {
     team = team.map((t, i) => (i === Math.max(0, pad) ? uid : t));
   }
   const shards = { ...save.shards, [unit.star]: (save.shards[unit.star] ?? 0) - check.shardsUsed };
-  return {
-    ...save,
-    units: save.units
-      .filter((u) => !consumed.has(u.uid))
-      .map((u) => (u.uid === uid ? { ...u, star: unit.star + 1 } : u)),
-    team,
-    shards,
-  };
+  return bump(
+    {
+      ...save,
+      units: save.units
+        .filter((u) => !consumed.has(u.uid))
+        .map((u) => (u.uid === uid ? { ...u, star: unit.star + 1 } : u)),
+      team,
+      shards,
+    },
+    'evolves',
+  );
 }
 
 // --- Team ---
@@ -261,6 +287,7 @@ export function toggleTeamMember(save: SaveData, uid: string): TeamToggleResult 
   const pad = team.indexOf(null);
   if (pad < 0) return { ok: false, reason: 'Your team is full (5 fighters).' };
   if (isTraining(save, uid)) return { ok: false, reason: 'This fighter is training in the Dojo. Collect them first.' };
+  if (isOnExpedition(save, uid)) return { ok: false, reason: 'This fighter is away on an expedition.' };
   const unit = findUnit(save, uid);
   const clash = teamUnits(save).find((u) => u.familyId === unit.familyId);
   if (clash) {
