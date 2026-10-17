@@ -4,6 +4,7 @@ import { BOSS_ATTEMPTS_PER_DAY, BOSS_ROUNDS, MILESTONES, attemptsLeft, bossProgr
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
 import { Sprite, Stars } from './Sprite';
+import { orbs } from './format';
 
 interface Props {
   save: SaveData;
@@ -14,7 +15,7 @@ interface Props {
 
 function rewardText(r: (typeof MILESTONES)[number]['reward']): string {
   return [
-    r.spins && `✦ ${r.spins}`,
+    r.spins && orbs(r.spins),
     r.gems && `◆ ${r.gems}`,
     r.gear && `${r.gear === 'legendary' ? 'Legendary' : 'Epic'} gear`,
     r.shards && `${r.shards} shards`,

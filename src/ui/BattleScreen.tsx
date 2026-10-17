@@ -29,7 +29,7 @@ import { teamSlots } from '../game/progression';
 import { ARENAS } from '../game/arenas';
 import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
 import { bossStage, recordBossAttempt } from '../game/worldBoss';
-import { classEdge } from '../game/roster';
+import { classEdge, getFamily } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
 import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
@@ -39,6 +39,9 @@ import { Portrait, Sprite, Stars } from './Sprite';
 import { GearCard } from './GearCard';
 import { sfx } from '../audio/sound';
 import { describeSpecial } from './specialText';
+import { orbs } from './format';
+import { ItemIcon } from './ItemIcon';
+import { PIECES_TO_FORGE } from '../game/legendary';
 
 interface Props {
   save: SaveData;
@@ -537,8 +540,13 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
             {battle.result === 'won' && rewards ? (
               <ul className="reward-list">
                 <li><PixelIcon kind="coin" /> {rewards.coins.toLocaleString()} coins</li>
-                {rewards.spins > 0 && <li><PixelIcon kind="spin" /> {rewards.spins} summon spin{rewards.spins === 1 ? '' : 's'}</li>}
+                {rewards.spins > 0 && <li><PixelIcon kind="orb" /> {orbs(rewards.spins)}</li>}
                 {rewards.gems > 0 && <li><PixelIcon kind="gem" /> {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
+                {rewards.piece && (
+                  <li className="reward-piece">
+                    <ItemIcon icon="piece" size={40} /> Legendary piece: {getFamily(rewards.piece).name} ({save.pieces[rewards.piece] ?? 0}/{PIECES_TO_FORGE})
+                  </li>
+                )}
                 {rewards.gear && (
                   <li className="reward-gear">
                     <GearCard item={rewards.gear} />
@@ -554,7 +562,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                 <b>{run.mode === 'farm' ? 'Auto-Farm' : 'Auto-Progress'} stopped.</b> {runAfter.stop}
                 <div>
                   {runAfter.run.wins} win{runAfter.run.wins === 1 ? '' : 's'} · ● {runAfter.run.coins.toLocaleString()}
-                  {runAfter.run.spins > 0 && ` · ✦ ${runAfter.run.spins}`}
+                  {runAfter.run.spins > 0 && ` · ${orbs(runAfter.run.spins)}`}
                   {runAfter.run.gems > 0 && ` · ◆ ${runAfter.run.gems}`}
                 </div>
               </div>

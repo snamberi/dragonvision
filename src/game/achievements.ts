@@ -1,6 +1,6 @@
 import { awakeningTree } from './awakening';
 import { equippedItems } from './gear';
-import { FAMILIES, FUSIONS, formForStar, getFamily } from './roster';
+import { FAMILIES, FUSIONS, LEGENDARIES, formForStar, getFamily } from './roster';
 import type { SaveData } from './types';
 
 export interface Achievement {
@@ -19,7 +19,7 @@ const maxStar = (save: SaveData) => Math.max(0, ...save.units.map((u) => u.star)
 
 /** Every form in the game, as "familyId:formIndex". */
 export function allForms(): string[] {
-  return [...FAMILIES, ...FUSIONS].flatMap((f) => f.forms.map((_, i) => `${f.id}:${i}`));
+  return [...FAMILIES, ...FUSIONS, ...LEGENDARIES].flatMap((f) => f.forms.map((_, i) => `${f.id}:${i}`));
 }
 
 export function formKey(familyId: string, star: number): string {
@@ -52,6 +52,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'forms-all', name: 'Archivist', text: 'Unlock every form', goal: allForms().length, progress: (s) => s.seenForms.length, reward: { gems: 60 }, title: 'Archivist' },
   { id: 'star-10', name: 'Ascended', text: 'Raise a fighter to 10★', goal: 10, progress: maxStar, reward: { gems: 15 }, title: 'Ascended' },
   { id: 'star-21', name: 'Ultimate', text: 'Raise a fighter to 21★', goal: 21, progress: maxStar, reward: { gems: 80 }, title: 'Ultimate' },
+  { id: 'legend', name: 'Legend Forged', text: 'Forge a legendary fighter from 10 pieces', goal: 1, progress: (s) => s.units.filter((u) => LEGENDARIES.some((f) => f.id === u.familyId)).length, reward: { gems: 30 }, title: 'Legendary' },
   { id: 'fusion', name: 'Two Become One', text: 'Create a fusion character', goal: 1, progress: (s) => s.units.filter((u) => FUSIONS.some((f) => f.id === u.familyId)).length, reward: { gems: 20 }, title: 'Fused' },
   { id: 'geared', name: 'Fully Geared', text: 'Equip all 4 gear slots on one fighter', goal: 4, progress: (s) => Math.max(0, ...s.units.map((u) => equippedItems(s, u).length)), reward: { spins: 5 } },
   { id: 'legendary', name: 'Treasure Hunter', text: 'Own a Legendary item', goal: 1, progress: (s) => s.items.filter((i) => i.rarity === 'legendary').length, reward: { gems: 10 }, title: 'Treasure Hunter' },

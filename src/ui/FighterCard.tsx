@@ -23,10 +23,10 @@ export function FighterCard({ familyId, star, level, onClick, highlight, badge, 
   const tier = tierFor(star);
   const family = getFamily(familyId);
   const role = roleFor(family);
-  const classes = ['card', `tier-${tier.id}`, star > 1 ? 'evolved' : '', highlight ? 'highlight' : '', className].join(' ');
+  const classes = ['card', `tier-${tier.id}`, star > 1 ? 'evolved' : '', family.legendary ? 'legend' : '', highlight ? 'highlight' : '', className].join(' ');
   const body = (
     <>
-      <span className="card-ribbon">{tier.label}</span>
+      <span className="card-ribbon">{family.legendary ? 'LEGEND' : tier.label}</span>
       {badge && <span className="badge">{badge}</span>}
       <div className="card-art">
         {tier.rank >= 2 &&

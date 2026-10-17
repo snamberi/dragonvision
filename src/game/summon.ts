@@ -1,4 +1,5 @@
 import { FOCUS_MULTIPLIER, LUCKY_MULTIPLIER, MAX_STARS, SUMMON_STAR_DECAY, spinPrice } from './balance';
+import { addPieces, rollSummonPiece } from './legendary';
 import { addUnit, bump, summonLevelRange } from './progression';
 import { FAMILIES } from './roster';
 import { type Rng, defaultRng, pickWeighted, randInt } from './rng';
@@ -43,34 +44,45 @@ export function summonOdds(save: SaveData, day = dayKey()): { familyId: string; 
   return rows.map((r) => ({ familyId: r.familyId, star: r.star, chance: r.weight / total }));
 }
 
+export interface Pull {
+  save: SaveData;
+  unit: Unit;
+  /** A legendary piece that dropped with this pull (0.5% a pull). */
+  piece: string | null;
+}
+
 /** Spends one spin: pick a family (focus raises its weight), then a star up to that family's cap. */
-export function summon(save: SaveData, rng: Rng = defaultRng, day = dayKey()): { save: SaveData; unit: Unit } {
-  if (save.spins <= 0) throw new Error('No summon spins left');
+export function summon(save: SaveData, rng: Rng = defaultRng, day = dayKey()): Pull {
+  if (save.spins <= 0) throw new Error('No Spin Orbs left');
   const family = pickWeighted(rng, FAMILIES, (f) => familyWeight(save, f.id, day));
   const cap = summonStarCap(save, family.id);
   const stars = Array.from({ length: cap }, (_, i) => i + 1);
   return give(save, family.id, pickWeighted(rng, stars, starWeight), rng);
 }
 
-function give(save: SaveData, familyId: string, star: number, rng: Rng): { save: SaveData; unit: Unit } {
+function give(save: SaveData, familyId: string, star: number, rng: Rng): Pull {
   const [min, max] = summonLevelRange(star);
   const level = randInt(rng, min, max);
   const result = addUnit({ ...save, spins: save.spins - 1 }, { familyId, star, level, baseLevel: level, coinsSpent: 0 });
-  return { save: bump(result.save, 'summons'), unit: result.unit };
+  const piece = rollSummonPiece(rng);
+  const after = bump(result.save, 'summons');
+  return { save: piece ? addPieces(after, piece) : after, unit: result.unit, piece };
 }
 
 /**
  * Ten summons for ten spins. The last one is guaranteed to be one star above your best copy
  * of a fighter you already own (focus and the lucky fighter still raise who it lands on).
  */
-export function summonTen(save: SaveData, rng: Rng = defaultRng, day = dayKey()): { save: SaveData; units: Unit[] } {
-  if (save.spins < 10) throw new Error('A 10× summon needs 10 spins');
+export function summonTen(save: SaveData, rng: Rng = defaultRng, day = dayKey()): { save: SaveData; units: Unit[]; pieces: string[] } {
+  if (save.spins < 10) throw new Error('A 10× summon needs 10 Spin Orbs');
   let current = save;
   const units: Unit[] = [];
+  const pieces: string[] = [];
   for (let i = 0; i < 9; i++) {
     const r = summon(current, rng, day);
     current = r.save;
     units.push(r.unit);
+    if (r.piece) pieces.push(r.piece);
   }
   // Only characters owned before this 10× count, so the guarantee is a real upgrade.
   const upgradable = FAMILIES.filter((f) => {
@@ -85,13 +97,14 @@ export function summonTen(save: SaveData, rng: Rng = defaultRng, day = dayKey())
         })()
       : summon(current, rng, day);
   units.push(r.unit);
-  return { save: r.save, units };
+  if (r.piece) pieces.push(r.piece);
+  return { save: r.save, units, pieces };
 }
 
 /** Buys summon spins with coins at the Summoning Shrine. */
 export function buySpins(save: SaveData, count: number): SaveData {
   const cost = spinPrice(save.clearedStage) * count;
-  if (count <= 0) throw new Error('Pick how many spins to buy');
+  if (count <= 0) throw new Error('Pick how many Spin Orbs to buy');
   if (cost > save.coins) throw new Error('Not enough coins');
   return { ...save, coins: save.coins - cost, spins: save.spins + count };
 }

@@ -78,7 +78,10 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 ## Navigation
 - Main tabs: Home, City, Inventory, Stages, Fighters.
 - Summoning happens inside the City at the **Summoning Shrine** building. Empty lots mark future buildings.
-- Inventory lists coins, gems and summon spins, with empty slots for future items.
+- Home is intentionally empty. Settings and Updates sit in the top-right corner; the daily login reward and
+  "What's new" (once per update, for returning players) open as popups.
+- The top bar shows only coins and gems. Spin Orbs are items, shown in the Inventory.
+- Inventory tabs: Items (everything but gear), Gear, Materials, Evo Shards, Pieces, as a grid of slots.
 
 ## Card rarity (visual only)
 | Stars | Tier | Look |
@@ -182,3 +185,25 @@ Hitting the class you beat deals 25% more damage; hitting the class that beats y
   playable offline after the first visit.
 - Saves stay on the device. Settings can copy a save code or download a save file, and load either on
   another device. True cloud saves would need a server and accounts, which this offline game doesn't have.
+
+## Spin Orbs and materials
+- Summon spins are **Spin Orbs** (green orbs), an item in the Inventory rather than a top-bar currency.
+- **Refresh Ticket:** restocks the Shop or the Armory for free; used before gems.
+- **Respec Scroll:** resets a fighter's awakening points for free; used before gems.
+
+## Legendary fighters
+- Ten legendaries (two per class): Ryuga, Solenne (Assassin), Volkan, Zephyra (Blaster), Tharok, Gorvath (Tank),
+  Nyxara, Morvain (Drainer), Seraphine, Aurel (Support). Each has its own awakening tree.
+- Never summoned and never random enemies. **10 pieces** of one forge it at 5★ (level 80); forging again makes a
+  copy to evolve with. Evolution works like any fighter (duplicates or shards).
+- Pieces: each summon has a **0.5%** chance of a bonus piece of a random legendary (focus and the lucky fighter
+  don't change it); stage bosses drop one **5%** of wins (first clear or replay); the Shop sells one at a time.
+
+## Shop
+- Six random offers a day (Spin Orbs, evolution shards, gear up to Epic, materials) for coins, plus one gold
+  legendary offer for gems: 20 Spin Orbs (60), a legendary piece (80) or a Legendary gear piece (100).
+- Each offer sells once. New stock at midnight, or for a Refresh Ticket / 5 gems.
+
+## Vision City
+- A town plan: buildings stand on terraced streets with a path to their door; streets are joined so every road
+  connects. Wide screens use a landscape plan around a central plaza; phones use a tall switchback plan.

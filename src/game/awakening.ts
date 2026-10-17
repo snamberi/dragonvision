@@ -187,6 +187,87 @@ const TREES: Record<string, Tree> = {
     ['Void Form', { chargeDiscount: 1, charge: 1 }],
     ['Echo Never Ends', { lastStand: 0.4 }],
   ],
+  // Legendary fighters.
+  ryuga: [
+    ['Dragon Blood', { atk: 0.1 }],
+    ["Emperor's Poise", { crit: 0.08 }],
+    ['Dragon Fist Mastery', { specialPower: 0.25 }],
+    ['First Roar', { firstStrike: 0.4 }],
+    ['Heavenly Scales', { atk: 0.12, hp: 0.12 }],
+    ['Eternal Dragon', { chargeDiscount: 1, secondWind: 0.3 }],
+  ],
+  solenne: [
+    ['Dawn Step', { spd: 4 }],
+    ['Sunlit Edge', { crit: 0.1 }],
+    ['Supernova Mastery', { specialPower: 0.25 }],
+    ['Blinding Noon', { firstStrike: 0.35 }],
+    ['Solar Core', { atk: 0.15 }],
+    ['Never Sets', { lastStand: 0.4, charge: 1 }],
+  ],
+  seraphine: [
+    ['Halo', { shield: 0.08 }],
+    ['Gentle Wings', { hp: 0.12 }],
+    ['Choir of Light', { heal: 0.25 }],
+    ['Swift Prayer', { chargeDiscount: 1 }],
+    ['Archangel Grace', { ki: 30, heal: 0.15 }],
+    ['Divine Return', { secondWind: 0.5 }],
+  ],
+  aurel: [
+    ['Golden Breath', { ki: 20 }],
+    ['Sage Armor', { def: 0.12 }],
+    ['Hymn of Courage', { specialPower: 0.25 }],
+    ['Gilded Ward', { shield: 0.1 }],
+    ['Eternal Verse', { chargeDiscount: 1, charge: 1 }],
+    ['Golden Age', { hp: 0.15, heal: 0.2 }],
+  ],
+  tharok: [
+    ['Bedrock', { def: 0.12 }],
+    ['Mountain Heart', { hp: 0.14 }],
+    ['Titan Wall', { shield: 0.12 }],
+    ['Avalanche', { atk: 0.1 }],
+    ['King of Peaks', { hp: 0.15, def: 0.1 }],
+    ['Unbreakable', { secondWind: 0.5 }],
+  ],
+  gorvath: [
+    ['Ancient Hide', { def: 0.12 }],
+    ['Primal Rage', { lastStand: 0.35 }],
+    ['World Breaker Mastery', { specialPower: 0.25 }],
+    ['Destroyer', { edge: 0.25 }],
+    ['Primordial Body', { hp: 0.18, atk: 0.08 }],
+    ['Endless Ruin', { chargeDiscount: 1, charge: 1 }],
+  ],
+  nyxara: [
+    ['Night Veil', { crit: 0.08 }],
+    ['Moon Thirst', { drain: 0.2 }],
+    ['Devourer Mastery', { specialPower: 0.25 }],
+    ['Shadow Step', { spd: 4 }],
+    ['Eclipse Queen', { atk: 0.12, drain: 0.15 }],
+    ['Endless Night', { secondWind: 0.4, chargeDiscount: 1 }],
+  ],
+  morvain: [
+    ['Fallen Grace', { hp: 0.12 }],
+    ['Godless Hunger', { drain: 0.2 }],
+    ['Godfall Mastery', { specialPower: 0.25 }],
+    ['Divine Scorn', { edge: 0.25 }],
+    ['Godslayer', { atk: 0.14, crit: 0.08 }],
+    ['Rise From Ruin', { secondWind: 0.5 }],
+  ],
+  volkan: [
+    ['Magma Veins', { atk: 0.1 }],
+    ['Obsidian Skin', { def: 0.12 }],
+    ['Cataclysm Mastery', { specialPower: 0.25 }],
+    ['Eruption', { firstStrike: 0.4 }],
+    ['Living Core', { atk: 0.12, hp: 0.12 }],
+    ['Endless Eruption', { chargeDiscount: 1, charge: 1 }],
+  ],
+  zephyra: [
+    ['Tailwind', { spd: 4 }],
+    ['Static Charge', { charge: 1 }],
+    ['Tempest Mastery', { specialPower: 0.25 }],
+    ['Eye of the Storm', { crit: 0.1 }],
+    ['Storm Empress', { atk: 0.14, spd: 3 }],
+    ['Endless Storm', { chargeDiscount: 1, lastStand: 0.3 }],
+  ],
 };
 
 export function awakeningTree(familyId: string): AwakenNode[] {
@@ -241,12 +322,16 @@ export function awaken(save: SaveData, uid: string, nodeId: string): SaveData {
   return { ...save, units: save.units.map((u) => (u.uid === uid ? { ...u, awakened: [...(u.awakened ?? []), nodeId] } : u)) };
 }
 
-/** Refunds every awakening point for gems. */
+/** Refunds every awakening point: a Respec Scroll if you have one, otherwise gems. */
 export function respecAwakening(save: SaveData, uid: string): SaveData {
   const unit = findUnit(save, uid);
   if (!unit.awakened?.length) throw new Error('Nothing to reset');
+  const units = save.units.map((u) => (u.uid === uid ? { ...u, awakened: [] } : u));
+  if (save.materials.respecScroll > 0) {
+    return { ...save, units, materials: { ...save.materials, respecScroll: save.materials.respecScroll - 1 } };
+  }
   if (save.gems < RESPEC_GEMS) throw new Error('Not enough gems');
-  return { ...save, gems: save.gems - RESPEC_GEMS, units: save.units.map((u) => (u.uid === uid ? { ...u, awakened: [] } : u)) };
+  return { ...save, gems: save.gems - RESPEC_GEMS, units };
 }
 
 export function awakeningBonus(unit: Unit): Bonus {

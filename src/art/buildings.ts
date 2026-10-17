@@ -239,6 +239,31 @@ const TOWER_PALETTE: Record<string, string> = {
   R: '#5b2fc0', W: '#c9c2e0', k: '#ffd23f', B: '#1a1240', S: '#8f8aa8',
 };
 
+// The Shop: a market stall with a striped awning and goods on the counter.
+const SHOP = [
+  '..........YYYY..........',
+  '.........YyCCyY.........',
+  '..........YYYY..........',
+  '..OOWWOOWWOOWWOOWWOOWW..',
+  '.OOWWOOWWOOWWOOWWOOWWOO.',
+  '.oowwoowwoowwoowwoowwoo.',
+  '..p.....................',
+  '..p..LLLLLLLLLLLLLLLL.p.',
+  '..p..L..GG..YY..mm..L.p.',
+  '..p..L.GgG.YyY.mMm..L.p.',
+  '..p..L..GG..YY..mm..L.p.',
+  '.TTTTTTTTTTTTTTTTTTTTTT.',
+  '.TtttttttttttttttttttttT',
+  '.TbbbbbbbbbbbbbbbbbbbbbT',
+  '.TbBBbbbBBbbbBBbbbBBbbbT',
+  '.AAAAAAAAAAAAAAAAAAAAAAA',
+];
+const SHOP_PALETTE: Record<string, string> = {
+  Y: '#ffd23f', y: '#c98a1a', C: '#fff4cd', O: '#ff8a1f', o: '#b8560f', W: '#f4ecd8', w: '#b9ad94',
+  p: '#5a3a22', L: '#3a2a4a', G: '#4ade80', g: '#1d7a4a', m: '#b794ff', M: '#6b3fc0',
+  T: '#8a5a30', t: '#c98a4a', b: '#5a3a22', B: '#3a2412', A: '#8f8aa8',
+};
+
 const ARMORY = [
   '.........SSSSSS.........',
   '........SsBBBBsS........',
@@ -358,6 +383,7 @@ export const portUrl = () => paintAscii('port', PORT, PORT_PALETTE);
 export const boardUrl = () => paintAscii('board', BOARD, BOARD_PALETTE);
 export const tentUrl = () => paintAscii('tent', TENT, TENT_PALETTE);
 export const towerUrl = () => paintAscii('tower', TOWER, TOWER_PALETTE);
+export const shopUrl = () => paintAscii('shop', SHOP, SHOP_PALETTE);
 export const armoryUrl = () => paintAscii('armory', ARMORY, ARMORY_PALETTE);
 export const hallUrl = () => paintAscii('hall', HALL, HALL_PALETTE);
 export const colosseumUrl = () => paintAscii('colosseum', COLOSSEUM, COLOSSEUM_PALETTE);

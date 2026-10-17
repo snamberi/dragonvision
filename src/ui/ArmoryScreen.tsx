@@ -28,8 +28,12 @@ export function ArmoryScreen({ save, update, onBack }: Props) {
       <section className="panel">
         <div className="section-head">
           <h3>Today's stock</h3>
-          <button className="btn small" disabled={save.gems < SHOP_REFRESH_GEMS} onClick={() => update((s) => refreshShop(s))}>
-            New stock ◆ {SHOP_REFRESH_GEMS}
+          <button
+            className="btn small"
+            disabled={save.materials.refreshTicket === 0 && save.gems < SHOP_REFRESH_GEMS}
+            onClick={() => update((s) => refreshShop(s))}
+          >
+            {save.materials.refreshTicket > 0 ? `New stock (ticket, ${save.materials.refreshTicket} left)` : `New stock ◆ ${SHOP_REFRESH_GEMS}`}
           </button>
         </div>
         <div className="gear-grid">

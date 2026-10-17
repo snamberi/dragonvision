@@ -14,10 +14,10 @@ const coins = (mult: number) => (s: SaveData) => s.coins + stageCoinReward(Math.
 /** A 7-day track that loops; one claim per calendar day, missing a day never resets it. */
 export const LOGIN_TRACK: LoginReward[] = [
   { label: 'Coins ×2', apply: (s) => ({ ...s, coins: coins(2)(s) }) },
-  { label: '2 spins', apply: (s) => ({ ...s, spins: s.spins + 2 }) },
+  { label: '2 Spin Orbs', apply: (s) => ({ ...s, spins: s.spins + 2 }) },
   { label: 'Coins ×4', apply: (s) => ({ ...s, coins: coins(4)(s) }) },
   { label: '3 gems', apply: (s) => ({ ...s, gems: s.gems + 3 }) },
-  { label: '5 spins', apply: (s) => ({ ...s, spins: s.spins + 5 }) },
+  { label: '5 Spin Orbs', apply: (s) => ({ ...s, spins: s.spins + 5 }) },
   { label: 'Rare gear', apply: (s, rng) => addItem(s, TEMPLATES[Math.floor(rng() * TEMPLATES.length)].id, 'rare').save },
   {
     label: 'Shard + 5 gems',

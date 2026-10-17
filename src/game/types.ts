@@ -61,6 +61,10 @@ export interface Family {
   base: { hp: number; atk: number; def: number; spd: number };
   special: Special;
   villain?: boolean;
+  /** Legendary fighters are made from pieces, never summoned, and start at this star. */
+  legendary?: boolean;
+  /** Star of the first form (legendaries start above 1★). */
+  firstStar?: number;
 }
 
 /** One fighter the player owns. */
@@ -139,7 +143,15 @@ export interface SaveData {
   seenForms: string[];
   /** Daily login track: last day claimed and how many days claimed in total. */
   login: { day: string; claims: number };
+  /** Legendary fighter pieces by family id; 10 make the fighter. */
+  pieces: Record<string, number>;
+  materials: Record<MaterialId, number>;
+  /** The Shop's daily stock (the Armory keeps its own in `shop`). */
+  market: { day: string; refreshes: number; bought: number[] };
 }
+
+/** Refresh Tickets refresh a shop for free; Respec Scrolls reset an awakening tree for free. */
+export type MaterialId = 'refreshTicket' | 'respecScroll';
 
 export interface Counters {
   wins: number;

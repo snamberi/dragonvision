@@ -1,7 +1,9 @@
 import { sfx } from '../audio/sound';
 import { PixelIcon } from './PixelIcon';
 import { useEffect, useRef, useState } from 'react';
-import { FAMILIES } from '../game/roster';
+import { FAMILIES, getFamily } from '../game/roster';
+import { ItemIcon } from './ItemIcon';
+import { orbs } from './format';
 import { spinPrice } from '../game/balance';
 import { buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
@@ -17,6 +19,7 @@ interface Props {
 
 export function SummonScreen({ save, update, onBack }: Props) {
   const [results, setResults] = useState<Unit[]>([]);
+  const [pieces, setPieces] = useState<string[]>([]);
   const [spinning, setSpinning] = useState(false);
   const rolling = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,21 +32,25 @@ export function SummonScreen({ save, update, onBack }: Props) {
     sfx('summon');
     if (rolling.current) return;
     const pulled: Unit[] = [];
+    const found: string[] = [];
     const success = update((s) => {
       if (count === 10) {
         const result = summonTen(s);
         pulled.push(...result.units);
+        found.push(...result.pieces);
         return result.save;
       }
       const result = summon(s);
       pulled.push(result.unit);
+      if (result.piece) found.push(result.piece);
       return result.save;
     });
     if (!success) return;
     rolling.current = true;
     setSpinning(true);
     setResults([]);
-    timer.current = setTimeout(() => { setResults(pulled); setSpinning(false); rolling.current = false; }, 1900);
+    setPieces([]);
+    timer.current = setTimeout(() => { setResults(pulled); setPieces(found); setSpinning(false); rolling.current = false; }, 1900);
   };
 
   const setFocus = (familyId: string) =>
@@ -63,10 +70,10 @@ export function SummonScreen({ save, update, onBack }: Props) {
         <div className={`summon-portal ${spinning ? 'spinning' : ''}`} role="status" aria-label={spinning ? 'Summoning fighters' : 'Summoning portal ready'}>
           <div className="portal-ring outer"/><div className="portal-ring inner"/>
           {Array.from({length:8},(_,i)=><span key={i} className="portal-rune" style={{transform:`rotate(${i*45}deg) translateY(-78px) rotate(${-i*45}deg)`}}>✦</span>)}
-          <div className="portal-center"><PixelIcon kind="spin" size={56}/></div>
+          <div className="portal-center"><ItemIcon icon="spinOrb" size={64} /></div>
           <span className="portal-caption">{spinning ? 'CALLING A FIGHTER…' : results.length ? 'SUMMON COMPLETE' : 'AWAKEN YOUR LEGEND'}</span>
         </div>
-        <div className="spin-count"><PixelIcon kind="spin" /> {save.spins} spin{save.spins === 1 ? '' : 's'}</div>
+        <div className="spin-count"><PixelIcon kind="orb" /> {orbs(save.spins)}</div>
         <div className="button-row">
           <button className="btn primary big" disabled={spinning || save.spins < 1} onClick={() => pull(1)}>
             Summon ×1
@@ -76,12 +83,13 @@ export function SummonScreen({ save, update, onBack }: Props) {
           </button>
         </div>
         <p className="muted small-text">
+          Every pull has a 0.5% chance of a bonus legendary piece (focus and the lucky fighter don't change it).
           ×10 guarantees one fighter a star above your best copy of a character you own. Today's lucky fighter:{' '}
           <b>{FAMILIES.find((f) => f.id === luckyFamilyId())?.name}</b>.
         </p>
         <div className="buy-spins">
           <span>
-            Buy spins: <span className="coin"><PixelIcon kind="coin" /> {price.toLocaleString()}</span> each
+            Buy Spin Orbs: <span className="coin"><PixelIcon kind="coin" /> {price.toLocaleString()}</span> each
           </span>
           <div className="button-row">
             <button className="btn small" disabled={save.coins < price} onClick={() => update((s) => buySpins(s, 1))}>
@@ -93,9 +101,18 @@ export function SummonScreen({ save, update, onBack }: Props) {
           </div>
         </div>
         <p className="muted small-text">
-          Free spins: 1 for each new stage, 5 per mini-boss, 10 per boss. Replays earn coins you can spend here.
+          Free Spin Orbs: 1 for each new stage, 5 per mini-boss, 10 per boss. Replays earn coins you can spend here.
         </p>
 
+        {pieces.length > 0 && (
+          <div className="piece-drops">
+            {pieces.map((id, i) => (
+              <span key={i} className="piece-drop">
+                <ItemIcon icon="piece" size={40} /> Legendary piece: <b>{getFamily(id).name}</b>
+              </span>
+            ))}
+          </div>
+        )}
         {results.length > 0 && (
           <div className="pull-results">
             {results.map((u, i) => (

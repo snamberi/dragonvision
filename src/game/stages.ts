@@ -16,6 +16,7 @@ import {
 } from './balance';
 import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
 import { type Weather, arenaForStage } from './arenas';
+import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
 import { FAMILIES } from './roster';
 import { type Rng, defaultRng, seededRng } from './rng';
 import type { SaveData } from './types';
@@ -163,6 +164,8 @@ export interface Rewards {
   spins: number;
   /** Bosses and mini-bosses drop a piece of gear on the first clear. */
   gear?: { templateId: string; rarity: Rarity };
+  /** Stage bosses sometimes drop a legendary piece, on any win. */
+  piece?: string;
 }
 
 /**
@@ -172,8 +175,9 @@ export interface Rewards {
 export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defaultRng): Rewards {
   const stage = getStage(stageNumber);
   const firstClear = stageNumber > save.clearedStage;
+  const piece = stage.kind === 'boss' && rng() < PIECE_BOSS_CHANCE ? randomLegendId(rng) : undefined;
   if (!firstClear) {
-    return { firstClear, coins: Math.round(stage.coins * REPLAY_COIN_SHARE), gems: 0, spins: 0 };
+    return { firstClear, coins: Math.round(stage.coins * REPLAY_COIN_SHARE), gems: 0, spins: 0, ...(piece && { piece }) };
   }
   let gems = 0;
   let spins = SPINS_NORMAL;
@@ -186,7 +190,7 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
   } else if (rng() < NORMAL_GEM_CHANCE) {
     gems = NORMAL_GEM_AMOUNT;
   }
-  const rewards: Rewards = { firstClear, coins: stage.coins, gems, spins };
+  const rewards: Rewards = { firstClear, coins: stage.coins, gems, spins, ...(piece && { piece }) };
   if (stage.kind !== 'normal') {
     const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
     let rarity = rollRarity(save.clearedStage, rng);
@@ -199,6 +203,7 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
 
 export function applyRewards(save: SaveData, stageNumber: number, rewards: Rewards): SaveData {
   if (rewards.gear) save = addItem(save, rewards.gear.templateId, rewards.gear.rarity).save;
+  if (rewards.piece) save = addPieces(save, rewards.piece);
   return {
     ...save,
     coins: save.coins + rewards.coins,

@@ -244,8 +244,13 @@ export function buyOffer(save: SaveData, index: number, day = dayKey()): SaveDat
   };
 }
 
+/** New stock: a Refresh Ticket if you have one, otherwise gems. */
 export function refreshShop(save: SaveData, day = dayKey()): SaveData {
   const synced = syncShop(save, day);
+  const shop = { day, refreshes: synced.shop.refreshes + 1, bought: [] };
+  if (synced.materials.refreshTicket > 0) {
+    return { ...synced, shop, materials: { ...synced.materials, refreshTicket: synced.materials.refreshTicket - 1 } };
+  }
   if (synced.gems < SHOP_REFRESH_GEMS) throw new Error('Not enough gems');
-  return { ...synced, gems: synced.gems - SHOP_REFRESH_GEMS, shop: { day, refreshes: synced.shop.refreshes + 1, bought: [] } };
+  return { ...synced, gems: synced.gems - SHOP_REFRESH_GEMS, shop };
 }

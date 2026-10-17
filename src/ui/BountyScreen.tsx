@@ -2,6 +2,7 @@ import { BOUNTIES, bountyProgress, claimBounty } from '../game/bounty';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
+import { orbs } from './format';
 
 interface Props {
   save: SaveData;
@@ -10,7 +11,7 @@ interface Props {
 }
 
 function rewardText(r: { coins?: number; spins?: number; gems?: number }): string {
-  return [r.coins && `● ${r.coins.toLocaleString()}`, r.spins && `✦ ${r.spins}`, r.gems && `◆ ${r.gems}`].filter(Boolean).join(' · ');
+  return [r.coins && `● ${r.coins.toLocaleString()}`, r.spins && orbs(r.spins), r.gems && `◆ ${r.gems}`].filter(Boolean).join(' · ');
 }
 
 export function BountyScreen({ save, update, onBack }: Props) {

@@ -6,6 +6,7 @@ import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
 import { Portrait, Stars } from './Sprite';
+import { orbs } from './format';
 
 interface Props {
   save: SaveData;
@@ -43,7 +44,7 @@ export function PortScreen({ save, update, onBack }: Props) {
     <div className="port">
       <BuildingHeader title="Expedition Port" onBack={onBack}>
         <p className="muted">
-          Send up to {EXPEDITION_MAX_PARTY} idle fighters on a trip. They come back with coins, plus spins on longer trips and a
+          Send up to {EXPEDITION_MAX_PARTY} idle fighters on a trip. They come back with coins, plus Spin Orbs on longer trips and a
           chance of gems. Bigger parties bring back more. {EXPEDITION_SLOTS} trips can be out at once.
         </p>
       </BuildingHeader>
@@ -65,7 +66,7 @@ export function PortScreen({ save, update, onBack }: Props) {
                 <span className="muted">{done ? 'Back home!' : `Back in ${formatTime(timeLeft(e, now))}`}</span>
                 <span className="trip-reward">
                   ● {e.reward.coins.toLocaleString()}
-                  {e.reward.spins > 0 && ` · ✦ ${e.reward.spins}`}
+                  {e.reward.spins > 0 && ` · ${orbs(e.reward.spins)}`}
                   {e.reward.gems > 0 && ` · ◆ ${e.reward.gems}`}
                 </span>
               </div>

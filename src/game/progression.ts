@@ -85,6 +85,9 @@ export function newSave(): SaveData {
     title: null,
     seenForms: ['kairo:0'],
     login: { day: '', claims: 0 },
+    pieces: {},
+    materials: { refreshTicket: 0, respecScroll: 0 },
+    market: { day: '', refreshes: 0, bought: [] },
   };
 }
 

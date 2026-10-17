@@ -43,6 +43,9 @@ function migrate(save: SaveData): SaveData {
     title: save.title ?? null,
     seenForms: save.seenForms ?? [],
     login: save.login ?? fresh.login,
+    pieces: save.pieces ?? {},
+    materials: { ...fresh.materials, ...save.materials },
+    market: save.market ?? fresh.market,
   };
 }
 
@@ -58,6 +61,15 @@ function isValid(data: unknown): data is SaveData {
     return false;
   }
   return true;
+}
+
+/** True when this device already has a save (a returning player). */
+export function hasSave(): boolean {
+  try {
+    return localStorage.getItem(KEY) !== null;
+  } catch {
+    return false;
+  }
 }
 
 /** Everything is stored on the device, so the game works fully offline. */

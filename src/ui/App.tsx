@@ -4,7 +4,9 @@ import { playMusic, unlockAudio } from '../audio/sound';
 import { recordForms } from '../game/achievements';
 import { syncBounties } from '../game/bounty';
 import { syncWorldBoss } from '../game/worldBoss';
-import { loadSave, writeSave } from '../game/save';
+import { loadSave, writeSave, hasSave } from '../game/save';
+import { loginReady } from '../game/login';
+import { unseenReleases } from '../content/changelog';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
 import { type Building, CityScreen } from './CityScreen';
@@ -25,6 +27,11 @@ import { HomeScreen } from './HomeScreen';
 import { InventoryScreen } from './InventoryScreen';
 import { StagesScreen } from './StagesScreen';
 import { SummonScreen } from './SummonScreen';
+import { ShopScreen } from './ShopScreen';
+import { Modal } from './Modal';
+import { SettingsPanel } from './SettingsPanel';
+import { WhatsNew } from './WhatsNew';
+import { LoginPopup } from './LoginPopup';
 import { type Run, newRun } from './run';
 
 export type Tab = 'home' | 'city' | 'inventory' | 'stages' | 'fighters';
@@ -48,8 +55,19 @@ type View =
 
 export type Updater = (change: (save: SaveData) => SaveData) => boolean;
 
+type Popup = 'news' | 'updates' | 'login' | 'settings' | null;
+
+// Read before the first save is written, so a returning player is told apart from a new one.
+const returning = hasSave();
+
 export function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
+  const [news] = useState(() => unseenReleases(returning));
+  // On launch: what's new first (after an update), then the daily login reward.
+  const [popup, setPopup] = useState<Popup>(() => (news.length ? 'news' : loginReady(save) ? 'login' : null));
+  const closePopup = useCallback(() => {
+    setPopup((p) => (p === 'news' && loginReady(saveRef.current) ? 'login' : null));
+  }, []);
   const [view, setView] = useState<View>({ kind: 'tab', tab: 'home' });
   const [toast, setToast] = useState<string | null>(null);
   const saveRef = useRef(save);
@@ -106,7 +124,6 @@ export function App() {
 
   const tab: Tab =
     view.kind === 'tab' ? view.tab : view.kind === 'fighter' ? 'fighters' : view.kind === 'building' ? 'city' : 'stages';
-  const openSummon = () => setView({ kind: 'building', building: 'summon' });
   const toCity = () => setView({ kind: 'tab', tab: 'city' });
   const continueRun = useCallback(
     (stage: number, run: Run) => setView((v) => ({ kind: 'battle', stage, run, seq: (v.kind === 'battle' ? v.seq : 0) + 1 })),
@@ -121,9 +138,21 @@ export function App() {
           <img className="logo-mark" src={`${import.meta.env.BASE_URL}brand/logo-icon-light-transparent.png`} alt="Dragon Vision" />
         </h1>
         <div className="wallet">
-          <span className="coin" title="Coins"><PixelIcon kind="coin" /> {save.coins.toLocaleString()}</span>
-          <span className="gem" title="Gems"><PixelIcon kind="gem" /> {save.gems}</span>
-          <span className="spin" title="Summon spins"><PixelIcon kind="spin" /> {save.spins}</span>
+          <span className="coin" title="Coins"><PixelIcon kind="coin" size={16} /> {compact(save.coins)}</span>
+          <span className="gem" title="Gems"><PixelIcon kind="gem" size={16} /> {compact(save.gems)}</span>
+        </div>
+        <div className="corner-buttons">
+          {loginReady(save) && (
+            <button className="corner-btn alert" onClick={() => setPopup('login')} aria-label="Daily login reward" title="Daily login reward">
+              <PixelIcon kind="gem" size={18} />
+            </button>
+          )}
+          <button className="corner-btn" onClick={() => setPopup('updates')} aria-label="Updates" title="Updates">
+            <PixelIcon kind="news" size={18} />
+          </button>
+          <button className="corner-btn" onClick={() => setPopup('settings')} aria-label="Settings" title="Settings">
+            <PixelIcon kind="settings" size={18} />
+          </button>
         </div>
       </header>
 
@@ -159,7 +188,9 @@ export function App() {
             onBack={() => setView({ kind: 'tab', tab: 'fighters' })}
           />
         ) : view.kind === 'building' ? (
-          view.building === 'summon' ? (
+          view.building === 'shop' ? (
+            <ShopScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'summon' ? (
             <SummonScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'dojo' ? (
             <DojoScreen save={save} update={update} onBack={toCity} />
@@ -198,11 +229,11 @@ export function App() {
             />
           )
         ) : view.tab === 'home' ? (
-          <HomeScreen save={save} update={update} onNavigate={(t) => setView({ kind: 'tab', tab: t })} onOpenSummon={openSummon} />
+          <HomeScreen />
         ) : view.tab === 'city' ? (
           <CityScreen save={save} onOpen={(building) => setView({ kind: 'building', building })} />
         ) : view.tab === 'inventory' ? (
-          <InventoryScreen save={save} />
+          <InventoryScreen save={save} update={update} />
         ) : view.tab === 'stages' ? (
           <StagesScreen save={save} update={update} onPlay={(stage, run = newRun('single')) => setView({ kind: 'battle', stage, run, seq: Date.now() })} />
         ) : (
@@ -217,13 +248,29 @@ export function App() {
               <PixelIcon kind={t} size={22} />
               <span className="tab-long">{TAB_LABELS[t]}</span>
               <span className="tab-short">{TAB_SHORT[t] ?? TAB_LABELS[t]}</span>
-              {t === 'city' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
             </button>
           ))}
         </nav>
       )}
 
+      {popup === 'news' && <WhatsNew releases={news} onClose={closePopup} />}
+      {popup === 'updates' && <WhatsNew onClose={closePopup} />}
+      {popup === 'login' && <LoginPopup save={save} update={update} onClose={closePopup} />}
+      {popup === 'settings' && (
+        <Modal title="Settings" onClose={closePopup}>
+          <SettingsPanel save={save} update={update} />
+        </Modal>
+      )}
+
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
+}
+
+/** 1,234,567 → 1.23M so the top bar stays small. */
+function compact(n: number): string {
+  if (n < 100_000) return n.toLocaleString();
+  if (n < 1_000_000) return `${Math.floor(n / 1000)}K`;
+  if (n < 1_000_000_000) return `${(n / 1_000_000).toFixed(n < 10_000_000 ? 2 : 1)}M`;
+  return `${(n / 1_000_000_000).toFixed(2)}B`;
 }

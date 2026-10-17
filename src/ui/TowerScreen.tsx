@@ -5,6 +5,7 @@ import { RULE_TEXT, towerRewards, towerStage } from '../game/tower';
 import type { SaveData } from '../game/types';
 import { BuildingHeader } from './BuildingHeader';
 import { Portrait, Stars } from './Sprite';
+import { orbs } from './format';
 
 interface Props {
   save: SaveData;
@@ -28,7 +29,7 @@ export function TowerScreen({ save, onBack, onChallenge }: Props) {
     <div className="tower">
       <BuildingHeader title="Rival Tower" onBack={onBack}>
         <p className="muted">
-          {TOWER_FLOORS} floors of rival squads, each with a twist rule. Every floor pays once: coins and 2 spins, plus gems and an
+          {TOWER_FLOORS} floors of rival squads, each with a twist rule. Every floor pays once: coins and 2 Spin Orbs, plus gems and an
           evolution shard every 5th floor. Your team power: {teamPower.toLocaleString()}.
         </p>
       </BuildingHeader>
@@ -57,7 +58,7 @@ export function TowerScreen({ save, onBack, onChallenge }: Props) {
                 </span>
                 {stage.rule && <span className="rule">⚠ {RULE_TEXT[stage.rule]}</span>}
                 <span className="muted small-text">
-                  ● {r.coins.toLocaleString()} · ✦ {r.spins}
+                  ● {r.coins.toLocaleString()} · {orbs(r.spins)}
                   {r.gems > 0 && ` · ◆ ${r.gems}`}
                   {r.shardStar && ` · ◇ ${r.shardStar}★ shard`}
                 </span>

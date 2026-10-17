@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { ACHIEVEMENTS, achievementState, allForms, claimAchievement, setTitle, unlockedTitles } from '../game/achievements';
-import { FAMILIES, FUSIONS } from '../game/roster';
+import { FAMILIES, FUSIONS, LEGENDARIES } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
 import { Sprite } from './Sprite';
+import { orbs } from './format';
 
 interface Props {
   save: SaveData;
@@ -19,7 +20,7 @@ export function HallScreen({ save, update, onBack }: Props) {
   return (
     <div className="hall">
       <BuildingHeader title="Hall of Legends" onBack={onBack}>
-        <p className="muted">Achievements pay gems and spins, and many unlock a title shown on your Home screen. The collection log keeps every form you have ever owned.</p>
+        <p className="muted">Achievements pay gems and Spin Orbs, and many unlock a title shown on your Home screen. The collection log keeps every form you have ever owned.</p>
       </BuildingHeader>
       <div className="button-row">
         <button className={`btn small ${tab === 'achievements' ? 'primary' : ''}`} onClick={() => setTab('achievements')}>
@@ -64,7 +65,7 @@ export function HallScreen({ save, update, onBack }: Props) {
                       </span>
                       <span className="muted small-text">
                         {st.done}/{a.goal} ·{' '}
-                        {[a.reward.gems && `◆ ${a.reward.gems}`, a.reward.spins && `✦ ${a.reward.spins}`, a.title && `title “${a.title}”`]
+                        {[a.reward.gems && `◆ ${a.reward.gems}`, a.reward.spins && orbs(a.reward.spins), a.title && `title “${a.title}”`]
                           .filter(Boolean)
                           .join(' · ')}
                       </span>
@@ -79,7 +80,7 @@ export function HallScreen({ save, update, onBack }: Props) {
           </section>
         </>
       ) : (
-        [...FAMILIES, ...FUSIONS].map((f) => (
+        [...FAMILIES, ...FUSIONS, ...LEGENDARIES].map((f) => (
           <section key={f.id} className="panel collection-row">
             <h3>
               {f.name} <span className="muted">· {f.title}</span>
@@ -89,7 +90,7 @@ export function HallScreen({ save, update, onBack }: Props) {
                 const has = seen.has(`${f.id}:${i}`);
                 return (
                   <div key={form.name} className={`collection-form ${has ? '' : 'unseen'}`} title={has ? form.name : '???'}>
-                    <Sprite familyId={f.id} star={i + 1} size={56} />
+                    <Sprite familyId={f.id} star={i + (f.firstStar ?? 1)} size={56} />
                     <small>{has ? form.name : '???'}</small>
                   </div>
                 );

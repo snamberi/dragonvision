@@ -242,15 +242,15 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
 
         <div className="reward-line">
           {replay ? (
-            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins (25%), no spins or gems</>
+            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins (25%){stage.kind === 'boss' ? ' · 5% legendary piece' : ', no Spin Orbs or gems'}</>
           ) : (
             <>
               First clear: {stage.coins.toLocaleString()} coins ·{' '}
               {stage.kind === 'boss'
-                ? '10 spins · 15 gems · Rare+ gear'
+                ? '10 Spin Orbs · 15 gems · Rare+ gear · 5% legendary piece'
                 : stage.kind === 'miniBoss'
-                  ? '5 spins · 5 gems · Uncommon+ gear'
-                  : '1 spin · 1% gem chance'}
+                  ? '5 Spin Orbs · 5 gems · Uncommon+ gear'
+                  : '1 Spin Orb · 1% gem chance'}
             </>
           )}
         </div>

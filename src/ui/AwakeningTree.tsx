@@ -44,8 +44,12 @@ export function AwakeningTree({ save, unit, update }: { save: SaveData; unit: Un
         ))}
       </div>
       {owned.size > 0 && (
-        <button className="btn small" disabled={save.gems < RESPEC_GEMS} onClick={() => update((s) => respecAwakening(s, unit.uid))}>
-          Reset points ◆ {RESPEC_GEMS}
+        <button
+          className="btn small"
+          disabled={save.materials.respecScroll === 0 && save.gems < RESPEC_GEMS}
+          onClick={() => update((s) => respecAwakening(s, unit.uid))}
+        >
+          {save.materials.respecScroll > 0 ? `Reset points (scroll, ${save.materials.respecScroll} left)` : `Reset points ◆ ${RESPEC_GEMS}`}
         </button>
       )}
     </section>

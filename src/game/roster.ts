@@ -404,6 +404,161 @@ export const FUSIONS: Family[] = [
   },
 ];
 
+/**
+ * Legendary fighters: never summoned. Ten pieces of one make the fighter at 5★; pieces drop rarely from
+ * summons, from stage bosses, and the Shop sells one at a time.
+ */
+function legend(f: Omit<Family, 'legendary' | 'firstStar'>): Family {
+  return { ...f, legendary: true, firstStar: 5 };
+}
+
+const ryugaBase: Look = { skin: SKIN, hair: '#1b1530', hairStyle: 'spikyTall', outfit: '#8a1020', accent: '#ffd23f', boots: '#1b1530', aura: '#ff8a1f' };
+const seraBase: Look = { skin: SKIN, hair: '#fff6c8', hairStyle: 'long', outfit: '#f4ecd8', accent: '#ffd23f', boots: '#d9c48a', aura: '#fff6c8' };
+const tharokBase: Look = { skin: SKIN_TAN, hair: '#5a3a22', hairStyle: 'topknot', outfit: '#6b4a2a', accent: '#c9d2e0', boots: '#3a2a1a', large: true };
+const nyxBase: Look = { skin: '#c9b8e8', hair: '#1a1240', hairStyle: 'ponytail', outfit: '#1a1240', accent: '#b794ff', boots: '#0a0618', aura: '#8b5cf6' };
+const volkanBase: Look = { skin: '#7a3a2a', hair: '#ff4a3d', hairStyle: 'flame', outfit: '#2a1410', accent: '#ff8a1f', boots: '#1b0a06', aura: '#ff4a3d' };
+const aurelBase: Look = { skin: SKIN, hair: '#e9e4d4', hairStyle: 'bald', outfit: '#d8a21f', accent: '#ffffff', boots: '#8a5a1a', aura: '#ffd23f' };
+const zephBase: Look = { skin: SKIN, hair: '#7fe7ff', hairStyle: 'braids', outfit: '#1f4a6b', accent: '#e9fbff', boots: '#e9fbff', aura: '#7fe7ff' };
+const morvainBase: Look = { skin: '#8a8fa8', hair: '#d9e2f2', hairStyle: 'horns', outfit: '#0a0618', accent: '#ff4a3d', boots: '#2a0a12', aura: '#ff4a3d' };
+const solBase: Look = { skin: SKIN_TAN, hair: '#ffb35a', hairStyle: 'mohawk', outfit: '#f4ecd8', accent: '#ff8a1f', boots: '#8a3a0a', aura: '#ffe066' };
+const gorvathBase: Look = { skin: '#5a6b4a', hair: '#2a2a2a', hairStyle: 'crest', outfit: '#3a3a3a', accent: '#8fd16a', boots: '#1b1b1b', large: true };
+
+export const LEGENDARIES: Family[] = [
+  legend({
+    id: 'ryuga',
+    name: 'Ryuga',
+    title: 'The Dragon Emperor',
+    base: { hp: 115, atk: 36, def: 26, spd: 30 },
+    special: { name: 'Emperor Dragon Fist', kind: 'beam', power: 3.8, charge: 3 },
+    forms: [
+      form('Ryuga', ryugaBase),
+      form('Crimson Ryuga', { ...ryugaBase, hair: '#d8432e', aura: '#ff4a3d' }),
+      form('Dragon King Ryuga', { ...ryugaBase, hair: '#ffd23f', hairStyle: 'long', aura: '#ffd23f' }),
+      form('Celestial Dragon Ryuga', { ...ryugaBase, hair: '#ffffff', hairStyle: 'long', outfit: '#1a1240', aura: '#fff07a' }),
+    ],
+  }),
+  legend({
+    id: 'solenne',
+    name: 'Solenne',
+    title: 'Blade of the Rising Sun',
+    base: { hp: 105, atk: 38, def: 24, spd: 32 },
+    special: { name: 'Supernova Edge', kind: 'beam', power: 3.9, charge: 3 },
+    forms: [
+      form('Solenne', solBase),
+      form('Dawn Solenne', { ...solBase, hair: '#ffd23f', aura: '#ffd23f' }),
+      form('Zenith Solenne', { ...solBase, hair: '#fff6c8', outfit: '#ff8a1f', aura: '#fff6c8' }),
+      form('Supernova Solenne', { ...solBase, hair: '#ffffff', outfit: '#d8432e', accent: '#ffd23f', aura: '#ffffff' }),
+    ],
+  }),
+  legend({
+    id: 'seraphine',
+    name: 'Seraphine',
+    title: 'Light of the Heavens',
+    base: { hp: 112, atk: 26, def: 30, spd: 30 },
+    special: { name: 'Celestial Rebirth', kind: 'revive', power: 0.6, charge: 3 },
+    forms: [
+      form('Seraphine', seraBase),
+      form('Haloed Seraphine', { ...seraBase, aura: '#ffd23f' }),
+      form('Archangel Seraphine', { ...seraBase, outfit: '#ffffff', hair: '#ffd23f', aura: '#ffe066' }),
+      form('Divine Seraphine', { ...seraBase, outfit: '#ffffff', hair: '#ffffff', accent: '#7fe7ff', aura: '#ffffff' }),
+    ],
+  }),
+  legend({
+    id: 'aurel',
+    name: 'Aurel',
+    title: 'The Golden Sage',
+    base: { hp: 118, atk: 27, def: 31, spd: 28 },
+    special: { name: 'Golden Hymn', kind: 'rally', power: 0.45, charge: 3 },
+    forms: [
+      form('Aurel', aurelBase),
+      form('Gilded Aurel', { ...aurelBase, outfit: '#ffd23f' }),
+      form('Radiant Aurel', { ...aurelBase, outfit: '#ffd23f', accent: '#ff8a1f', aura: '#fff07a' }),
+      form('Eternal Aurel', { ...aurelBase, outfit: '#ffffff', accent: '#ffd23f', aura: '#ffffff' }),
+    ],
+  }),
+  legend({
+    id: 'tharok',
+    name: 'Tharok',
+    title: 'The Mountain King',
+    base: { hp: 170, atk: 28, def: 38, spd: 22 },
+    special: { name: 'Titan Bulwark', kind: 'shield', power: 0.4, charge: 3 },
+    forms: [
+      form('Tharok', tharokBase),
+      form('Stoneborn Tharok', { ...tharokBase, outfit: '#5a5a6b', accent: '#ffd23f' }),
+      form('Mountain King Tharok', { ...tharokBase, outfit: '#3a3a4a', accent: '#ffd23f', aura: '#c9d2e0' }),
+      form('Worldpillar Tharok', { ...tharokBase, hair: '#ffffff', outfit: '#2a2a3a', accent: '#7fe7ff', aura: '#7fe7ff' }),
+    ],
+  }),
+  legend({
+    id: 'gorvath',
+    name: 'Gorvath',
+    title: 'The Ancient Destroyer',
+    villain: true,
+    base: { hp: 160, atk: 32, def: 34, spd: 23 },
+    special: { name: 'World Breaker', kind: 'stun', power: 1.2, charge: 3 },
+    forms: [
+      form('Gorvath', gorvathBase),
+      form('Awakened Gorvath', { ...gorvathBase, aura: '#8fd16a' }),
+      form('Primordial Gorvath', { ...gorvathBase, skin: '#3a4a2a', accent: '#ff4a3d', aura: '#ff4a3d' }),
+      form('Worldender Gorvath', { ...gorvathBase, skin: '#2a2a2a', hair: '#ff4a3d', accent: '#ffd23f', aura: '#ffd23f' }),
+    ],
+  }),
+  legend({
+    id: 'nyxara',
+    name: 'Nyxara',
+    title: 'Queen of the Endless Night',
+    villain: true,
+    base: { hp: 120, atk: 33, def: 27, spd: 31 },
+    special: { name: 'Night Devourer', kind: 'drain', power: 3.3, charge: 3 },
+    forms: [
+      form('Nyxara', nyxBase),
+      form('Moonlit Nyxara', { ...nyxBase, hair: '#d9e2f2', aura: '#c9b8ff' }),
+      form('Eclipse Nyxara', { ...nyxBase, outfit: '#0a0618', accent: '#ff4a3d', aura: '#ff4a3d' }),
+      form('Endless Night Nyxara', { ...nyxBase, hair: '#0a0618', outfit: '#0a0618', accent: '#ffd23f', aura: '#b794ff' }),
+    ],
+  }),
+  legend({
+    id: 'morvain',
+    name: 'Morvain',
+    title: 'The Fallen God',
+    villain: true,
+    base: { hp: 125, atk: 34, def: 28, spd: 27 },
+    special: { name: 'Godfall', kind: 'drain', power: 3.4, charge: 3 },
+    forms: [
+      form('Morvain', morvainBase),
+      form('Risen Morvain', { ...morvainBase, aura: '#b794ff' }),
+      form('Godslayer Morvain', { ...morvainBase, outfit: '#2a0a12', hair: '#ff4a3d', aura: '#ff4a3d' }),
+      form('Fallen God Morvain', { ...morvainBase, skin: '#5a5f78', hair: '#ffd23f', accent: '#ffd23f', aura: '#ffd23f', large: true }),
+    ],
+  }),
+  legend({
+    id: 'volkan',
+    name: 'Volkan',
+    title: 'The Living Volcano',
+    base: { hp: 115, atk: 37, def: 25, spd: 27 },
+    special: { name: 'Magma Cataclysm', kind: 'wave', power: 1.9, charge: 3 },
+    forms: [
+      form('Volkan', volkanBase),
+      form('Molten Volkan', { ...volkanBase, hair: '#ff8a1f', aura: '#ff8a1f' }),
+      form('Eruption Volkan', { ...volkanBase, hair: '#ffd23f', accent: '#ffd23f', aura: '#ffd23f' }),
+      form('Core Volkan', { ...volkanBase, skin: '#3a1410', hair: '#ffffff', aura: '#fff07a', large: true }),
+    ],
+  }),
+  legend({
+    id: 'zephyra',
+    name: 'Zephyra',
+    title: 'The Storm Empress',
+    base: { hp: 110, atk: 35, def: 26, spd: 34 },
+    special: { name: 'Tempest Crown', kind: 'wave', power: 1.8, charge: 3 },
+    forms: [
+      form('Zephyra', zephBase),
+      form('Gale Zephyra', { ...zephBase, outfit: '#2f5fd0' }),
+      form('Thunder Zephyra', { ...zephBase, hair: '#ffe066', accent: '#ffe066', aura: '#ffe066' }),
+      form('Storm Empress Zephyra', { ...zephBase, hair: '#ffffff', outfit: '#1a1240', aura: '#ffffff' }),
+    ],
+  }),
+];
+
 export interface FusionRecipe {
   result: string;
   parts: [string, string];
@@ -417,7 +572,7 @@ export const FUSION_RECIPES: FusionRecipe[] = [
   { result: 'grylas', parts: ['grimm', 'sylas'], minStar: 6 },
 ];
 
-const byId = new Map([...FAMILIES, ...FUSIONS].map((f) => [f.id, f]));
+const byId = new Map([...FAMILIES, ...FUSIONS, ...LEGENDARIES].map((f) => [f.id, f]));
 
 export function getFamily(id: string): Family {
   const family = byId.get(id);
@@ -427,7 +582,8 @@ export function getFamily(id: string): Family {
 
 /** Form shown at a star rating; families with fewer forms keep their last one. */
 export function formForStar(family: Family, star: number): Form {
-  return family.forms[Math.min(star, family.forms.length) - 1];
+  const index = star - (family.firstStar ?? 1);
+  return family.forms[Math.max(0, Math.min(index, family.forms.length - 1))];
 }
 
 export type Role = 'Tank' | 'Assassin' | 'Blaster' | 'Support' | 'Drainer';

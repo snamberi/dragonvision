@@ -8,20 +8,29 @@ interface InstallPrompt extends Event {
   prompt: () => Promise<void>;
 }
 
+// The browser offers installing once, often before Settings is ever opened, so keep the offer from page load.
+let installOffer: InstallPrompt | null = null;
+const installListeners = new Set<(offer: InstallPrompt | null) => void>();
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installOffer = e as InstallPrompt;
+    installListeners.forEach((fn) => fn(installOffer));
+  });
+}
+
 /** Sound switches, install-as-app, and moving a save between devices. */
 export function SettingsPanel({ save, update }: { save: SaveData; update: Updater }) {
   const [sound, setSound] = useState(soundSettings);
-  const [install, setInstall] = useState<InstallPrompt | null>(null);
+  const [install, setInstall] = useState<InstallPrompt | null>(installOffer);
   const [code, setCode] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const onPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstall(e as InstallPrompt);
+    installListeners.add(setInstall);
+    return () => {
+      installListeners.delete(setInstall);
     };
-    window.addEventListener('beforeinstallprompt', onPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
   }, []);
 
   const toggle = (key: 'music' | 'sfx') => {
@@ -65,8 +74,8 @@ export function SettingsPanel({ save, update }: { save: SaveData; update: Update
   };
 
   return (
-    <section className="panel settings">
-      <h3>Settings</h3>
+    <section className="settings">
+      <h3>Sound</h3>
       <div className="button-row">
         <button className={`btn small ${sound.music ? 'primary' : ''}`} onClick={() => toggle('music')}>
           Music {sound.music ? 'ON' : 'OFF'}
@@ -79,6 +88,7 @@ export function SettingsPanel({ save, update }: { save: SaveData; update: Update
             className="btn small primary"
             onClick={async () => {
               await install.prompt();
+              installOffer = null;
               setInstall(null);
             }}
           >
