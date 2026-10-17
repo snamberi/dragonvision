@@ -16,7 +16,7 @@ import {
   upgradeCost,
   upgradeUnit,
 } from '../game/progression';
-import { BEATS, formForStar, getFamily, roleFor } from '../game/roster';
+import { BEATS, combosWith, formForStar, getFamily, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { AwakeningTree } from './AwakeningTree';
@@ -97,6 +97,11 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
               {(Object.keys(BEATS) as (keyof typeof BEATS)[]).find((r) => BEATS[r] === roleFor(family))}
             </span>
           </div>
+          {combosWith(unit.familyId).map((c) => (
+            <div key={c.name} className="muted small-text">
+              ★★ Combo <b>{c.name}</b> with {getFamily(c.parts[0] === unit.familyId ? c.parts[1] : c.parts[0]).name} when both specials are full
+            </div>
+          ))}
           <div className="special-box">
             <strong>{family.special.name}</strong> · charges in {family.special.charge} moves
             <div className="muted small-text">{describeSpecial(family.special)}</div>

@@ -12,6 +12,7 @@ import {
   type Hit,
   canUse,
   chooseAction,
+  comboFor,
   createBattle,
   living,
   nextActor,
@@ -263,7 +264,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
         </div>
       </div>
 
-      <div className={`field ${busy && event?.data.kind === 'special' ? 'special-impact' : ''}`}><WorldScene />
+      <div className={`field ${busy && (event?.data.kind === 'special' || event?.data.kind === 'combo') ? 'special-impact' : ''}`}><WorldScene />
         {battle.fighters.map((f) => (
           <button
             key={f.id}
@@ -281,8 +282,8 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
                     {hitText(h)}
                   </span>
                 ))}
-            {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special') && (
-              <AttackEffect key={`fx-${event.id}`} familyId={f.familyId} side={f.side} special={event.data.kind === 'special'} support={event.data.kind === 'special' && ['heal','revive','shield','rally'].includes(specialOf(f).kind)} duration={step} />
+            {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special' || event.data.kind === 'combo') && (
+              <AttackEffect key={`fx-${event.id}`} familyId={f.familyId} side={f.side} special={event.data.kind === 'special' || event.data.kind === 'combo'} support={event.data.kind === 'special' && ['heal','revive','shield','rally'].includes(specialOf(f).kind)} duration={step} />
             )}
             <span className="unit-hp">
               <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
@@ -352,6 +353,13 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
                 : ''}
             </small>
           </button>
+          {showControls && actor && comboFor(battle, actor) && (
+            <button className="cmd combo ready" disabled={!playerControls} onClick={() => choose('combo')}>
+              <span className="cmd-icon">★★</span>
+              {comboFor(battle, actor)!.combo.name}
+              <small>with {comboFor(battle, actor)!.partner.name}</small>
+            </button>
+          )}
           <button className="cmd charge" disabled={!showControls || !playerControls} onClick={() => choose('charge')}>
             <span className="cmd-icon"><PixelIcon kind="charge" size={26} /></span>Charge<small>+Ki</small>
           </button>

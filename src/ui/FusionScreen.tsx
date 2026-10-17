@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SHARD_FUSION_COST } from '../game/balance';
-import { fuseShard, sellPrice, sellSpares, spareUnits } from '../game/fusion';
+import { canFuse as fusionCheck, fuseFighters, fuseShard, fusionParts, sellPrice, sellSpares, spareUnits } from '../game/fusion';
+import { FUSION_RECIPES, getFamily } from '../game/roster';
 import { unitName } from '../game/progression';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -60,6 +61,50 @@ export function FusionScreen({ save, update, onBack }: Props) {
               </span>
             ))
           )}
+        </div>
+      </section>
+
+      <section className="panel">
+        <h3>Fighter Fusion</h3>
+        <p className="muted small-text">
+          Fuse two fighters for good into a new, stronger character. Uses your best free copy of each; the fusion keeps the lower
+          star and level. Gear they wore goes back to your inventory.
+        </p>
+        <div className="fusion-recipes">
+          {FUSION_RECIPES.map((recipe) => {
+            const [a, b] = fusionParts(save, recipe);
+            const check = fusionCheck(save, recipe);
+            return (
+              <div key={recipe.result} className="fusion-recipe">
+                <span className="fusion-side">
+                  <Portrait familyId={recipe.parts[0]} star={a?.star ?? 1} size={40} />
+                  <small>{a ? `${a.star}★ Lv ${a.level}` : 'none'}</small>
+                </span>
+                <b>+</b>
+                <span className="fusion-side">
+                  <Portrait familyId={recipe.parts[1]} star={b?.star ?? 1} size={40} />
+                  <small>{b ? `${b.star}★ Lv ${b.level}` : 'none'}</small>
+                </span>
+                <b>=</b>
+                <span className="fusion-side">
+                  <Portrait familyId={recipe.result} star={Math.min(a?.star ?? 1, b?.star ?? 1)} size={48} />
+                  <small>{getFamily(recipe.result).name}</small>
+                </span>
+                <button
+                  className="btn small primary"
+                  disabled={!check.ok}
+                  title={check.reason}
+                  onClick={() => {
+                    if (window.confirm(`Fuse ${getFamily(recipe.parts[0]).name} and ${getFamily(recipe.parts[1]).name} into ${getFamily(recipe.result).name}? This can't be undone.`)) {
+                      update((s) => fuseFighters(s, recipe.result).save);
+                    }
+                  }}
+                >
+                  {check.ok ? 'Fuse' : check.reason}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
 

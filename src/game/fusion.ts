@@ -1,5 +1,6 @@
-import { SHARD_FUSION_COST, sellValue } from './balance';
-import { isBusy, power } from './progression';
+import { SHARD_FUSION_COST, levelCap, sellValue } from './balance';
+import { addUnit, isBusy, power } from './progression';
+import { FUSION_RECIPES, type FusionRecipe, getFamily } from './roster';
 import type { SaveData, Unit } from './types';
 
 /** The strongest copy of each character, which the Lab never touches. */
@@ -61,4 +62,46 @@ export function sellSpares(save: SaveData, uids: string[]): SaveData {
   const units = takeSpares(save, [...new Set(uids)]);
   const gone = new Set(uids);
   return { ...save, coins: save.coins + sellPrice(units), units: save.units.filter((u) => !gone.has(u.uid)) };
+}
+
+// --- Fighter fusion ---
+
+/** Best copy of a character that isn't busy (highest star, then level). */
+function bestFree(save: SaveData, familyId: string): Unit | null {
+  return (
+    save.units
+      .filter((u) => u.familyId === familyId && !isBusy(save, u.uid))
+      .sort((a, b) => b.star - a.star || b.level - a.level)[0] ?? null
+  );
+}
+
+export function fusionParts(save: SaveData, recipe: FusionRecipe): [Unit | null, Unit | null] {
+  return [bestFree(save, recipe.parts[0]), bestFree(save, recipe.parts[1])];
+}
+
+export function canFuse(save: SaveData, recipe: FusionRecipe): { ok: boolean; reason?: string } {
+  const [a, b] = fusionParts(save, recipe);
+  if (!a || !b) return { ok: false, reason: `Needs ${getFamily(recipe.parts[0]).name} and ${getFamily(recipe.parts[1]).name}` };
+  if (a.star < recipe.minStar || b.star < recipe.minStar) return { ok: false, reason: `Both need ${recipe.minStar}★ or more` };
+  return { ok: true };
+}
+
+/**
+ * Permanently fuses the best copies of two fighters into the fusion character.
+ * It keeps the lower star and level of the two; gear they wore goes back to the inventory.
+ */
+export function fuseFighters(save: SaveData, resultId: string): { save: SaveData; unit: Unit } {
+  const recipe = FUSION_RECIPES.find((r) => r.result === resultId);
+  if (!recipe) throw new Error('Unknown fusion');
+  const check = canFuse(save, recipe);
+  if (!check.ok) throw new Error(check.reason);
+  const [a, b] = fusionParts(save, recipe) as [Unit, Unit];
+  const star = Math.min(a.star, b.star);
+  const level = Math.min(a.level, b.level, levelCap(star));
+  const created = addUnit(save, { familyId: recipe.result, star, level, baseLevel: level, coinsSpent: 0 });
+  const gone = new Set([a.uid, b.uid]);
+  // The fusion takes the first part's pad; the second part's pad empties.
+  const team = save.team.map((t) => (t === a.uid || (t === b.uid && !save.team.includes(a.uid)) ? created.unit.uid : t && gone.has(t) ? null : t));
+  const next = { ...created.save, units: created.save.units.filter((u) => !gone.has(u.uid)), team };
+  return { save: next, unit: created.unit };
 }

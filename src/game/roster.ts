@@ -362,7 +362,62 @@ export const FAMILIES: Family[] = [
 
 export const STARTER_FAMILY_ID = 'kairo';
 
-const byId = new Map(FAMILIES.map((f) => [f.id, f]));
+/**
+ * Fusion characters: made only by fusing two specific fighters in the Fusion Lab.
+ * They are never summoned and never appear as random enemies.
+ */
+export const FUSIONS: Family[] = [
+  {
+    id: 'kavrek',
+    name: 'Kavrek',
+    title: 'Fusion of Spark and Prince',
+    base: { hp: 125, atk: 34, def: 27, spd: 28 },
+    special: { name: 'Final Vision Flash', kind: 'beam', power: 3.6, charge: 3 },
+    forms: [
+      form('Kavrek', { skin: SKIN, hair: INK, hairStyle: 'spikyTall', outfit: '#3a2f8f', accent: '#ff8a1f', boots: '#e9e4d4' }),
+      form('Radiant Kavrek', { skin: SKIN, hair: '#ffd23f', hairStyle: 'spikyTall', outfit: '#3a2f8f', accent: '#ff8a1f', boots: '#e9e4d4', aura: '#ffd23f' }),
+      form('Azure Kavrek', { skin: SKIN, hair: '#3fc6ff', hairStyle: 'spikyTall', outfit: '#1f2a6b', accent: '#ff8a1f', boots: '#e9e4d4', aura: '#7fe7ff' }),
+    ],
+  },
+  {
+    id: 'orzen',
+    name: 'Orzen',
+    title: 'Fusion of Sage and Keeper',
+    base: { hp: 145, atk: 26, def: 33, spd: 26 },
+    special: { name: 'Eternal Rite', kind: 'heal', power: 0.4, charge: 3 },
+    forms: [
+      form('Orzen', { skin: '#9fb0e6', hair: '#fff6c8', hairStyle: 'horns', outfit: '#2b1f5c', accent: '#ffd23f', boots: '#1a1240', aura: '#c9b8ff' }),
+      form('Ascended Orzen', { skin: '#b8c6f2', hair: '#ffffff', hairStyle: 'horns', outfit: '#1a1240', accent: '#ffd23f', boots: '#1a1240', aura: '#ffffff' }),
+    ],
+  },
+  {
+    id: 'grylas',
+    name: 'Grylas',
+    title: 'Fusion of Demon and Organism',
+    villain: true,
+    base: { hp: 155, atk: 33, def: 29, spd: 24 },
+    special: { name: 'Endless Feast', kind: 'drain', power: 3.0, charge: 3 },
+    forms: [
+      form('Grylas', { skin: '#7a3a4a', hair: '#2a4a1d', hairStyle: 'crest', outfit: '#1b1530', accent: '#8fd16a', boots: '#2a0a12', aura: '#b6f28c' }),
+      form('Perfect Grylas', { skin: '#5a1f3a', hair: '#ffd23f', hairStyle: 'crest', outfit: '#0a0618', accent: '#ff4a3d', boots: '#2a0a12', aura: '#ff4a3d', large: true }),
+    ],
+  },
+];
+
+export interface FusionRecipe {
+  result: string;
+  parts: [string, string];
+  /** Both parts must have at least this many stars. */
+  minStar: number;
+}
+
+export const FUSION_RECIPES: FusionRecipe[] = [
+  { result: 'kavrek', parts: ['kairo', 'varek'], minStar: 6 },
+  { result: 'orzen', parts: ['orrin', 'zeno'], minStar: 6 },
+  { result: 'grylas', parts: ['grimm', 'sylas'], minStar: 6 },
+];
+
+const byId = new Map([...FAMILIES, ...FUSIONS].map((f) => [f.id, f]));
 
 export function getFamily(id: string): Family {
   const family = byId.get(id);
@@ -406,4 +461,29 @@ export function classEdge(attacker: Role, defender: Role): 'strong' | 'weak' | '
   if (BEATS[attacker] === defender) return 'strong';
   if (BEATS[defender] === attacker) return 'weak';
   return 'neutral';
+}
+
+export interface Combo {
+  name: string;
+  parts: [string, string];
+  kind: 'beam' | 'wave' | 'heal' | 'drain';
+  /** Damage multiplier, or share of max HP for heals. */
+  power: number;
+}
+
+/** Pairs that unlock a shared attack when both are on the team with full special bars. */
+export const COMBOS: Combo[] = [
+  { name: 'Rival Cannon', parts: ['kairo', 'varek'], kind: 'beam', power: 4.5 },
+  { name: 'Family Comet', parts: ['kairo', 'sora'], kind: 'wave', power: 2.2 },
+  { name: 'Sacred Restoration', parts: ['orrin', 'zeno'], kind: 'heal', power: 0.45 },
+  { name: 'Storm Blade', parts: ['mei', 'jin'], kind: 'beam', power: 4.2 },
+  { name: 'Earthshaker', parts: ['bruno', 'mogra'], kind: 'wave', power: 2.0 },
+  { name: 'Master and Student', parts: ['tobi', 'kenji'], kind: 'wave', power: 2.0 },
+  { name: 'Starlight Blossom', parts: ['lyra', 'aya'], kind: 'wave', power: 2.2 },
+  { name: 'Devour', parts: ['grimm', 'sylas'], kind: 'drain', power: 3.5 },
+  { name: 'Void Tyranny', parts: ['vorg', 'kael'], kind: 'beam', power: 4.6 },
+];
+
+export function combosWith(familyId: string): Combo[] {
+  return COMBOS.filter((c) => c.parts.includes(familyId));
 }

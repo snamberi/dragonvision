@@ -27,14 +27,14 @@ import {
   enemyStrengthForStage,
 } from './balance';
 import { isBackRow, statsFor, unitName } from './progression';
-import { type Role, classEdge, getFamily, roleFor } from './roster';
+import { type Combo, type Role, classEdge, combosWith, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
 import { type Bonus, emptyBonus } from './bonus';
 import type { Special, Unit } from './types';
 
 export type Side = 'player' | 'enemy';
-export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard';
+export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard' | 'combo';
 export type Row = 'front' | 'back';
 
 export interface Fighter {
@@ -233,8 +233,20 @@ export function specialReady(fighter: Fighter): boolean {
   return !fighter.specialSpent && fighter.charge >= specialNeed(fighter);
 }
 
+/** A combo this fighter can fire now: a partner on its side is standing and both bars are full. */
+export function comboFor(state: BattleState, fighter: Fighter): { combo: Combo; partner: Fighter } | null {
+  if (fighter.hp <= 0 || !specialReady(fighter)) return null;
+  for (const combo of combosWith(fighter.familyId)) {
+    const other = combo.parts[0] === fighter.familyId ? combo.parts[1] : combo.parts[0];
+    const partner = living(state, fighter.side).find((f) => f.familyId === other && f.id !== fighter.id && specialReady(f));
+    if (partner) return { combo, partner };
+  }
+  return null;
+}
+
 export function canUse(state: BattleState, fighter: Fighter, kind: ActionKind): boolean {
   if (kind === 'kiBlast') return fighter.ki >= KI_BLAST_COST;
+  if (kind === 'combo') return comboFor(state, fighter) !== null;
   if (kind === 'special') {
     if (!specialReady(fighter)) return false;
     if (specialOf(fighter).kind === 'revive') return fallen(state, fighter.side).length > 0;
@@ -257,6 +269,10 @@ export function legalTargets(state: BattleState, side: Side): Fighter[] {
 /** Fighters the action can be aimed at, or null when the action needs no target. */
 export function targetsFor(state: BattleState, fighter: Fighter, kind: ActionKind): Fighter[] | null {
   if (kind === 'attack' || kind === 'kiBlast') return legalTargets(state, fighter.side);
+  if (kind === 'combo') {
+    const c = comboFor(state, fighter)?.combo;
+    return c && (c.kind === 'beam' || c.kind === 'drain') ? legalTargets(state, fighter.side) : null;
+  }
   if (kind !== 'special') return null;
   const special = specialOf(fighter).kind;
   if (special === 'beam' || special === 'drain' || special === 'stun') return legalTargets(state, fighter.side);
@@ -306,7 +322,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   const pick = (candidates: Fighter[]) => fighters.get((candidates.find((f) => f.id === action.targetId) ?? candidates[0]).id)!;
 
   const strike = (target: Fighter, mult: number, wave = false) => {
-    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special', rng);
+    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', rng);
     self.struck = true;
     const absorbed = Math.min(target.shield, amount);
     target.shield -= absorbed;
@@ -350,6 +366,23 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       self.guarding = true;
       self.ki += KI_PER_ATTACK;
       break;
+    case 'combo': {
+      const { combo, partner } = comboFor(state, actor)!;
+      label = combo.name;
+      if (combo.kind === 'beam') strike(pick(legalTargets(state, actor.side)), combo.power);
+      else if (combo.kind === 'wave') {
+        for (const foe of living(state, opposite(actor.side))) strike(fighters.get(foe.id)!, combo.power, true);
+      } else if (combo.kind === 'drain') {
+        const dealt = strike(pick(legalTargets(state, actor.side)), combo.power);
+        restore(self, Math.round(dealt * (DRAIN_SHARE + self.bonus.drain)), 'heal');
+      } else {
+        for (const ally of allies()) restore(ally, Math.round(ally.maxHp * combo.power * (1 + self.bonus.heal)), 'heal');
+      }
+      // Both partners spend their bars; the partner still gets its own turn.
+      self.charge = 0;
+      fighters.get(partner.id)!.charge = 0;
+      break;
+    }
     case 'special': {
       const special = specialOf(actor);
       label = special.name;
@@ -408,7 +441,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       break;
     }
   }
-  if (action.kind !== 'special') self.charge = Math.min(specialNeed(self), self.charge + 1);
+  if (action.kind !== 'special' && action.kind !== 'combo') self.charge = Math.min(specialNeed(self), self.charge + 1);
   self.ki = Math.max(0, Math.min(KI_MAX, self.ki));
 
   let next: BattleState = {
@@ -455,6 +488,10 @@ export function chooseAction(state: BattleState, rng: Rng = defaultRng): Action 
   const weakest = [...legal].sort((a, b) => a.hp - b.hp)[0];
   const strongest = [...legal].sort((a, b) => b.atk - a.atk)[0];
 
+  if (canUse(state, actor, 'combo')) {
+    const c = comboFor(state, actor)!.combo;
+    if (c.kind !== 'heal' || allies.some((a) => a.hp / a.maxHp < 0.6)) return { kind: 'combo', targetId: weakest.id };
+  }
   if (canUse(state, actor, 'special')) {
     const kind = specialOf(actor).kind;
     if (kind === 'heal') {

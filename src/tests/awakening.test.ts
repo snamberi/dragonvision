@@ -41,3 +41,44 @@ describe('awakening trees', () => {
     expect(canAwaken(save.units[0], awakeningTree('kairo')[0]).ok).toBe(false);
   });
 });
+
+describe('combos and fusion', () => {
+  it('a combo needs both partners with full bars and empties both', async () => {
+    const { createBattle, comboFor, performAction, canUse } = await import('../game/battle');
+    const { teamSlots } = await import('../game/progression');
+    const { getStage } = await import('../game/stages');
+    let save = newSave();
+    const v = addUnit(save, { familyId: 'varek', star: 1, level: 20, baseLevel: 20, coinsSpent: 0 });
+    save = { ...v.save, team: ['u1', v.unit.uid, null, null, null] };
+    let battle = createBattle(teamSlots(save), getStage(12));
+    const kairo = battle.fighters.find((f) => f.familyId === 'kairo')!;
+    expect(comboFor(battle, kairo)).toBeNull();
+    battle = { ...battle, fighters: battle.fighters.map((f) => (f.side === 'player' ? { ...f, charge: 9 } : f)) };
+    const actor = battle.fighters.find((f) => f.familyId === 'kairo')!;
+    expect(comboFor(battle, actor)?.combo.name).toBe('Rival Cannon');
+    // Kairo or Varek may be faster; whoever acts first can fire it.
+    const first = battle.fighters.filter((f) => f.side === 'player').sort((a, b) => b.spd - a.spd)[0];
+    expect(canUse(battle, first, 'combo')).toBe(true);
+    const target = battle.fighters.find((f) => f.side === 'enemy' && f.row === 'front')!;
+    const { state, event } = performAction(battle, { kind: 'combo', targetId: target.id }, () => 0.5);
+    expect(event.label).toBe('Rival Cannon');
+    expect(state.fighters.filter((f) => f.side === 'player').every((f) => f.charge === 0)).toBe(true);
+  });
+
+  it('fuses the best copies of two 6-star fighters into a new character', async () => {
+    const { fuseFighters, canFuse } = await import('../game/fusion');
+    const { FUSION_RECIPES, getFamily } = await import('../game/roster');
+    let save = newSave();
+    expect(canFuse(save, FUSION_RECIPES[0]).ok).toBe(false);
+    const k = addUnit(save, { familyId: 'kairo', star: 7, level: 130, baseLevel: 130, coinsSpent: 0 });
+    const v = addUnit(k.save, { familyId: 'varek', star: 6, level: 110, baseLevel: 110, coinsSpent: 0 });
+    save = { ...v.save, team: [k.unit.uid, 'u1', v.unit.uid, null, null] };
+    const { save: fused, unit } = fuseFighters(save, 'kavrek');
+    expect(getFamily(unit.familyId).name).toBe('Kavrek');
+    expect(unit.star).toBe(6);
+    expect(unit.level).toBe(110);
+    expect(fused.units.some((u) => u.uid === k.unit.uid || u.uid === v.unit.uid)).toBe(false);
+    expect(fused.team).toEqual([unit.uid, 'u1', null, null, null]);
+    expect(awakeningTree('kavrek')).toHaveLength(6);
+  });
+});
