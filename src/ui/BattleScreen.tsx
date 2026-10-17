@@ -17,11 +17,12 @@ import {
   nextActor,
   performAction,
   specialOf,
+  specialNeed,
   specialReady,
   targetsFor,
 } from '../game/battle';
 import { recordWin } from '../game/bounty';
-import { roleBonuses } from '../game/gravity';
+import { unitBonus } from '../game/fighterBonus';
 import { teamSlots } from '../game/progression';
 import { classEdge } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
@@ -30,6 +31,7 @@ import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { type Run, nextInRun } from './run';
 import { Portrait, Sprite, Stars } from './Sprite';
+import { GearCard } from './GearCard';
 import { describeSpecial } from './specialText';
 
 interface Props {
@@ -92,7 +94,7 @@ function fieldPosition(f: Fighter): CSSProperties {
 export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExit, onContinue }: Props) {
   const stage = useMemo(() => (towerFloor ? towerStage(towerFloor) : getStage(stageNumber)), [stageNumber, towerFloor]);
   const [battle, setBattle] = useState<BattleState>(() =>
-    createBattle(teamSlots(save), stage, { roleBonus: roleBonuses(save) }),
+    createBattle(teamSlots(save), stage, { bonusFor: (u) => unitBonus(save, u) }),
   );
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -346,7 +348,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
               {actor && special
                 ? actor.specialSpent
                   ? 'USED'
-                  : (specialBlocked ?? (specialReady(actor) ? 'READY' : `${actor.charge}/${special.charge}`))
+                  : (specialBlocked ?? (specialReady(actor) ? 'READY' : `${actor.charge}/${specialNeed(actor)}`))
                 : ''}
             </small>
           </button>
@@ -444,6 +446,11 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
                 <li><PixelIcon kind="coin" /> {rewards.coins.toLocaleString()} coins</li>
                 {rewards.spins > 0 && <li><PixelIcon kind="spin" /> {rewards.spins} summon spin{rewards.spins === 1 ? '' : 's'}</li>}
                 {rewards.gems > 0 && <li><PixelIcon kind="gem" /> {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
+                {rewards.gear && (
+                  <li className="reward-gear">
+                    <GearCard item={rewards.gear} />
+                  </li>
+                )}
                 {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (25% coins)</li>}
               </ul>
             ) : (
@@ -471,7 +478,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
 
 /** Special bar: one pip per move needed; full pips glow when the special is ready. */
 function ChargePips({ fighter }: { fighter: Fighter }) {
-  const need = specialOf(fighter).charge;
+  const need = specialNeed(fighter);
   if (fighter.specialSpent) return <span className="pips used">USED</span>;
   return (
     <span className={`pips ${specialReady(fighter) ? 'ready' : ''}`} aria-label={`Special ${fighter.charge} of ${need}`}>

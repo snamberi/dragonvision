@@ -75,6 +75,9 @@ export function newSave(): SaveData {
     bounties: { daily: null, weekly: null },
     fortuneDay: null,
     towerFloor: 0,
+    items: [],
+    nextItemId: 1,
+    shop: { day: '', refreshes: 0, bought: [] },
   };
 }
 

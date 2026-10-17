@@ -75,6 +75,18 @@ export interface Unit {
   coinsSpent: number;
   /** Free levels earned in the Training Dojo; kept through a gem reset. */
   trainedLevels?: number;
+  /** Equipped item ids by slot. */
+  gear?: Partial<Record<GearSlotKey, string>>;
+  /** Awakening nodes unlocked, by node id. */
+  awakened?: string[];
+}
+
+export type GearSlotKey = 'weapon' | 'armor' | 'acc1' | 'acc2';
+
+export interface GearItem {
+  id: string;
+  templateId: string;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 }
 
 /** A fighter training in the Dojo since `since` (ms timestamp). */
@@ -112,6 +124,10 @@ export interface SaveData {
   fortuneDay: string | null;
   /** Highest Rival Tower floor cleared. */
   towerFloor: number;
+  /** Gear in the inventory (equipped or not). */
+  items: GearItem[];
+  nextItemId: number;
+  shop: { day: string; refreshes: number; bought: number[] };
 }
 
 export interface Counters {

@@ -130,3 +130,22 @@ Roles come from each character: heal special → Support, drain special → Drai
 - **Rival Tower:** 30 floors of themed rival squads, each with a rule (only 3 fighters, enemies start
   charged, enemies start shielded, or enemies have 50% more HP). Each floor pays once: coins and 2 spins,
   plus 5 gems and an evolution shard (3★ up to 8★) every 5th floor.
+
+## Classes
+Five classes in a loop, each beating the next: **Assassin → Blaster → Tank → Drainer → Support → Assassin**.
+Hitting the class you beat deals 25% more damage; hitting the class that beats you deals 15% less.
+(Striker was renamed Assassin.)
+
+## Gear
+- Every fighter has 4 slots: 1 weapon, 1 armor, 2 accessories. Gear lives in the Inventory and can be moved
+  between fighters at any time; it is never lost when a fighter is used up.
+- Rarities: Common, Uncommon, Rare, Epic, Legendary (×1, ×1.6, ×2.4, ×3.5, ×5 stats).
+- Weapons add attack, armor adds HP and a starting shield, accessories add crit, speed, Ki, defense, HP,
+  healing or attack depending on the piece.
+- 5 sets of 4 pieces (weapon, armor, 2 different accessories):
+  Ember (2: +10% ATK, 4: special starts 1 step charged), Bulwark (2: +15% HP, 4: start with a 20% shield),
+  Tempest (2: +4 SPD, 4: +15% crit), Sage (2: +20% healing, 4: +40 starting Ki),
+  Void (2: +8% ATK, 4: +20% more damage vs the class it beats).
+- **Armory** (City): 6 items a day, better rarities deeper in the story, Epic/Legendary also cost gems,
+  new stock for 5 gems. Unworn gear can be sold.
+- Bosses drop a Rare-or-better piece on the first clear, mini-bosses Uncommon-or-better.

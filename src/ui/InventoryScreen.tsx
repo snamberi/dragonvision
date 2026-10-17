@@ -1,12 +1,13 @@
 import { PixelIcon } from './PixelIcon';
+import { useState } from 'react';
+import { RARITIES, getTemplate } from '../game/gear';
 import type { SaveData } from '../game/types';
+import { GearCard } from './GearCard';
 
 interface Props {
   save: SaveData;
 }
 
-// Empty slots show where future items will go.
-const ITEM_SLOTS = 12;
 
 export function InventoryScreen({ save }: Props) {
   const resources = [
@@ -51,15 +52,40 @@ export function InventoryScreen({ save }: Props) {
         </div>
       </section>
 
-      <section className="panel">
-        <h3>Items</h3>
-        <p className="muted small-text">No items yet. Items you find will show up here.</p>
-        <div className="item-grid">
-          {Array.from({ length: ITEM_SLOTS }, (_, i) => (
-            <div key={i} className="item-slot" />
+      <GearInventory save={save} />
+    </div>
+  );
+}
+
+type Filter = 'all' | 'weapon' | 'armor' | 'accessory';
+
+/** Every gear piece owned, best rarity first. Equip from a fighter's page. */
+function GearInventory({ save }: { save: SaveData }) {
+  const [filter, setFilter] = useState<Filter>('all');
+  const items = save.items
+    .filter((i) => filter === 'all' || getTemplate(i.templateId).kind === filter)
+    .sort((a, b) => RARITIES.indexOf(b.rarity) - RARITIES.indexOf(a.rarity) || a.templateId.localeCompare(b.templateId));
+  return (
+    <section className="panel">
+      <div className="section-head">
+        <h3>Gear ({save.items.length})</h3>
+        <div className="button-row">
+          {(['all', 'weapon', 'armor', 'accessory'] as Filter[]).map((f) => (
+            <button key={f} className={`btn small ${filter === f ? 'primary' : ''}`} onClick={() => setFilter(f)}>
+              {f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}
+            </button>
           ))}
         </div>
-      </section>
-    </div>
+      </div>
+      {items.length === 0 ? (
+        <p className="muted small-text">No gear yet. Buy some at the Armory in the City, or beat bosses for drops. Equip it from a fighter's page.</p>
+      ) : (
+        <div className="gear-grid">
+          {items.map((item) => (
+            <GearCard key={item.id} save={save} item={item} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

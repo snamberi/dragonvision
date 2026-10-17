@@ -33,6 +33,9 @@ function migrate(save: SaveData): SaveData {
     bounties: save.bounties ?? fresh.bounties,
     fortuneDay: save.fortuneDay ?? null,
     towerFloor: save.towerFloor ?? 0,
+    items: save.items ?? [],
+    nextItemId: save.nextItemId ?? 1,
+    shop: save.shop ?? fresh.shop,
   };
 }
 

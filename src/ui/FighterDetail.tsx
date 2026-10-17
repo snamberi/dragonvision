@@ -19,6 +19,7 @@ import {
 import { BEATS, formForStar, getFamily, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
+import { GearSlots } from './GearSlots';
 import { Sprite, Stars } from './Sprite';
 import { describeSpecial } from './specialText';
 
@@ -105,6 +106,8 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
           </div>
         </div>
       </section>
+
+      <GearSlots save={save} unit={unit} update={update} />
 
       <section className="panel">
         <h3>

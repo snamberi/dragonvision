@@ -14,6 +14,7 @@ import {
   enemyStarForStage,
   stageCoinReward,
 } from './balance';
+import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
 import { FAMILIES } from './roster';
 import { type Rng, defaultRng, seededRng } from './rng';
 import type { SaveData } from './types';
@@ -152,6 +153,8 @@ export interface Rewards {
   coins: number;
   gems: number;
   spins: number;
+  /** Bosses and mini-bosses drop a piece of gear on the first clear. */
+  gear?: { templateId: string; rarity: Rarity };
 }
 
 /**
@@ -175,10 +178,19 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
   } else if (rng() < NORMAL_GEM_CHANCE) {
     gems = NORMAL_GEM_AMOUNT;
   }
-  return { firstClear, coins: stage.coins, gems, spins };
+  const rewards: Rewards = { firstClear, coins: stage.coins, gems, spins };
+  if (stage.kind !== 'normal') {
+    const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
+    let rarity = rollRarity(save.clearedStage, rng);
+    const floor: Rarity = stage.kind === 'boss' ? 'rare' : 'uncommon';
+    if (RARITIES.indexOf(rarity) < RARITIES.indexOf(floor)) rarity = floor;
+    rewards.gear = { templateId: template.id, rarity };
+  }
+  return rewards;
 }
 
 export function applyRewards(save: SaveData, stageNumber: number, rewards: Rewards): SaveData {
+  if (rewards.gear) save = addItem(save, rewards.gear.templateId, rewards.gear.rarity).save;
   return {
     ...save,
     coins: save.coins + rewards.coins,

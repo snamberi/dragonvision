@@ -1,5 +1,5 @@
 import { WorldScene } from './WorldScene';
-import { boardUrl, dojoUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
+import { armoryUrl, boardUrl, dojoUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
 import { dojoProgress } from '../game/dojo';
 import { expeditionDone } from '../game/expedition';
@@ -7,7 +7,7 @@ import { fortuneReady } from '../game/fortune';
 import { spareUnits } from '../game/fusion';
 import type { SaveData } from '../game/types';
 
-export type Building = 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower';
+export type Building = 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory';
 
 interface Props {
   save: SaveData;
@@ -32,6 +32,7 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'gravity', name: 'Gravity Chamber', art: gravityUrl() },
     { id: 'port', name: 'Expedition Port', art: portUrl(), badge: tripsBack > 0 ? `${tripsBack} BACK` : undefined },
     { id: 'bounty', name: 'Bounty Board', art: boardUrl(), badge: bountiesReady > 0 ? `${bountiesReady} DONE` : undefined },
+    { id: 'armory', name: 'Armory', art: armoryUrl() },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
   ];
 

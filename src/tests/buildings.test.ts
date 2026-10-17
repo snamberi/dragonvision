@@ -4,7 +4,8 @@ import { createBattle } from '../game/battle';
 import { BOUNTIES, bountyProgress, claimBounty, recordWin, syncBounties } from '../game/bounty';
 import { claimExpedition, expeditionDone, recallExpedition, startExpedition } from '../game/expedition';
 import { claimFortune, fortuneReady } from '../game/fortune';
-import { gravityMultiplier, roleBonuses, upgradeGravity } from '../game/gravity';
+import { unitBonus } from '../game/fighterBonus';
+import { gravityMultiplier, upgradeGravity } from '../game/gravity';
 import { addUnit, newSave, teamSlots, toggleTeamMember } from '../game/progression';
 import { seededRng } from '../game/rng';
 import { CHAPTER_NAMES, getStage } from '../game/stages';
@@ -62,7 +63,7 @@ describe('gravity chamber', () => {
     expect(save.coins).toBe(10_000 - gravityCost(0));
     expect(gravityMultiplier(save, 'Assassin')).toBeCloseTo(1 + GRAVITY_PER_LEVEL);
     const plain = createBattle(teamSlots(save), getStage(12));
-    const boosted = createBattle(teamSlots(save), getStage(12), { roleBonus: roleBonuses(save) });
+    const boosted = createBattle(teamSlots(save), getStage(12), { bonusFor: (u) => unitBonus(save, u) });
     expect(boosted.fighters[0].maxHp).toBeGreaterThan(plain.fighters[0].maxHp);
   });
 });

@@ -2536,6 +2536,10 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
 .building[data-building=port] { left:86%; top:84%; }
 .building[data-building=bounty] { left:76%; top:60%; }
 .building[data-building=tower] { left:73%; top:31%; }
+.building[data-building=armory] { left:53%; top:33%; }
+.building[data-building=hall] { left:14%; top:28%; }
+.building[data-building=colosseum] { left:11%; top:82%; }
+.building[data-building=gate] { left:90%; top:42%; }
 .city-motes { position:absolute; inset:0; pointer-events:none; }
 .city-motes i { position:absolute; width:3px; height:3px; background:#ffe6a3; box-shadow:0 0 8px #ffd36b; animation:mote 4s steps(12) infinite; }
 @keyframes mote { 0%,100% { opacity:0; translate:0 10px; } 50% { opacity:1; translate:9px -14px; } }
@@ -2586,18 +2590,22 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
  .wallet .pixel-icon { width:19px; height:19px; }
  .tabs button { flex-direction:column; gap:5px; font-size:9px; }
  .city-view .screen { padding:8px; }
- .city-map { min-height:850px; height:calc(100dvh - 140px); }
+ .city-map { min-height:1250px; height:auto; }
  .city-map .world-scene { width:160%; left:-30%; }
  .city-map .building { width:145px; }
  .city-map .building-art { width:110px; max-height:110px; }
- .building[data-building=summon] { left:29%; top:28%; }
- .building[data-building=tower] { left:75%; top:22%; }
- .building[data-building=fortune] { left:23%; top:49%; }
- .building[data-building=fusion] { left:72%; top:43%; }
- .building[data-building=dojo] { left:27%; top:69%; }
- .building[data-building=bounty] { left:76%; top:63%; }
- .building[data-building=gravity] { left:27%; top:89%; }
- .building[data-building=port] { left:76%; top:87%; }
+ .building[data-building=summon] { left:28%; top:12%; }
+ .building[data-building=tower] { left:74%; top:10%; }
+ .building[data-building=armory] { left:72%; top:25%; }
+ .building[data-building=fortune] { left:26%; top:28%; }
+ .building[data-building=fusion] { left:74%; top:40%; }
+ .building[data-building=dojo] { left:26%; top:44%; }
+ .building[data-building=bounty] { left:74%; top:55%; }
+ .building[data-building=hall] { left:26%; top:59%; }
+ .building[data-building=gravity] { left:74%; top:70%; }
+ .building[data-building=colosseum] { left:26%; top:74%; }
+ .building[data-building=port] { left:74%; top:86%; }
+ .building[data-building=gate] { left:26%; top:90%; }
  .city-location { left:15px; top:22px; }
  .city-location span { font-size:11px; }
  .city-location small { font-size:13px; letter-spacing:1px; }
@@ -2641,3 +2649,26 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
   color: #fff;
   background: #c2414b;
 }
+
+/* ---------- Gear ---------- */
+.gear-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }
+.gear-card { display:flex; flex-direction:column; gap:6px; padding:6px; background:var(--bg-2); border:2px solid var(--rarity); box-shadow:inset 0 0 12px color-mix(in srgb,var(--rarity) 20%,transparent); }
+.gear-card.selected { outline:3px solid var(--gold); }
+.gear-open { display:flex; gap:8px; align-items:flex-start; width:100%; padding:0; background:none; border:0; color:inherit; text-align:left; cursor:pointer; }
+div.gear-open { cursor:default; }
+.gear-icon { display:grid; place-items:center; flex:none; background:#120b2e; border:2px solid var(--rarity); box-shadow:0 0 8px color-mix(in srgb,var(--rarity) 50%,transparent); image-rendering:pixelated; }
+.gear-icon.rarity-legendary { animation:pulse-glow 1.2s steps(2) infinite; }
+.gear-text { display:flex; flex-direction:column; line-height:1.1; min-width:0; }
+.gear-rarity { font-size:15px; text-transform:capitalize; }
+.gear-stats { font-size:15px; color:var(--ink); }
+.gear-set { font-size:14px; }
+.gear-worn { font-size:14px; color:var(--orange-2); }
+.gear-slots { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.gear-slot { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; background:var(--bg-2); border:2px dashed var(--line); color:inherit; cursor:pointer; }
+.gear-slot.filled { border-style:solid; }
+.gear-empty { display:grid; place-items:center; width:48px; height:48px; font-size:28px; color:var(--muted); }
+.gear-slot-name { font-size:14px; text-align:center; line-height:1.05; }
+.gear-picker { width:min(760px,100%); max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
+.set-list { display:flex; flex-direction:column; gap:6px; }
+.set-text { font-size:16px; }
+@media (max-width:700px) { .gear-slots { grid-template-columns:repeat(2,minmax(0,1fr)); } .gear-grid { grid-template-columns:1fr; } }

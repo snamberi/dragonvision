@@ -5,6 +5,7 @@ import { loadSave, writeSave } from '../game/save';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
 import { type Building, CityScreen } from './CityScreen';
+import { ArmoryScreen } from './ArmoryScreen';
 import { BountyScreen } from './BountyScreen';
 import { DojoScreen } from './DojoScreen';
 import { FortuneScreen } from './FortuneScreen';
@@ -129,6 +130,8 @@ export function App() {
             <PortScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'bounty' ? (
             <BountyScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'armory' ? (
+            <ArmoryScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'fortune' ? (
             <FortuneScreen save={save} update={update} onBack={toCity} />
           ) : (

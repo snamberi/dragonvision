@@ -239,6 +239,88 @@ const TOWER_PALETTE: Record<string, string> = {
   R: '#5b2fc0', W: '#c9c2e0', k: '#ffd23f', B: '#1a1240', S: '#8f8aa8',
 };
 
+const ARMORY = [
+  '.........SSSSSS.........',
+  '........SsBBBBsS........',
+  '.......SsB.BB.BsS.......',
+  '....RRRRRRRRRRRRRRRR....',
+  '...RrrrrrrrrrrrrrrrrR...',
+  '..RRRRRRRRRRRRRRRRRRRR..',
+  '...WWWWWWWWWWWWWWWWWW...',
+  '...WkkWWWWWWWWWWWWkkW...',
+  '...WkkWWGGGGGGGGWWkkW...',
+  '...WWWWWGddddddGWWWWW...',
+  '...WPPWWGd.YY.dGWWPPW...',
+  '...WPPWWGd.YY.dGWWPPW...',
+  '...WPPWWGd....dGWWPPW...',
+  '...WWWWWGGGGGGGGWWWWW...',
+  '..AAAAAAAAAAAAAAAAAAAA..',
+  '.AaaaaaaaaaaaaaaaaaaaaA.',
+];
+const ARMORY_PALETTE: Record<string, string> = {
+  S: '#b9c2cf', s: '#6b7080', B: '#1b1530', R: '#5a3a22', r: '#8a5a30', W: '#d9c9a8', k: '#2a1d55',
+  G: '#5a3a22', d: '#2a1d12', Y: '#ffd23f', P: '#9aa0b0', A: '#8f8aa8', a: '#5f5a7a',
+};
+
+const HALL = [
+  '...........YY...........',
+  '..........YYYY..........',
+  '......TTTTTTTTTTTT......',
+  '....TTttttttttttttTT....',
+  '..TTTTTTTTTTTTTTTTTTTT..',
+  '..WWWWWWWWWWWWWWWWWWWW..',
+  '..WCWWWCWWWCWWWCWWWCWW..',
+  '..WCWWWCWWWCWWWCWWWCWW..',
+  '..WCWWWCWWBBBBWWWCWWCW..',
+  '..WCWWWCWWBYYBWWWCWWCW..',
+  '..WCWWWCWWBYYBWWWCWWCW..',
+  '..WCWWWCWWBBBBWWWCWWCW..',
+  '.SSSSSSSSSSSSSSSSSSSSSS.',
+  'SssssssssssssssssssssssS',
+];
+const HALL_PALETTE: Record<string, string> = {
+  Y: '#ffd23f', T: '#c9a227', t: '#ffe066', W: '#f4ecd8', C: '#c9c2e0', B: '#3b2a6b', S: '#8f8aa8', s: '#5f5a7a',
+};
+
+const COLOSSEUM = [
+  '....RR..........RR......',
+  '....RRR.........RRR.....',
+  '....R...........R.......',
+  '..SSSSSSSSSSSSSSSSSSSS..',
+  '.SsSsSsSsSsSsSsSsSsSsSS.',
+  '.SSSSSSSSSSSSSSSSSSSSSS.',
+  '.SaSaSaSaSaSaSaSaSaSaSS.',
+  '.SaSaSaSaSaSaSaSaSaSaSS.',
+  '.SSSSSSSSSSSSSSSSSSSSSS.',
+  '.SaSaSaSaBBBBBaSaSaSaSS.',
+  '.SaSaSaSaBrrrBaSaSaSaSS.',
+  '.SaSaSaSaBrrrBaSaSaSaSS.',
+  '.SSSSSSSSSSSSSSSSSSSSSS.',
+  'GGGGGGGGGGGGGGGGGGGGGGGG',
+];
+const COLOSSEUM_PALETTE: Record<string, string> = {
+  R: '#d8432e', S: '#cbb898', s: '#e9dcc0', a: '#3b2a1a', B: '#2a1d12', r: '#ff4a3d', G: '#5f5a7a',
+};
+
+const GATE = [
+  '......PPPPPPPPPPPP......',
+  '.....PPppppppppppPP.....',
+  '....PPpp........ppPP....',
+  '....Pp..vvvvvvvv..pP....',
+  '....Pp.vvVVVVVVvv.pP....',
+  '....Pp.vVVwwwwVVv.pP....',
+  '....Pp.vVwwWWwwVv.pP....',
+  '....Pp.vVVwwwwVVv.pP....',
+  '....Pp.vvVVVVVVvv.pP....',
+  '....Pp..vvvvvvvv..pP....',
+  '....Pp............pP....',
+  '...SSSSSSSSSSSSSSSSSS...',
+  '..SsssssssssssssssssS..',
+];
+const GATE_PALETTE: Record<string, string> = {
+  P: '#3b2a6b', p: '#5b3fa8', v: '#7a3fa8', V: '#b794ff', w: '#e9e4ff', W: '#ffffff', S: '#8f8aa8', s: '#5f5a7a',
+};
+
 const cache = new Map<string, string>();
 
 function paintAscii(key: string, rows: string[], palette: Record<string, string>): string {
@@ -276,3 +358,7 @@ export const portUrl = () => paintAscii('port', PORT, PORT_PALETTE);
 export const boardUrl = () => paintAscii('board', BOARD, BOARD_PALETTE);
 export const tentUrl = () => paintAscii('tent', TENT, TENT_PALETTE);
 export const towerUrl = () => paintAscii('tower', TOWER, TOWER_PALETTE);
+export const armoryUrl = () => paintAscii('armory', ARMORY, ARMORY_PALETTE);
+export const hallUrl = () => paintAscii('hall', HALL, HALL_PALETTE);
+export const colosseumUrl = () => paintAscii('colosseum', COLOSSEUM, COLOSSEUM_PALETTE);
+export const gateUrl = () => paintAscii('gate', GATE, GATE_PALETTE);

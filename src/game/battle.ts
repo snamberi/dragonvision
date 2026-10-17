@@ -30,6 +30,7 @@ import { isBackRow, statsFor, unitName } from './progression';
 import { type Role, classEdge, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
+import { type Bonus, emptyBonus } from './bonus';
 import type { Special, Unit } from './types';
 
 export type Side = 'player' | 'enemy';
@@ -66,6 +67,11 @@ export interface Fighter {
   /** Own turns left with the rally attack bonus. */
   rallyTurns: number;
   rallyBonus: number;
+  /** Gear, Gravity and awakening bonuses (empty for enemies). */
+  bonus: Bonus;
+  secondWindUsed: boolean;
+  /** Has landed a hit this battle (for first-strike bonuses). */
+  struck: boolean;
 }
 
 export interface BattleState {
@@ -105,11 +111,22 @@ function placement(familyId: string, slot: number) {
   return { role: roleFor(getFamily(familyId)), slot, row: (isBackRow(slot) ? 'back' : 'front') as Row };
 }
 
-const FRESH = { ki: KI_START, guarding: false, charge: 0, specialSpent: false, shield: 0, stunned: false, rallyTurns: 0, rallyBonus: 0 };
+const FRESH = {
+  ki: KI_START,
+  guarding: false,
+  charge: 0,
+  specialSpent: false,
+  shield: 0,
+  stunned: false,
+  rallyTurns: 0,
+  rallyBonus: 0,
+  secondWindUsed: false,
+  struck: false,
+};
 
 export interface BattleOptions {
-  /** Gravity Chamber stat multiplier per role, for the player's fighters. */
-  roleBonus?: Partial<Record<Role, number>>;
+  /** Gear, Gravity and awakening bonuses for each of the player's fighters. */
+  bonusFor?: (unit: Unit) => Bonus;
 }
 
 /** `team` is the five formation pads in order, with null for empty ones. */
@@ -122,8 +139,14 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     if (!u || allowed <= 0) return [];
     allowed--;
     const base = statsFor(u.familyId, u.star, u.level);
-    const bonus = options.roleBonus?.[roleFor(getFamily(u.familyId))] ?? 1;
-    const s = { ...base, hp: Math.round(base.hp * bonus), atk: Math.round(base.atk * bonus), def: Math.round(base.def * bonus) };
+    const b = options.bonusFor?.(u) ?? emptyBonus();
+    const s = {
+      hp: Math.round(base.hp * (1 + b.hp)),
+      atk: Math.round(base.atk * (1 + b.atk)),
+      def: Math.round(base.def * (1 + b.def)),
+      spd: base.spd + b.spd,
+    };
+    const need = Math.max(1, getFamily(u.familyId).special.charge - b.chargeDiscount);
     const fighter: Fighter = {
       id: `p-${u.uid}`,
       side: 'player',
@@ -139,6 +162,10 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       def: s.def,
       spd: s.spd,
       ...FRESH,
+      ki: Math.min(KI_MAX, KI_START + b.ki),
+      charge: Math.min(need, b.charge),
+      shield: Math.round(s.hp * b.shield),
+      bonus: b,
     };
     return [fighter];
   });
@@ -164,6 +191,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       def: Math.round(s.def * strength),
       spd: s.spd,
       ...FRESH,
+      bonus: emptyBonus(),
       charge: rule === 'fullSpecials' ? special.charge : 0,
       shield: rule === 'enemyShields' ? Math.round(hp * 0.3) : 0,
     };
@@ -196,8 +224,13 @@ export function nextActor(state: BattleState): Fighter | null {
   return ready[0] ?? null;
 }
 
+/** Moves needed to fill this fighter's special bar. */
+export function specialNeed(fighter: Fighter): number {
+  return Math.max(1, specialOf(fighter).charge - fighter.bonus.chargeDiscount);
+}
+
 export function specialReady(fighter: Fighter): boolean {
-  return !fighter.specialSpent && fighter.charge >= specialOf(fighter).charge;
+  return !fighter.specialSpent && fighter.charge >= specialNeed(fighter);
 }
 
 export function canUse(state: BattleState, fighter: Fighter, kind: ActionKind): boolean {
@@ -231,18 +264,29 @@ export function targetsFor(state: BattleState, fighter: Fighter, kind: ActionKin
   return null;
 }
 
-function damage(attacker: Fighter, defender: Fighter, mult: number, wave: boolean, rng: Rng): { amount: number; crit: boolean } {
-  const atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1);
+function damage(
+  attacker: Fighter,
+  defender: Fighter,
+  mult: number,
+  wave: boolean,
+  special: boolean,
+  rng: Rng,
+): { amount: number; crit: boolean } {
+  const b = attacker.bonus;
+  let atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1);
+  if (b.lastStand && attacker.hp / attacker.maxHp < 0.3) atk *= 1 + b.lastStand;
   // atk / (atk + def) keeps fights the same length at every level when both sides are even.
   let base = atk * (atk / (atk + defender.def)) * 0.9 * mult;
   if (attacker.role === 'Assassin' && !wave) base *= ASSASSIN_SINGLE_BONUS;
   if (attacker.role === 'Blaster' && wave) base *= BLASTER_WAVE_BONUS;
   if (defender.role === 'Tank') base *= TANK_DAMAGE_TAKEN;
   const edge = classEdge(attacker.role, defender.role);
-  if (edge === 'strong') base *= CLASS_ADVANTAGE;
+  if (edge === 'strong') base *= CLASS_ADVANTAGE + b.edge;
   else if (edge === 'weak') base *= CLASS_DISADVANTAGE;
+  if (special) base *= 1 + b.specialPower;
+  if (!attacker.struck) base *= 1 + b.firstStrike;
   if (wave && defender.row === 'back') base *= BACK_ROW_WAVE_REDUCTION;
-  const crit = rng() < CRIT_CHANCE;
+  const crit = rng() < CRIT_CHANCE + b.crit;
   const variance = 0.9 + rng() * 0.2;
   let amount = base * variance * (crit ? CRIT_MULTIPLIER : 1);
   if (defender.guarding) amount *= GUARD_REDUCTION;
@@ -262,12 +306,20 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   const pick = (candidates: Fighter[]) => fighters.get((candidates.find((f) => f.id === action.targetId) ?? candidates[0]).id)!;
 
   const strike = (target: Fighter, mult: number, wave = false) => {
-    const { amount, crit } = damage(self, target, mult, wave, rng);
+    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special', rng);
+    self.struck = true;
     const absorbed = Math.min(target.shield, amount);
     target.shield -= absorbed;
     const dealt = Math.min(target.hp, amount - absorbed);
     target.hp -= dealt;
     hits.push({ targetId: target.id, kind: 'damage', amount, crit, absorbed, ko: target.hp <= 0 });
+    // Second wind: stand back up once per battle.
+    if (target.hp <= 0 && target.bonus.secondWind > 0 && !target.secondWindUsed) {
+      target.secondWindUsed = true;
+      target.hp = Math.max(1, Math.round(target.maxHp * target.bonus.secondWind));
+      hits[hits.length - 1].ko = false;
+      hits.push({ targetId: target.id, kind: 'revive', amount: target.hp, crit: false, absorbed: 0, ko: false });
+    }
     return dealt;
   };
   const restore = (target: Fighter, amount: number, kind: HitKind) => {
@@ -301,7 +353,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
     case 'special': {
       const special = specialOf(actor);
       label = special.name;
-      const healBonus = actor.role === 'Support' ? SUPPORT_HEAL_BONUS : 1;
+      const healBonus = (actor.role === 'Support' ? SUPPORT_HEAL_BONUS : 1) * (1 + self.bonus.heal);
       switch (special.kind) {
         case 'beam':
           strike(pick(legalTargets(state, actor.side)), special.power);
@@ -311,7 +363,8 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
           break;
         case 'drain': {
           const dealt = strike(pick(legalTargets(state, actor.side)), special.power);
-          restore(self, Math.round(dealt * (actor.role === 'Drainer' ? DRAINER_DRAIN_SHARE : DRAIN_SHARE)), 'heal');
+          const share = (actor.role === 'Drainer' ? DRAINER_DRAIN_SHARE : DRAIN_SHARE) + self.bonus.drain;
+          restore(self, Math.round(dealt * share), 'heal');
           break;
         }
         case 'heal':
@@ -355,7 +408,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       break;
     }
   }
-  if (action.kind !== 'special') self.charge = Math.min(specialOf(actor).charge, self.charge + 1);
+  if (action.kind !== 'special') self.charge = Math.min(specialNeed(self), self.charge + 1);
   self.ki = Math.max(0, Math.min(KI_MAX, self.ki));
 
   let next: BattleState = {
