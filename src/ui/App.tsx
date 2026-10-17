@@ -2,12 +2,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadSave, writeSave } from '../game/save';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
+import { CityScreen } from './CityScreen';
 import { FighterDetail } from './FighterDetail';
 import { FightersScreen } from './FightersScreen';
+import { HomeScreen } from './HomeScreen';
 import { StagesScreen } from './StagesScreen';
 import { SummonScreen } from './SummonScreen';
 
-export type Tab = 'stages' | 'fighters' | 'summon';
+export type Tab = 'home' | 'city' | 'stages' | 'fighters' | 'summon';
+
+const TAB_LABELS: Record<Tab, string> = {
+  home: 'Home',
+  city: 'City',
+  stages: 'Stages',
+  fighters: 'Fighters',
+  summon: 'Summon',
+};
 
 type View = { kind: 'tab'; tab: Tab } | { kind: 'battle'; stage: number } | { kind: 'fighter'; uid: string };
 
@@ -15,7 +25,7 @@ export type Updater = (change: (save: SaveData) => SaveData) => boolean;
 
 export function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
-  const [view, setView] = useState<View>({ kind: 'tab', tab: 'stages' });
+  const [view, setView] = useState<View>({ kind: 'tab', tab: 'home' });
   const [toast, setToast] = useState<string | null>(null);
   const saveRef = useRef(save);
   saveRef.current = save;
@@ -67,6 +77,10 @@ export function App() {
             toast={setToast}
             onBack={() => setView({ kind: 'tab', tab: 'fighters' })}
           />
+        ) : view.tab === 'home' ? (
+          <HomeScreen save={save} onNavigate={(t) => setView({ kind: 'tab', tab: t })} />
+        ) : view.tab === 'city' ? (
+          <CityScreen />
         ) : view.tab === 'stages' ? (
           <StagesScreen save={save} onPlay={(stage) => setView({ kind: 'battle', stage })} />
         ) : view.tab === 'fighters' ? (
@@ -78,9 +92,10 @@ export function App() {
 
       {view.kind !== 'battle' && (
         <nav className="tabs">
-          {(['stages', 'fighters', 'summon'] as Tab[]).map((t) => (
+          {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button key={t} className={t === tab ? 'active' : ''} onClick={() => setView({ kind: 'tab', tab: t })}>
-              {t === 'stages' ? 'Stages' : t === 'fighters' ? 'Fighters' : `Summon${save.spins ? ` (${save.spins})` : ''}`}
+              {TAB_LABELS[t]}
+              {t === 'summon' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
             </button>
           ))}
         </nav>

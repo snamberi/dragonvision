@@ -45,6 +45,10 @@ export function paintFighter(look: Look): Grid {
 
   // Hair that hangs behind the body.
   if (look.hairStyle === 'long') rect(9, 8, 4, 16, hairDark);
+  if (look.hairStyle === 'ponytail') {
+    rect(9, 6, 3, 3, hairDark);
+    rect(8, 9, 3, 8, hairDark);
+  }
   if (look.hairStyle === 'braids') {
     rect(10, 10, 2, 10, hairDark);
     rect(10, 20, 2, 1, look.accent);
@@ -123,6 +127,23 @@ export function paintFighter(look: Look): Grid {
       break;
     case 'mohawk':
       heights({ 14: 3, 15: 1, 16: 1, 17: 3 }, 7, hair);
+      break;
+    case 'topknot':
+      heights({ 11: 7, 12: 5, 13: 5, 14: 4, 15: 4, 16: 4, 17: 4, 18: 5, 19: 5, 20: 7 }, 8, hair);
+      rect(14, 1, 4, 3, hair);
+      rect(15, 4, 2, 1, look.accent);
+      rect(12, 9, 1, 3, hair);
+      break;
+    case 'ponytail':
+      heights({ 11: 7, 12: 5, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 5, 19: 5, 20: 7 }, 8, hair);
+      rect(13, 9, 3, 1, hair);
+      rect(12, 9, 1, 3, hair);
+      break;
+    case 'bob':
+      heights({ 11: 6, 12: 5, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4, 19: 5, 20: 6 }, 8, hair);
+      rect(11, 9, 2, 5, hair);
+      rect(19, 9, 2, 3, hair);
+      rect(14, 9, 4, 1, hair);
       break;
     case 'visor':
       heights({ 11: 7, 12: 5, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4, 19: 5, 20: 7 }, 8, hair);

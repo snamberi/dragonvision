@@ -8,7 +8,10 @@ export type HairStyle =
   | 'horns'
   | 'crest'
   | 'mohawk'
-  | 'visor';
+  | 'visor'
+  | 'topknot'
+  | 'ponytail'
+  | 'bob';
 
 /** Everything the procedural sprite painter needs to draw one form. */
 export interface Look {

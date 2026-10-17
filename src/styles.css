@@ -165,6 +165,24 @@ h3 {
   cursor: pointer;
 }
 
+.tab-count {
+  margin-left: 4px;
+  color: var(--gold);
+}
+
+.tabs button.active .tab-count {
+  color: #1b0f00;
+}
+
+.home-actions {
+  margin-top: 14px;
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 28px 14px;
+}
+
 .tabs button.active {
   background: var(--orange);
   color: #1b0f00;
@@ -1035,5 +1053,16 @@ select {
 
   .btn.big {
     font-size: 10px;
+  }
+
+  .tabs {
+    gap: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .tabs button {
+    padding: 12px 2px;
+    font-size: 8px;
   }
 }

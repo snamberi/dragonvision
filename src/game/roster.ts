@@ -251,6 +251,113 @@ export const FAMILIES: Family[] = [
       }),
     ],
   },
+  {
+    id: 'jin',
+    name: 'Jin',
+    title: 'Wandering Blade',
+    base: { hp: 92, atk: 28, def: 20, spd: 27 },
+    special: { name: 'Crescent Slash', kind: 'beam', power: 2.8 },
+    forms: [
+      form('Jin', { skin: SKIN, hair: INK, hairStyle: 'topknot', outfit: '#2f5fd0', accent: '#e9e4d4', boots: '#1b1530' }),
+      form('Blade Jin', { skin: SKIN, hair: INK, hairStyle: 'topknot', outfit: '#1d3f9e', accent: '#ffd23f', boots: '#1b1530', aura: '#9ad4ff' }),
+      form('Ascended Jin', { skin: SKIN, hair: '#e9e4d4', hairStyle: 'topknot', outfit: '#e9e4d4', accent: '#2f5fd0', boots: '#2f5fd0', aura: '#e9e4ff' }),
+    ],
+  },
+  {
+    id: 'aya',
+    name: 'Aya',
+    title: 'Blossom Dancer',
+    base: { hp: 88, atk: 24, def: 20, spd: 31 },
+    special: { name: 'Petal Storm', kind: 'wave', power: 1.3 },
+    forms: [
+      form('Aya', { skin: SKIN, hair: '#e8578f', hairStyle: 'ponytail', outfit: '#f4ecd8', accent: '#e8578f', boots: '#7a2a4a' }),
+      form('Bloom Aya', { skin: SKIN, hair: '#ff8fbf', hairStyle: 'ponytail', outfit: '#e8578f', accent: '#ffd23f', boots: '#7a2a4a', aura: '#ff8fbf' }),
+    ],
+  },
+  {
+    id: 'bruno',
+    name: 'Bruno',
+    title: 'Iron Wall',
+    base: { hp: 150, atk: 23, def: 30, spd: 13 },
+    special: { name: 'Titan Fist', kind: 'beam', power: 2.6 },
+    forms: [
+      form('Bruno', { skin: SKIN_TAN, hair: SKIN_TAN, hairStyle: 'bald', outfit: '#6b6f7a', accent: '#d8432e', boots: '#2b2d33', large: true }),
+      form('Iron Bruno', { skin: '#b9c2cf', hair: '#b9c2cf', hairStyle: 'bald', outfit: '#3a3f4b', accent: '#ffb02e', boots: '#22252d', large: true, aura: '#cfd8e6' }),
+    ],
+  },
+  {
+    id: 'kenji',
+    name: 'Kenji',
+    title: 'Old Master of the Isle',
+    base: { hp: 90, atk: 25, def: 24, spd: 22 },
+    special: { name: 'Old Lightning', kind: 'beam', power: 2.9 },
+    forms: [
+      form('Master Kenji', { skin: SKIN, hair: '#f2f2f2', hairStyle: 'bob', outfit: '#e0a030', accent: '#7a3a1a', boots: '#5a3a22', small: true }),
+      form('Max Power Kenji', { skin: SKIN, hair: '#f2f2f2', hairStyle: 'bob', outfit: '#e0a030', accent: '#7a3a1a', boots: '#5a3a22', large: true, aura: '#ffe066' }),
+    ],
+  },
+  {
+    id: 'lyra',
+    name: 'Lyra',
+    title: 'Star Ranger',
+    base: { hp: 94, atk: 26, def: 21, spd: 26 },
+    special: { name: 'Starfall', kind: 'wave', power: 1.25 },
+    forms: [
+      form('Lyra', { skin: SKIN, hair: '#3fc6ff', hairStyle: 'bob', outfit: '#1f2a5c', accent: '#ffd23f', boots: '#e9e4d4' }),
+      form('Nova Lyra', { skin: SKIN, hair: '#9ae6ff', hairStyle: 'bob', outfit: '#16204a', accent: '#ffd23f', boots: '#e9e4d4', aura: '#9ae6ff' }),
+      form('Supernova Lyra', { skin: SKIN, hair: '#fff07a', hairStyle: 'bob', outfit: '#16204a', accent: '#ff8a1f', boots: '#ff8a1f', aura: '#ffb02e' }),
+    ],
+  },
+  {
+    id: 'zeno',
+    name: 'Zeno',
+    title: 'Keeper of the Rift',
+    base: { hp: 105, atk: 22, def: 26, spd: 26 },
+    special: { name: 'Rift Mend', kind: 'heal', power: 0.25 },
+    forms: [
+      form('Zeno', { skin: '#a9b7e8', hair: '#e9e4ff', hairStyle: 'long', outfit: '#2b1f5c', accent: '#a78bfa', boots: '#1a1240' }),
+      form('Unsealed Zeno', { skin: '#a9b7e8', hair: '#ffffff', hairStyle: 'long', outfit: '#1a1240', accent: '#ffd23f', boots: '#1a1240', aura: '#c9b8ff' }),
+    ],
+  },
+  {
+    id: 'grimm',
+    name: 'Grimm',
+    title: 'Demon King',
+    villain: true,
+    base: { hp: 115, atk: 28, def: 23, spd: 20 },
+    special: { name: 'Soul Feast', kind: 'drain', power: 2.2 },
+    forms: [
+      form('Grimm', { skin: '#c23a3a', hair: '#1b1530', hairStyle: 'horns', outfit: '#1b1530', accent: '#ffd23f', boots: '#1b1530' }),
+      form('Demon Lord Grimm', { skin: '#a81f2f', hair: '#2a0a12', hairStyle: 'horns', outfit: '#2a0a12', accent: '#ff4a3d', boots: '#2a0a12', aura: '#ff4a3d' }),
+      form('True Grimm', { skin: '#5a0f1f', hair: '#ffd23f', hairStyle: 'horns', outfit: '#120b2e', accent: '#ffd23f', boots: '#120b2e', aura: '#b0203a', large: true }),
+    ],
+  },
+  {
+    id: 'sylas',
+    name: 'Sylas',
+    title: 'The Perfect Organism',
+    villain: true,
+    base: { hp: 108, atk: 26, def: 25, spd: 23 },
+    special: { name: 'Absorb', kind: 'drain', power: 2.1 },
+    forms: [
+      form('Larval Sylas', { skin: '#6fa84a', hair: '#3d6b2a', hairStyle: 'crest', outfit: '#3d6b2a', accent: '#1b1530', boots: '#2a4a1d' }),
+      form('Sylas', { skin: '#8fd16a', hair: '#2a4a1d', hairStyle: 'crest', outfit: '#2a4a1d', accent: '#e9e4d4', boots: '#1b1530' }),
+      form('Perfect Sylas', { skin: '#c8f0a8', hair: '#5a2f8a', hairStyle: 'crest', outfit: '#1b1530', accent: '#8fd16a', boots: '#5a2f8a', aura: '#b6f28c' }),
+    ],
+  },
+  {
+    id: 'kael',
+    name: 'Kael',
+    title: 'The Corrupted Echo',
+    villain: true,
+    base: { hp: 98, atk: 29, def: 20, spd: 26 },
+    special: { name: 'Void Cannon', kind: 'beam', power: 3.0 },
+    forms: [
+      form('Kael', { skin: '#c9b8b0', hair: '#3a1f5c', hairStyle: 'spiky', outfit: '#3a1f5c', accent: '#ff4a3d', boots: '#1b1530' }),
+      form('Dark Kael', { skin: '#b0a0a8', hair: '#6b2fd0', hairStyle: 'spikyTall', outfit: '#1b1530', accent: '#ff4a3d', boots: '#1b1530', aura: '#8b5cf6' }),
+      form('Void Kael', { skin: '#9a8a94', hair: '#ff2f4a', hairStyle: 'spikyTall', outfit: '#0a0618', accent: '#ff2f4a', boots: '#0a0618', aura: '#ff2f4a' }),
+    ],
+  },
 ];
 
 export const STARTER_FAMILY_ID = 'kairo';

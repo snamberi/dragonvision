@@ -3,7 +3,7 @@
 Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a first guess to tune.
 
 ## Fighters and forms
-- Original characters in an anime-fighter style (no licensed characters).
+- 18 original characters in an anime-fighter style (no licensed characters): 12 heroes and 6 villains.
 - The starter is **Kid Kairo** (1★, level 1).
 - Each star is one form. Fighters with fewer forms than stars keep their last form and still gain stars.
 - Max **21 stars**, max **level 400**.
