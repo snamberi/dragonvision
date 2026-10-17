@@ -2631,3 +2631,13 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
 .unit.ko .unit-tags {
   visibility: hidden;
 }
+
+.status.edge-strong {
+  color: #062b14;
+  background: #4ade80;
+}
+
+.status.edge-weak {
+  color: #fff;
+  background: #c2414b;
+}

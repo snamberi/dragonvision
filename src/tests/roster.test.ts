@@ -36,6 +36,19 @@ describe('roles', () => {
     expect(roleFor(getFamily('aya'))).toBe('Blaster');
     expect(roleFor(getFamily('zeno'))).toBe('Support');
     expect(roleFor(getFamily('kenji'))).toBe('Support');
-    expect(roleFor(getFamily('kairo'))).toBe('Striker');
+    expect(roleFor(getFamily('kairo'))).toBe('Assassin');
+  });
+});
+
+describe('class loop', () => {
+  it('every class beats exactly one and loses to exactly one', async () => {
+    const { BEATS, classEdge } = await import('../game/roster');
+    const roles = Object.keys(BEATS) as (keyof typeof BEATS)[];
+    for (const r of roles) {
+      expect(roles.filter((x) => BEATS[x] === r)).toHaveLength(1);
+      expect(classEdge(r, BEATS[r])).toBe('strong');
+      expect(classEdge(BEATS[r], r)).toBe('weak');
+    }
+    expect(classEdge('Tank', 'Assassin')).toBe('neutral');
   });
 });

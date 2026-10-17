@@ -5,6 +5,12 @@ import type { SaveData } from './types';
 
 const KEY = 'dragonvision.save.v1';
 
+function renameKey(record: Record<string, number>, from: string, to: string): Record<string, number> {
+  if (!(from in record)) return record;
+  const { [from]: value, ...rest } = record;
+  return { ...rest, [to]: Math.max(value, rest[to] ?? 0) };
+}
+
 /** Older saves stored the team as a plain list; spread it onto the five pads. */
 function migrate(save: SaveData): SaveData {
   const team = Array.from({ length: MAX_TEAM_SIZE }, (_, i): string | null => {
@@ -20,7 +26,8 @@ function migrate(save: SaveData): SaveData {
     team,
     dojo,
     shards: save.shards ?? {},
-    gravity: save.gravity ?? {},
+    // Striker was renamed Assassin.
+    gravity: renameKey(save.gravity ?? {}, 'Striker', 'Assassin'),
     expeditions: (save.expeditions ?? []).filter((e) => e.uids.every((uid) => save.units.some((u) => u.uid === uid))),
     counters: { ...fresh.counters, ...save.counters },
     bounties: save.bounties ?? fresh.bounties,

@@ -22,7 +22,7 @@ export function tierFor(star: number): Tier {
 
 export const ROLE_COLORS: Record<string, string> = {
   Tank: '#3fc6ff',
-  Striker: '#ff4a3d',
+  Assassin: '#ff4a3d',
   Blaster: '#ff8a1f',
   Support: '#4ade80',
   Drainer: '#b794ff',

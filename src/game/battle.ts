@@ -4,6 +4,8 @@ import {
   BLASTER_WAVE_BONUS,
   BOSS_ATK_MULTIPLIER,
   BOSS_HP_MULTIPLIER,
+  CLASS_ADVANTAGE,
+  CLASS_DISADVANTAGE,
   CRIT_CHANCE,
   CRIT_MULTIPLIER,
   DRAINER_DRAIN_SHARE,
@@ -19,13 +21,13 @@ import {
   MINI_BOSS_ATK_MULTIPLIER,
   MINI_BOSS_HP_MULTIPLIER,
   RALLY_TURNS,
-  STRIKER_SINGLE_BONUS,
+  ASSASSIN_SINGLE_BONUS,
   SUPPORT_HEAL_BONUS,
   TANK_DAMAGE_TAKEN,
   enemyStrengthForStage,
 } from './balance';
 import { isBackRow, statsFor, unitName } from './progression';
-import { type Role, getFamily, roleFor } from './roster';
+import { type Role, classEdge, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
 import type { Special, Unit } from './types';
@@ -233,9 +235,12 @@ function damage(attacker: Fighter, defender: Fighter, mult: number, wave: boolea
   const atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1);
   // atk / (atk + def) keeps fights the same length at every level when both sides are even.
   let base = atk * (atk / (atk + defender.def)) * 0.9 * mult;
-  if (attacker.role === 'Striker' && !wave) base *= STRIKER_SINGLE_BONUS;
+  if (attacker.role === 'Assassin' && !wave) base *= ASSASSIN_SINGLE_BONUS;
   if (attacker.role === 'Blaster' && wave) base *= BLASTER_WAVE_BONUS;
   if (defender.role === 'Tank') base *= TANK_DAMAGE_TAKEN;
+  const edge = classEdge(attacker.role, defender.role);
+  if (edge === 'strong') base *= CLASS_ADVANTAGE;
+  else if (edge === 'weak') base *= CLASS_DISADVANTAGE;
   if (wave && defender.row === 'back') base *= BACK_ROW_WAVE_REDUCTION;
   const crit = rng() < CRIT_CHANCE;
   const variance = 0.9 + rng() * 0.2;

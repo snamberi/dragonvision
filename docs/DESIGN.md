@@ -92,14 +92,14 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 | 21 | Ultimate | animated rainbow border plus all effects |
 
 Roles come from each character: heal special → Support, drain special → Drainer,
-120+ base HP → Tank, hit-all special → Blaster, otherwise Striker.
+120+ base HP → Tank, hit-all special → Blaster, otherwise Assassin.
 
 ## Formation and role rules in battle
 - Single-target attacks (Attack, Ki Blast, beam and drain specials) can only hit the front row while
   anyone in it is standing. Once the front row falls, the back row is open.
 - A **Tank** in the front row draws every single-target attack aimed at its side, and takes 15% less damage.
 - Back-row fighters take 20% less damage from hit-all attacks.
-- **Striker:** +15% single-target damage. **Blaster:** +15% hit-all damage.
+- **Assassin:** +15% single-target damage. **Blaster:** +15% hit-all damage.
 - **Support:** heals 20% more. **Drainer:** drain heals 75% of damage dealt (others 50%).
 - Turn order inside a side is still fastest first.
 

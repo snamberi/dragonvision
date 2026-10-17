@@ -16,7 +16,7 @@ import {
   upgradeCost,
   upgradeUnit,
 } from '../game/progression';
-import { formForStar, getFamily, roleFor } from '../game/roster';
+import { BEATS, formForStar, getFamily, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { Sprite, Stars } from './Sprite';
@@ -90,7 +90,10 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
             <span>DEF {stats.def.toLocaleString()}</span>
             <span>SPD {stats.spd}</span>
             <span>Power {power(unit.familyId, unit.star, unit.level).toLocaleString()}</span>
-            <span>Role: {roleFor(family)}</span>
+            <span>
+              Class: {roleFor(family)} · beats {BEATS[roleFor(family)]} · weak to{' '}
+              {(Object.keys(BEATS) as (keyof typeof BEATS)[]).find((r) => BEATS[r] === roleFor(family))}
+            </span>
           </div>
           <div className="special-box">
             <strong>{family.special.name}</strong> · charges in {family.special.charge} moves

@@ -375,7 +375,7 @@ export function formForStar(family: Family, star: number): Form {
   return family.forms[Math.min(star, family.forms.length) - 1];
 }
 
-export type Role = 'Tank' | 'Striker' | 'Blaster' | 'Support' | 'Drainer';
+export type Role = 'Tank' | 'Assassin' | 'Blaster' | 'Support' | 'Drainer';
 
 /** Battle role shown on cards and in the team arena, derived from stats and special. */
 export function roleFor(family: Family): Role {
@@ -384,5 +384,26 @@ export function roleFor(family: Family): Role {
   if (family.special.kind === 'drain') return 'Drainer';
   if (family.base.hp >= 120) return 'Tank';
   if (family.special.kind === 'wave') return 'Blaster';
-  return 'Striker';
+  return 'Assassin';
+}
+
+/**
+ * Class loop: each class beats the next one.
+ * Assassin → Blaster → Tank → Drainer → Support → Assassin
+ * (assassins dive squishy casters, blasts melt armor, armor starves drains,
+ * drains outlast healing, healing outlasts burst).
+ */
+export const BEATS: Record<Role, Role> = {
+  Assassin: 'Blaster',
+  Blaster: 'Tank',
+  Tank: 'Drainer',
+  Drainer: 'Support',
+  Support: 'Assassin',
+};
+
+/** 1 = neutral, >1 attacker has the edge, <1 defender has the edge. */
+export function classEdge(attacker: Role, defender: Role): 'strong' | 'weak' | 'neutral' {
+  if (BEATS[attacker] === defender) return 'strong';
+  if (BEATS[defender] === attacker) return 'weak';
+  return 'neutral';
 }

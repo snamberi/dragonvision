@@ -58,9 +58,9 @@ describe('10x summon guarantee', () => {
 describe('gravity chamber', () => {
   it('raises a role multiplier for coins and applies it in battle', () => {
     let save: SaveData = { ...newSave(), coins: 10_000 };
-    save = upgradeGravity(save, 'Striker');
+    save = upgradeGravity(save, 'Assassin');
     expect(save.coins).toBe(10_000 - gravityCost(0));
-    expect(gravityMultiplier(save, 'Striker')).toBeCloseTo(1 + GRAVITY_PER_LEVEL);
+    expect(gravityMultiplier(save, 'Assassin')).toBeCloseTo(1 + GRAVITY_PER_LEVEL);
     const plain = createBattle(teamSlots(save), getStage(12));
     const boosted = createBattle(teamSlots(save), getStage(12), { roleBonus: roleBonuses(save) });
     expect(boosted.fighters[0].maxHp).toBeGreaterThan(plain.fighters[0].maxHp);

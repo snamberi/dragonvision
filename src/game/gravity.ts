@@ -2,7 +2,7 @@ import { GRAVITY_MAX_LEVEL, GRAVITY_PER_LEVEL, gravityCost } from './balance';
 import type { Role } from './roster';
 import type { SaveData } from './types';
 
-export const ROLES: Role[] = ['Tank', 'Striker', 'Blaster', 'Support', 'Drainer'];
+export const ROLES: Role[] = ['Tank', 'Assassin', 'Blaster', 'Support', 'Drainer'];
 
 export function gravityLevel(save: SaveData, role: Role): number {
   return save.gravity[role] ?? 0;

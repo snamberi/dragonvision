@@ -23,6 +23,7 @@ import {
 import { recordWin } from '../game/bounty';
 import { roleBonuses } from '../game/gravity';
 import { teamSlots } from '../game/progression';
+import { classEdge } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
 import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
@@ -292,6 +293,11 @@ export function BattleScreen({ save, stageNumber, towerFloor, run, update, onExi
             <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 112 : 88} flip={f.side === 'player'} />
             <span className="unit-tags">
               {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="status taunt">TAUNT</span>}
+              {actor && aimingAtEnemies && targetIds.has(f.id) && classEdge(actor.role, f.role) !== 'neutral' && (
+                <span className={`status edge-${classEdge(actor.role, f.role)}`}>
+                  {classEdge(actor.role, f.role) === 'strong' ? '▲ STRONG' : '▼ WEAK'}
+                </span>
+              )}
               {f.stunned && <span className="status stun">STUN</span>}
               {f.rallyTurns > 0 && <span className="status rally">ATK↑</span>}
             </span>
