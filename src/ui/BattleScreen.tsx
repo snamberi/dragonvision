@@ -37,6 +37,7 @@ import type { Updater } from './App';
 import { type Run, nextInRun } from './run';
 import { Portrait, Sprite, Stars } from './Sprite';
 import { GearCard } from './GearCard';
+import { sfx } from '../audio/sound';
 import { describeSpecial } from './specialText';
 
 interface Props {
@@ -157,6 +158,9 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     setBusy(true);
     const parts = ev.hits.map((h) => `${nameOf(h.targetId)} ${hitText(h)}${h.crit ? '!' : ''}`);
     setLog((l) => [[nameOf(ev.actorId), ev.label, ...parts].join(' · '), ...l].slice(0, 30));
+    if (ev.kind === 'special' || ev.kind === 'combo') sfx(ev.hits.every((h) => h.kind !== 'damage') ? 'heal' : 'special');
+    else if (ev.hits.some((h) => h.crit)) sfx('crit');
+    else if (ev.hits.some((h) => h.kind === 'damage')) sfx('hit');
     setTimeout(() => {
       acting.current = false;
       setBusy(false);
@@ -178,6 +182,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     // Survival waves roll on in their own effect below.
     if (mode === 'survival' && battle.result === 'won') return;
     rewarded.current = true;
+    sfx(battle.result === 'won' ? 'win' : 'lose');
     if (mode === 'boss') {
       const left = battle.fighters.find((f) => f.side === 'enemy')?.hp ?? 0;
       const dealt = Math.max(0, bossStart - left);

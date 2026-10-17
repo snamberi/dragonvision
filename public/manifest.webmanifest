@@ -1,0 +1,17 @@
+{
+  "name": "Dragon Vision",
+  "short_name": "Dragon Vision",
+  "description": "Collect fighters, evolve them and climb to the Vision Gate in this pixel 5v5 RPG.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120b2e",
+  "theme_color": "#120b2e",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

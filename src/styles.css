@@ -2785,3 +2785,9 @@ div.gear-open { cursor:default; }
 .login-day.next { border-color:var(--gold); box-shadow:0 0 10px #ffd23f66; }
 .login-day.big { background:linear-gradient(135deg,#3b2a6b,#5b2fc0); }
 @media (max-width:700px) { .login-track { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+/* ---------- Settings ---------- */
+.settings h3 { margin-top:8px; }
+.save-code { width:100%; margin:8px 0; padding:8px; font:16px var(--body); color:var(--ink); background:var(--bg-2); border:2px solid var(--line); resize:vertical; }
+.file-btn { position:relative; overflow:hidden; cursor:pointer; }
+.file-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; }

@@ -82,3 +82,18 @@ describe('login calendar', () => {
     expect(LOGIN_TRACK).toHaveLength(7);
   });
 });
+
+describe('save export and import', () => {
+  it('round-trips a save through a code and rejects junk', async () => {
+    const { exportCode, importCode } = await import('../game/save');
+    const save: SaveData = { ...newSave(), coins: 1234, title: 'Rookie' };
+    const code = exportCode(save);
+    expect(code.startsWith('DV1:')).toBe(true);
+    const back = importCode(code);
+    expect(back.coins).toBe(1234);
+    expect(back.title).toBe('Rookie');
+    expect(importCode(JSON.stringify(save)).coins).toBe(1234);
+    expect(() => importCode('hello')).toThrow();
+    expect(() => importCode('DV1:' + btoa('{"version":2}'))).toThrow();
+  });
+});

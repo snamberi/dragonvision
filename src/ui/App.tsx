@@ -1,5 +1,6 @@
 import { PixelIcon } from './PixelIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { playMusic, unlockAudio } from '../audio/sound';
 import { recordForms } from '../game/achievements';
 import { syncBounties } from '../game/bounty';
 import { syncWorldBoss } from '../game/worldBoss';
@@ -57,6 +58,18 @@ export function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
+
+  // Battle music in fights, the city theme everywhere else.
+  useEffect(() => {
+    playMusic(view.kind === 'battle' ? 'battle' : 'city');
+  }, [view.kind]);
+
+  // Sound can only start after the first tap.
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener('pointerdown', unlock);
+    return () => window.removeEventListener('pointerdown', unlock);
+  }, []);
 
   // Start new bounty days and weeks on launch and while the game stays open.
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { sfx } from '../audio/sound';
 import { PixelIcon } from './PixelIcon';
 import { useEffect, useRef, useState } from 'react';
 import { FAMILIES } from '../game/roster';
@@ -25,6 +26,7 @@ export function SummonScreen({ save, update, onBack }: Props) {
   const chanceOf = (familyId: string) => odds.filter((o) => o.familyId === familyId).reduce((sum, o) => sum + o.chance, 0);
 
   const pull = (count: number) => {
+    sfx('summon');
     if (rolling.current) return;
     const pulled: Unit[] = [];
     const success = update((s) => {

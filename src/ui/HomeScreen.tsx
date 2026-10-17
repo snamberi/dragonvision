@@ -2,6 +2,7 @@ import { TOTAL_STAGES } from '../game/balance';
 import { LOGIN_TRACK, claimLogin, loginIndex, loginReady } from '../game/login';
 import type { SaveData } from '../game/types';
 import type { Tab, Updater } from './App';
+import { SettingsPanel } from './SettingsPanel';
 import { TeamArena } from './TeamArena';
 
 interface Props {
@@ -31,6 +32,7 @@ export function HomeScreen({ save, update, onNavigate, onOpenSummon }: Props) {
         </div>
       </section>
       <LoginCalendar save={save} update={update} />
+      <SettingsPanel save={save} update={update} />
     </div>
   );
 }

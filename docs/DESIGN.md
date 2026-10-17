@@ -174,3 +174,11 @@ Hitting the class you beat deals 25% more damage; hitting the class that beats y
 ## Daily login
 - A 7-day track on Home (coins, spins, gems, Rare gear, shard + gems), one claim per day, loops forever,
   and missing a day never resets it.
+
+## Sound, install, saves
+- Chiptune music (city and battle themes) and sound effects, synthesized in the browser. Music and effects
+  can be switched off in Settings on Home.
+- Installable as an app ("Install app" button where the browser supports it, or Add to Home Screen) and
+  playable offline after the first visit.
+- Saves stay on the device. Settings can copy a save code or download a save file, and load either on
+  another device. True cloud saves would need a server and accounts, which this offline game doesn't have.

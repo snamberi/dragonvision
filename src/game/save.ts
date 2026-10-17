@@ -89,3 +89,31 @@ export function clearSave(): void {
     // Nothing to clear.
   }
 }
+
+const CODE_PREFIX = 'DV1:';
+
+/** A copy-pasteable code holding the whole save, for moving progress between devices. */
+export function exportCode(save: SaveData): string {
+  const bytes = new TextEncoder().encode(JSON.stringify(save));
+  let binary = '';
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return CODE_PREFIX + btoa(binary);
+}
+
+/** Reads a save code or a raw save file's text. Throws if it isn't a Dragon Vision save. */
+export function importCode(text: string): SaveData {
+  const trimmed = text.trim();
+  let json = trimmed;
+  if (trimmed.startsWith(CODE_PREFIX)) {
+    const binary = atob(trimmed.slice(CODE_PREFIX.length));
+    json = new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    throw new Error('That is not a Dragon Vision save code.');
+  }
+  if (!isValid(parsed)) throw new Error('That save is damaged or from another game.');
+  return migrate(parsed);
+}
