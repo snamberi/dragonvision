@@ -9,9 +9,10 @@ import { Sprite, Stars } from './Sprite';
 interface Props {
   save: SaveData;
   update: Updater;
+  onBack: () => void;
 }
 
-export function SummonScreen({ save, update }: Props) {
+export function SummonScreen({ save, update, onBack }: Props) {
   const [results, setResults] = useState<Unit[]>([]);
   const odds = summonOdds(save);
   const chanceOf = (familyId: string) => odds.filter((o) => o.familyId === familyId).reduce((sum, o) => sum + o.chance, 0);
@@ -35,8 +36,12 @@ export function SummonScreen({ save, update }: Props) {
 
   return (
     <div className="summon">
+      <button className="btn ghost summon-back" onClick={onBack}>
+        ← City
+      </button>
       <section className="panel summon-main">
-        <h2>Summon</h2>
+        <div className="eyebrow">Vision City</div>
+        <h2>Summoning Shrine</h2>
         <p className="muted">
           One shared pool. You can pull a fighter up to one star above your best version of them. Higher stars are rarer.
         </p>

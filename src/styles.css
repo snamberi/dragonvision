@@ -673,6 +673,118 @@ select {
   background: #3b2140;
 }
 
+/* ---------- City ---------- */
+
+.summon-back {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.city-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  align-items: end;
+  padding: 24px 16px 16px;
+  background:
+    linear-gradient(transparent 70%, #3f7a3a 70%, #2f5f2b 100%),
+    linear-gradient(#3a6fd8, #9ac4ff 70%);
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 #0a0620;
+}
+
+.building {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.building:hover:not(.lot),
+.building:focus-visible {
+  border-color: var(--gold);
+  background: rgba(18, 11, 46, 0.25);
+}
+
+.building.ready .building-art {
+  filter: drop-shadow(0 0 6px #b794ff);
+}
+
+.building.lot {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.building-art {
+  width: 144px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.building-art.small {
+  width: 96px;
+}
+
+.building-name {
+  font-family: var(--pixel);
+  font-size: 9px;
+  padding: 4px 6px;
+  background: rgba(18, 11, 46, 0.85);
+  border: 2px solid var(--line);
+}
+
+/* ---------- Inventory ---------- */
+
+.resource-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resource {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+}
+
+.resource-icon {
+  font-size: 28px;
+  width: 32px;
+  text-align: center;
+}
+
+.resource-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.resource-amount {
+  font-family: var(--pixel);
+  font-size: 13px;
+}
+
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 8px;
+}
+
+.item-slot {
+  aspect-ratio: 1;
+  background: var(--bg-2);
+  border: 2px dashed var(--line);
+}
+
 /* ---------- Battle ---------- */
 
 .battle {
@@ -1063,6 +1175,19 @@ select {
 
   .tabs button {
     padding: 12px 2px;
-    font-size: 8px;
+    font-size: 7px;
+  }
+
+  .city-map {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 16px 8px 8px;
+  }
+
+  .building-art {
+    width: 112px;
+  }
+
+  .building-art.small {
+    width: 72px;
   }
 }

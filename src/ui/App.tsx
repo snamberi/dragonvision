@@ -6,20 +6,25 @@ import { CityScreen } from './CityScreen';
 import { FighterDetail } from './FighterDetail';
 import { FightersScreen } from './FightersScreen';
 import { HomeScreen } from './HomeScreen';
+import { InventoryScreen } from './InventoryScreen';
 import { StagesScreen } from './StagesScreen';
 import { SummonScreen } from './SummonScreen';
 
-export type Tab = 'home' | 'city' | 'stages' | 'fighters' | 'summon';
+export type Tab = 'home' | 'city' | 'inventory' | 'stages' | 'fighters';
 
 const TAB_LABELS: Record<Tab, string> = {
   home: 'Home',
   city: 'City',
+  inventory: 'Inventory',
   stages: 'Stages',
   fighters: 'Fighters',
-  summon: 'Summon',
 };
 
-type View = { kind: 'tab'; tab: Tab } | { kind: 'battle'; stage: number } | { kind: 'fighter'; uid: string };
+type View =
+  | { kind: 'tab'; tab: Tab }
+  | { kind: 'battle'; stage: number }
+  | { kind: 'fighter'; uid: string }
+  | { kind: 'summon' };
 
 export type Updater = (change: (save: SaveData) => SaveData) => boolean;
 
@@ -51,7 +56,9 @@ export function App() {
     }
   }, []);
 
-  const tab = view.kind === 'tab' ? view.tab : view.kind === 'fighter' ? 'fighters' : 'stages';
+  const tab: Tab =
+    view.kind === 'tab' ? view.tab : view.kind === 'fighter' ? 'fighters' : view.kind === 'summon' ? 'city' : 'stages';
+  const openSummon = () => setView({ kind: 'summon' });
 
   return (
     <div className="app">
@@ -77,16 +84,18 @@ export function App() {
             toast={setToast}
             onBack={() => setView({ kind: 'tab', tab: 'fighters' })}
           />
+        ) : view.kind === 'summon' ? (
+          <SummonScreen save={save} update={update} onBack={() => setView({ kind: 'tab', tab: 'city' })} />
         ) : view.tab === 'home' ? (
-          <HomeScreen save={save} onNavigate={(t) => setView({ kind: 'tab', tab: t })} />
+          <HomeScreen save={save} onNavigate={(t) => setView({ kind: 'tab', tab: t })} onOpenSummon={openSummon} />
         ) : view.tab === 'city' ? (
-          <CityScreen />
+          <CityScreen save={save} onOpenSummon={openSummon} />
+        ) : view.tab === 'inventory' ? (
+          <InventoryScreen save={save} />
         ) : view.tab === 'stages' ? (
           <StagesScreen save={save} onPlay={(stage) => setView({ kind: 'battle', stage })} />
-        ) : view.tab === 'fighters' ? (
-          <FightersScreen save={save} update={update} toast={setToast} onOpen={(uid) => setView({ kind: 'fighter', uid })} />
         ) : (
-          <SummonScreen save={save} update={update} />
+          <FightersScreen save={save} update={update} toast={setToast} onOpen={(uid) => setView({ kind: 'fighter', uid })} />
         )}
       </main>
 
@@ -95,7 +104,7 @@ export function App() {
           {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button key={t} className={t === tab ? 'active' : ''} onClick={() => setView({ kind: 'tab', tab: t })}>
               {TAB_LABELS[t]}
-              {t === 'summon' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
+              {t === 'city' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
             </button>
           ))}
         </nav>

@@ -7,10 +7,11 @@ import { Sprite, Stars } from './Sprite';
 interface Props {
   save: SaveData;
   onNavigate: (tab: Tab) => void;
+  onOpenSummon: () => void;
 }
 
 // Placeholder hub; its real features are still being designed.
-export function HomeScreen({ save, onNavigate }: Props) {
+export function HomeScreen({ save, onNavigate, onOpenSummon }: Props) {
   const next = Math.min(TOTAL_STAGES, save.clearedStage + 1);
   return (
     <div className="home">
@@ -33,7 +34,7 @@ export function HomeScreen({ save, onNavigate }: Props) {
             Next: Stage {next}
           </button>
           {save.spins > 0 && (
-            <button className="btn big" onClick={() => onNavigate('summon')}>
+            <button className="btn big" onClick={onOpenSummon}>
               {save.spins} spin{save.spins === 1 ? '' : 's'} ready
             </button>
           )}

@@ -56,3 +56,8 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Final roster, forms, moves and real sprite art (current sprites are generated placeholders).
 - Balance of costs, rewards, odds and boss strength.
 - Extra items, sound, desktop/mobile packaging, and the shared Vision universe tie-ins.
+
+## Navigation
+- Main tabs: Home, City, Inventory, Stages, Fighters.
+- Summoning happens inside the City at the **Summoning Shrine** building. Empty lots mark future buildings.
+- Inventory lists coins, gems and summon spins, with empty slots for future items.
