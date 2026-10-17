@@ -61,3 +61,17 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Main tabs: Home, City, Inventory, Stages, Fighters.
 - Summoning happens inside the City at the **Summoning Shrine** building. Empty lots mark future buildings.
 - Inventory lists coins, gems and summon spins, with empty slots for future items.
+
+## Card rarity (visual only)
+| Stars | Tier | Look |
+|---|---|---|
+| 1 | Common | grey border, plain background |
+| 2–3 | Uncommon | green border, energy-burst background (all evolved fighters get one) |
+| 4–6 | Rare | blue border, twinkling sparkles |
+| 7–10 | Epic | purple border, faster sparkles |
+| 11–15 | Legendary | gold border, outer glow, light sweep |
+| 16–20 | Mythic | red border, glow, sweep, flickering aura |
+| 21 | Ultimate | animated rainbow border plus all effects |
+
+Roles shown on cards and in the team arena come from each character: heal special → Support,
+drain special → Drainer, 120+ base HP → Tank, hit-all special → Blaster, otherwise Striker.

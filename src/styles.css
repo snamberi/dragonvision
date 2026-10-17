@@ -465,30 +465,6 @@ select {
   gap: 10px;
 }
 
-.unit-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  background: var(--panel);
-  border: 2px solid var(--line);
-}
-
-.unit-card.in-team {
-  border-color: var(--orange);
-}
-
-.unit-open {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  text-align: center;
-}
-
 .unit-name {
   font-size: 19px;
   line-height: 1;
@@ -496,12 +472,6 @@ select {
 
 .unit-meta {
   color: var(--muted);
-}
-
-.unit-family {
-  font-size: 15px;
-  color: var(--muted);
-  opacity: 0.8;
 }
 
 .badge {
@@ -513,6 +483,410 @@ select {
   padding: 3px 4px;
   background: var(--green);
   color: #062b14;
+}
+
+/* ---------- Collectible cards ---------- */
+
+.card {
+  --tier: #9a94b8;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  background: var(--bg-2);
+  border: 3px solid var(--tier);
+  box-shadow:
+    inset 0 0 0 2px #0a0620,
+    inset 0 0 0 4px color-mix(in srgb, var(--tier) 30%, transparent),
+    4px 4px 0 #0a0620;
+  overflow: hidden;
+}
+
+/* Pixel notches on the corners. */
+.card::before,
+.card::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--tier);
+  z-index: 2;
+}
+.card::before {
+  top: 0;
+  left: 0;
+}
+.card::after {
+  top: 0;
+  right: 0;
+}
+
+.card-team {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  z-index: 3;
+  font-family: var(--pixel);
+  font-size: 7px;
+  padding: 3px 4px;
+  background: var(--orange);
+  color: #1b0f00;
+}
+
+.card-open {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0 0 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: center;
+}
+
+div.card-open {
+  cursor: default;
+}
+
+.card-ribbon {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 3;
+  font-family: var(--pixel);
+  font-size: 7px;
+  padding: 3px 4px;
+  background: var(--tier);
+  color: #120b2e;
+}
+
+.card .badge {
+  z-index: 3;
+}
+
+.card-art {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 14px 0 4px;
+  background: linear-gradient(#1a1240, #120b2e);
+  border-bottom: 2px solid color-mix(in srgb, var(--tier) 50%, transparent);
+  overflow: hidden;
+}
+
+/* Evolved fighters stand in front of a tier-colored energy burst. */
+.card.evolved .card-art {
+  background:
+    radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--tier) 60%, transparent) 0 18%, transparent 60%),
+    repeating-conic-gradient(from 0deg at 50% 70%, color-mix(in srgb, var(--tier) 22%, transparent) 0 10deg, transparent 10deg 20deg),
+    linear-gradient(#1a1240, #120b2e);
+}
+
+.card-name {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.card-meta {
+  color: var(--muted);
+}
+
+.role-tag {
+  --role: var(--muted);
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 5px;
+  font-family: var(--pixel);
+  font-size: 7px;
+  color: var(--role);
+  border: 2px solid var(--role);
+  background: color-mix(in srgb, var(--role) 15%, transparent);
+}
+
+.card-action {
+  width: 100%;
+}
+
+/* Rare and up: twinkling pixel sparkles. */
+.sparkle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 2px 0 var(--tier), -2px 0 var(--tier), 0 2px var(--tier), 0 -2px var(--tier);
+  opacity: 0;
+  animation: twinkle 1.8s steps(2) infinite;
+}
+.sparkle.s0 {
+  top: 20%;
+  left: 18%;
+}
+.sparkle.s1 {
+  top: 30%;
+  right: 16%;
+  animation-delay: 0.45s;
+}
+.sparkle.s2 {
+  bottom: 22%;
+  left: 26%;
+  animation-delay: 0.9s;
+}
+.sparkle.s3 {
+  bottom: 34%;
+  right: 24%;
+  animation-delay: 1.35s;
+}
+
+@keyframes twinkle {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  70%,
+  90% {
+    opacity: 1;
+  }
+}
+
+.tier-epic .sparkle {
+  animation-duration: 1.3s;
+}
+
+/* Legendary and up: outer glow and a light sweep across the art. */
+.card.tier-legendary,
+.card.tier-mythic,
+.card.tier-ultimate {
+  box-shadow:
+    inset 0 0 0 2px #0a0620,
+    inset 0 0 0 4px color-mix(in srgb, var(--tier) 40%, transparent),
+    0 0 10px color-mix(in srgb, var(--tier) 70%, transparent),
+    4px 4px 0 #0a0620;
+}
+
+.tier-legendary .card-art::after,
+.tier-mythic .card-art::after,
+.tier-ultimate .card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: sweep 2.6s steps(10) infinite;
+}
+
+@keyframes sweep {
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.tier-mythic .sprite {
+  animation: flicker 1.2s steps(2) infinite;
+}
+
+@keyframes flicker {
+  50% {
+    filter: drop-shadow(0 0 4px var(--tier)) drop-shadow(0 0 8px var(--tier));
+  }
+}
+
+/* 21 stars: cycling rainbow border. */
+.card.tier-ultimate {
+  animation: rainbow 3s steps(12) infinite;
+}
+
+@keyframes rainbow {
+  0%,
+  100% {
+    border-color: #ff4a3d;
+  }
+  17% {
+    border-color: #ff8a1f;
+  }
+  33% {
+    border-color: #ffd23f;
+  }
+  50% {
+    border-color: #4ade80;
+  }
+  67% {
+    border-color: #3fc6ff;
+  }
+  83% {
+    border-color: #b794ff;
+  }
+}
+
+/* ---------- Team arena ---------- */
+
+.team-arena {
+  margin-bottom: 16px;
+  border: 3px solid var(--line);
+  box-shadow: 4px 4px 0 #0a0620;
+  background: var(--panel);
+}
+
+.arena-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px 8px;
+}
+
+.arena-head h2 {
+  margin: 0;
+}
+
+.arena-power {
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.arena-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
+  min-height: 190px;
+  padding: 0 6px 18px;
+  background:
+    /* floor tiles */
+    linear-gradient(transparent 62%, #5a3a22 62%, #5a3a22 64%, transparent 64%),
+    repeating-linear-gradient(90deg, #7a5230 0 16px, #6b4628 16px 32px) bottom / 100% 38% no-repeat,
+    /* distant pixel mountains */
+    linear-gradient(135deg, transparent 50%, #3b2f7a 50%) 0 52% / 48px 40px repeat-x,
+    linear-gradient(225deg, transparent 50%, #3b2f7a 50%) 24px 52% / 48px 40px repeat-x,
+    linear-gradient(#2b1f6b, #6a4fd0 55%, #ff8a1f 62%);
+  border-top: 3px solid var(--line);
+  border-bottom: 3px solid var(--line);
+}
+
+.arena-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.arena-slot:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.arena-slot.back {
+  transform: translateY(-26px);
+}
+
+.arena-slot .sprite {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--tier) 80%, transparent));
+}
+
+.arena-slot:hover:not(:disabled) .sprite,
+.arena-slot:focus-visible .sprite {
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px var(--tier));
+}
+
+/* Numbered pad under each fighter's feet. */
+.arena-pad {
+  margin-top: -3px;
+  width: 64px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  font-family: var(--pixel);
+  font-size: 8px;
+  color: #120b2e;
+  background: var(--tier, #9a94b8);
+  border: 2px solid #120b2e;
+  border-radius: 50%;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.arena-slot.empty .arena-pad {
+  background: rgba(18, 11, 46, 0.5);
+  color: var(--muted);
+  border-style: dashed;
+  border-color: var(--muted);
+}
+
+.arena-ghost {
+  width: 34px;
+  height: 56px;
+  margin-bottom: 10px;
+  border: 2px dashed rgba(244, 236, 216, 0.35);
+  border-radius: 14px 14px 4px 4px;
+}
+
+.arena-hud {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 8px;
+}
+
+.hud-card {
+  --tier: var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 4px;
+  background: var(--bg-2);
+  border: 2px solid var(--tier);
+  text-align: center;
+  line-height: 1.05;
+}
+
+.hud-card.empty {
+  border-style: dashed;
+  font-size: 15px;
+}
+
+.hud-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+}
+
+.hud-meta {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.hud-hp {
+  width: 100%;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle,
+  .card-art::after,
+  .tier-mythic .sprite,
+  .card.tier-ultimate,
+  .idle {
+    animation: none !important;
+  }
+  .sparkle {
+    opacity: 1;
+  }
 }
 
 /* ---------- Detail ---------- */
@@ -605,27 +979,7 @@ select {
 }
 
 .pull-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 4px;
-  background: var(--bg-2);
-  border: 2px solid var(--line);
-  text-align: center;
   animation: reveal 0.4s steps(4) both;
-}
-
-.pull-card.star-2 {
-  border-color: var(--blue);
-}
-.pull-card.star-3,
-.pull-card.star-4 {
-  border-color: #b794ff;
-}
-.pull-card.star-5,
-.pull-card.star-6 {
-  border-color: var(--gold);
-  box-shadow: 0 0 12px var(--gold);
 }
 
 @keyframes reveal {
@@ -1151,6 +1505,51 @@ select {
 
   .f-meta {
     font-size: 13px;
+  }
+
+  .arena-stage {
+    min-height: 150px;
+    padding-bottom: 14px;
+  }
+
+  .arena-slot .sprite {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .arena-slot.back {
+    transform: translateY(-18px);
+  }
+
+  .arena-pad {
+    width: 44px;
+  }
+
+  .arena-hud {
+    gap: 3px;
+    padding: 6px 4px;
+  }
+
+  .hud-card {
+    padding: 4px 2px;
+  }
+
+  .hud-name {
+    font-size: 14px;
+  }
+
+  .hud-meta,
+  .hud-hp {
+    font-size: 13px;
+  }
+
+  .hud-card .role-tag {
+    font-size: 6px;
+    padding: 2px 3px;
+  }
+
+  .unit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .team-slot .sprite {

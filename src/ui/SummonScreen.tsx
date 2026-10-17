@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { unitName } from '../game/progression';
 import { FAMILIES } from '../game/roster';
 import { summon, summonOdds, summonStarCap } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
-import { Sprite, Stars } from './Sprite';
+import { FighterCard } from './FighterCard';
+import { Sprite } from './Sprite';
 
 interface Props {
   save: SaveData;
@@ -59,13 +59,14 @@ export function SummonScreen({ save, update, onBack }: Props) {
         {results.length > 0 && (
           <div className="pull-results">
             {results.map((u, i) => (
-              <div key={u.uid} className={`pull-card star-${Math.min(u.star, 6)}`} style={{ animationDelay: `${i * 90}ms` }}>
-                <Sprite familyId={u.familyId} star={u.star} size={64} />
-                <div className="unit-name">{unitName(u)}</div>
-                <div className="unit-meta">
-                  Lv {u.level} <Stars star={u.star} />
-                </div>
-              </div>
+              <FighterCard
+                key={u.uid}
+                familyId={u.familyId}
+                star={u.star}
+                level={u.level}
+                className="pull-card"
+                style={{ animationDelay: `${i * 90}ms` }}
+              />
             ))}
           </div>
         )}

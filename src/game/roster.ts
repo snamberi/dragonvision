@@ -374,3 +374,14 @@ export function getFamily(id: string): Family {
 export function formForStar(family: Family, star: number): Form {
   return family.forms[Math.min(star, family.forms.length) - 1];
 }
+
+export type Role = 'Tank' | 'Striker' | 'Blaster' | 'Support' | 'Drainer';
+
+/** Battle role shown on cards and in the team arena, derived from stats and special. */
+export function roleFor(family: Family): Role {
+  if (family.special.kind === 'heal') return 'Support';
+  if (family.special.kind === 'drain') return 'Drainer';
+  if (family.base.hp >= 120) return 'Tank';
+  if (family.special.kind === 'wave') return 'Blaster';
+  return 'Striker';
+}

@@ -1,8 +1,7 @@
 import { TOTAL_STAGES } from '../game/balance';
-import { teamUnits, unitName } from '../game/progression';
 import type { SaveData } from '../game/types';
 import type { Tab } from './App';
-import { Sprite, Stars } from './Sprite';
+import { TeamArena } from './TeamArena';
 
 interface Props {
   save: SaveData;
@@ -15,20 +14,10 @@ export function HomeScreen({ save, onNavigate, onOpenSummon }: Props) {
   const next = Math.min(TOTAL_STAGES, save.clearedStage + 1);
   return (
     <div className="home">
+      <TeamArena save={save} title="Ready to fight" />
       <section className="panel">
         <div className="eyebrow">Welcome back, fighter</div>
         <h2>Home</h2>
-        <div className="team-row">
-          {teamUnits(save).map((u) => (
-            <div key={u.uid} className="team-slot filled">
-              <Sprite familyId={u.familyId} star={u.star} size={56} className="idle" />
-              <span>{unitName(u)}</span>
-              <small>
-                Lv {u.level} <Stars star={u.star} />
-              </small>
-            </div>
-          ))}
-        </div>
         <div className="button-row home-actions">
           <button className="btn primary big" onClick={() => onNavigate('stages')}>
             Next: Stage {next}

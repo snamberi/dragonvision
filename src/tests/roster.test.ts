@@ -19,3 +19,14 @@ describe('roster', () => {
     }
   });
 });
+
+describe('roles', () => {
+  it('derives roles from specials and stats', async () => {
+    const { getFamily, roleFor } = await import('../game/roster');
+    expect(roleFor(getFamily('orrin'))).toBe('Support');
+    expect(roleFor(getFamily('vorg'))).toBe('Drainer');
+    expect(roleFor(getFamily('bruno'))).toBe('Tank');
+    expect(roleFor(getFamily('tobi'))).toBe('Blaster');
+    expect(roleFor(getFamily('kairo'))).toBe('Striker');
+  });
+});
