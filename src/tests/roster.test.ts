@@ -10,6 +10,13 @@ describe('roster', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
+  it('every special charges in 2 to 4 moves', () => {
+    for (const family of FAMILIES) {
+      expect(family.special.charge, family.id).toBeGreaterThanOrEqual(2);
+      expect(family.special.charge, family.id).toBeLessThanOrEqual(4);
+    }
+  });
+
   it('paints every form', () => {
     for (const family of FAMILIES) {
       for (const form of family.forms) {
@@ -26,7 +33,9 @@ describe('roles', () => {
     expect(roleFor(getFamily('orrin'))).toBe('Support');
     expect(roleFor(getFamily('vorg'))).toBe('Drainer');
     expect(roleFor(getFamily('bruno'))).toBe('Tank');
-    expect(roleFor(getFamily('tobi'))).toBe('Blaster');
+    expect(roleFor(getFamily('aya'))).toBe('Blaster');
+    expect(roleFor(getFamily('zeno'))).toBe('Support');
+    expect(roleFor(getFamily('kenji'))).toBe('Support');
     expect(roleFor(getFamily('kairo'))).toBe('Striker');
   });
 });

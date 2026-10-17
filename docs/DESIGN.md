@@ -12,7 +12,8 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Levels are bought with coins, per fighter. Cost rises with level (*placeholder curve*).
 - A summoned fighter's starting level depends on its star: star *s* arrives between level
   `(s-1)×20` and `s×20` (1★: 1–20, 2★: 20–40, 20★: 380–400, 21★: 400).
-- Levels are not capped by star; only the global max of 400 applies.
+- **Level wall:** a fighter can't level past `star × 20` (1★ → 20, 2★ → 40, … 20★ → 400). It must
+  evolve to keep leveling. 21★ stays at the 400 max.
 
 ## Evolution (stars)
 - To go from *s*★ to *s+1*★: reach level `s×20`, and own **two more copies of the same fighter
@@ -40,7 +41,10 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 - Focusing a character makes it 5× as likely as each other character (*placeholder*). Never guaranteed.
 
 ## Spins, coins and gems
-- Spins come only from **first clears**: 1 per normal stage, 5 per mini-boss, 10 per boss.
+- Free spins come from **first clears**: 1 per normal stage, 5 per mini-boss, 10 per boss.
+- Spins can also be **bought with coins** at the Summoning Shrine. The price is half the coins of your
+  latest stage's first clear. Without this, the level wall could lock a player out for good: they'd need
+  duplicates to evolve, but could no longer win new stages to earn spins.
 - Gems: 5 per mini-boss, 15 per boss (*placeholder amounts*), 1% chance of 1 gem on a normal first clear.
 - Replays pay 25% of the stage's coins and nothing else.
 
@@ -51,8 +55,13 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 
 ## Battle
 - Your whole team acts (fastest first), then the whole enemy team acts.
-- Actions: Attack (+10 ki), Ki Blast (30 ki), Special (60 ki), Charge (+40 ki), Guard (half damage until your next turn).
-- Specials are per character: single-target beams, hit-all waves, team heals, life-drain.
+- Actions: Attack (+10 Ki), Ki Blast (30 Ki), Charge (+40 Ki), Guard (half damage until your next turn), Special.
+- **Specials use a charge bar, not Ki.** Every non-special move adds one charge. When the bar is full
+  (2–4 moves, set per character) the special is free, then the bar empties.
+- Special types: beam (big single hit), wave (hits all), heal (heals all), drain (hit + self-heal),
+  **revive** (one fallen ally back at 40% HP, once per battle), **shield** (each ally gets a 25% max-HP
+  shield, capped at 40%), **stun** (hit + target skips its next turn; bosses resist), **rally** (allies +30%
+  damage for 2 turns).
 - Auto mode lets the AI play your side.
 
 ## Still open

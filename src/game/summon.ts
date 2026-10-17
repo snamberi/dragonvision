@@ -1,4 +1,4 @@
-import { FOCUS_MULTIPLIER, MAX_STARS, SUMMON_STAR_DECAY } from './balance';
+import { FOCUS_MULTIPLIER, MAX_STARS, SUMMON_STAR_DECAY, spinPrice } from './balance';
 import { addUnit, summonLevelRange } from './progression';
 import { FAMILIES } from './roster';
 import { type Rng, defaultRng, pickWeighted, randInt } from './rng';
@@ -47,4 +47,12 @@ export function summon(save: SaveData, rng: Rng = defaultRng): { save: SaveData;
   const level = randInt(rng, min, max);
   const result = addUnit({ ...save, spins: save.spins - 1 }, { familyId: family.id, star, level, baseLevel: level, coinsSpent: 0 });
   return result;
+}
+
+/** Buys summon spins with coins at the Summoning Shrine. */
+export function buySpins(save: SaveData, count: number): SaveData {
+  const cost = spinPrice(save.clearedStage) * count;
+  if (count <= 0) throw new Error('Pick how many spins to buy');
+  if (cost > save.coins) throw new Error('Not enough coins');
+  return { ...save, coins: save.coins - cost, spins: save.spins + count };
 }

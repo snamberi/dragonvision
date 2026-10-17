@@ -29,13 +29,21 @@ export interface Look {
   large?: boolean;
 }
 
-export type SpecialKind = 'beam' | 'wave' | 'heal' | 'drain';
+/**
+ * beam: big single-target hit · wave: hits every enemy · heal: heals every ally
+ * drain: hit and heal self · revive: bring back a fallen ally (once per battle)
+ * shield: every ally gets a damage shield · stun: hit and skip the target's next turn
+ * rally: every ally hits harder for two turns
+ */
+export type SpecialKind = 'beam' | 'wave' | 'heal' | 'drain' | 'revive' | 'shield' | 'stun' | 'rally';
 
 export interface Special {
   name: string;
   kind: SpecialKind;
-  /** Damage multiplier for attacks, share of max HP for heals. */
+  /** Damage multiplier for attacks; share of max HP for heals, revives and shields; attack bonus for rally. */
   power: number;
+  /** Moves the fighter must make to fill the special bar. Using the special is free. */
+  charge: number;
 }
 
 export interface Form {

@@ -34,7 +34,7 @@ export const FAMILIES: Family[] = [
     name: 'Kairo',
     title: 'The Wandering Spark',
     base: { hp: 100, atk: 26, def: 22, spd: 24 },
-    special: { name: 'Solar Wave', kind: 'beam', power: 2.8 },
+    special: { name: 'Solar Wave', kind: 'beam', power: 2.8, charge: 3 },
     forms: [
       form('Kid Kairo', { ...kairoBase, small: true }),
       form('Teen Kairo', { ...kairoBase, outfit: '#e0602c' }),
@@ -53,7 +53,7 @@ export const FAMILIES: Family[] = [
     name: 'Varek',
     title: 'Exiled Prince',
     base: { hp: 95, atk: 28, def: 21, spd: 25 },
-    special: { name: 'Royal Cannon', kind: 'beam', power: 2.9 },
+    special: { name: 'Royal Cannon', kind: 'beam', power: 2.9, charge: 3 },
     forms: [
       form('Varek', varekBase),
       form('Radiant Varek', { ...varekBase, hair: '#ffd23f', aura: '#ffd23f' }),
@@ -67,7 +67,7 @@ export const FAMILIES: Family[] = [
     name: 'Tobi',
     title: 'Monk of the Cliff Temple',
     base: { hp: 90, atk: 22, def: 22, spd: 28 },
-    special: { name: 'Spinning Disc', kind: 'wave', power: 1.3 },
+    special: { name: 'Blinding Flash', kind: 'stun', power: 0.8, charge: 3 },
     forms: [
       form('Tobi', {
         skin: SKIN,
@@ -85,7 +85,7 @@ export const FAMILIES: Family[] = [
     name: 'Orrin',
     title: 'Horned Sage',
     base: { hp: 120, atk: 22, def: 28, spd: 18 },
-    special: { name: 'Sage Light', kind: 'heal', power: 0.25 },
+    special: { name: 'Sage Light', kind: 'heal', power: 0.25, charge: 3 },
     forms: [
       form('Orrin', {
         skin: '#8fb3d9',
@@ -111,7 +111,7 @@ export const FAMILIES: Family[] = [
     name: 'Sora',
     title: 'Hidden Prodigy',
     base: { hp: 95, atk: 25, def: 22, spd: 25 },
-    special: { name: 'Twin Comet', kind: 'beam', power: 2.7 },
+    special: { name: 'Twin Comet', kind: 'beam', power: 2.7, charge: 3 },
     forms: [
       form('Kid Sora', {
         skin: SKIN,
@@ -147,7 +147,7 @@ export const FAMILIES: Family[] = [
     name: 'Mei',
     title: 'Storm Fist',
     base: { hp: 92, atk: 24, def: 21, spd: 30 },
-    special: { name: 'Thunder Palm', kind: 'beam', power: 2.6 },
+    special: { name: 'Thunder Palm', kind: 'beam', power: 2.2, charge: 2 },
     forms: [
       form('Mei', {
         skin: SKIN_TAN,
@@ -174,7 +174,7 @@ export const FAMILIES: Family[] = [
     title: 'Tyrant of the Pale Stars',
     villain: true,
     base: { hp: 105, atk: 27, def: 24, spd: 23 },
-    special: { name: 'Death Ray', kind: 'drain', power: 2.2 },
+    special: { name: 'Death Ray', kind: 'drain', power: 2.2, charge: 3 },
     forms: [
       form('Vorg', {
         skin: '#e8e6f2',
@@ -210,7 +210,7 @@ export const FAMILIES: Family[] = [
     title: 'Rogue Android',
     villain: true,
     base: { hp: 100, atk: 25, def: 26, spd: 22 },
-    special: { name: 'Pulse Storm', kind: 'wave', power: 1.25 },
+    special: { name: 'Pulse Storm', kind: 'wave', power: 1.25, charge: 4 },
     forms: [
       form('Nyx-9', {
         skin: '#e9d6c4',
@@ -228,7 +228,7 @@ export const FAMILIES: Family[] = [
     title: 'Mountain Breaker',
     villain: true,
     base: { hp: 140, atk: 27, def: 20, spd: 14 },
-    special: { name: 'Quake Slam', kind: 'wave', power: 1.35 },
+    special: { name: 'Quake Slam', kind: 'wave', power: 1.35, charge: 4 },
     forms: [
       form('Mogra', {
         skin: '#c57a52',
@@ -256,7 +256,7 @@ export const FAMILIES: Family[] = [
     name: 'Jin',
     title: 'Wandering Blade',
     base: { hp: 92, atk: 28, def: 20, spd: 27 },
-    special: { name: 'Crescent Slash', kind: 'beam', power: 2.8 },
+    special: { name: 'Crescent Slash', kind: 'beam', power: 2.8, charge: 3 },
     forms: [
       form('Jin', { skin: SKIN, hair: INK, hairStyle: 'topknot', outfit: '#2f5fd0', accent: '#e9e4d4', boots: '#1b1530' }),
       form('Blade Jin', { skin: SKIN, hair: INK, hairStyle: 'topknot', outfit: '#1d3f9e', accent: '#ffd23f', boots: '#1b1530', aura: '#9ad4ff' }),
@@ -268,7 +268,7 @@ export const FAMILIES: Family[] = [
     name: 'Aya',
     title: 'Blossom Dancer',
     base: { hp: 88, atk: 24, def: 20, spd: 31 },
-    special: { name: 'Petal Storm', kind: 'wave', power: 1.3 },
+    special: { name: 'Petal Storm', kind: 'wave', power: 1.3, charge: 3 },
     forms: [
       form('Aya', { skin: SKIN, hair: '#e8578f', hairStyle: 'ponytail', outfit: '#f4ecd8', accent: '#e8578f', boots: '#7a2a4a' }),
       form('Bloom Aya', { skin: SKIN, hair: '#ff8fbf', hairStyle: 'ponytail', outfit: '#e8578f', accent: '#ffd23f', boots: '#7a2a4a', aura: '#ff8fbf' }),
@@ -279,7 +279,7 @@ export const FAMILIES: Family[] = [
     name: 'Bruno',
     title: 'Iron Wall',
     base: { hp: 150, atk: 23, def: 30, spd: 13 },
-    special: { name: 'Titan Fist', kind: 'beam', power: 2.6 },
+    special: { name: 'Iron Bulwark', kind: 'shield', power: 0.25, charge: 3 },
     forms: [
       form('Bruno', { skin: SKIN_TAN, hair: SKIN_TAN, hairStyle: 'bald', outfit: '#6b6f7a', accent: '#d8432e', boots: '#2b2d33', large: true }),
       form('Iron Bruno', { skin: '#b9c2cf', hair: '#b9c2cf', hairStyle: 'bald', outfit: '#3a3f4b', accent: '#ffb02e', boots: '#22252d', large: true, aura: '#cfd8e6' }),
@@ -290,7 +290,7 @@ export const FAMILIES: Family[] = [
     name: 'Kenji',
     title: 'Old Master of the Isle',
     base: { hp: 90, atk: 25, def: 24, spd: 22 },
-    special: { name: 'Old Lightning', kind: 'beam', power: 2.9 },
+    special: { name: "Master's Lesson", kind: 'rally', power: 0.3, charge: 4 },
     forms: [
       form('Master Kenji', { skin: SKIN, hair: '#f2f2f2', hairStyle: 'bob', outfit: '#e0a030', accent: '#7a3a1a', boots: '#5a3a22', small: true }),
       form('Max Power Kenji', { skin: SKIN, hair: '#f2f2f2', hairStyle: 'bob', outfit: '#e0a030', accent: '#7a3a1a', boots: '#5a3a22', large: true, aura: '#ffe066' }),
@@ -301,7 +301,7 @@ export const FAMILIES: Family[] = [
     name: 'Lyra',
     title: 'Star Ranger',
     base: { hp: 94, atk: 26, def: 21, spd: 26 },
-    special: { name: 'Starfall', kind: 'wave', power: 1.25 },
+    special: { name: 'Starfall', kind: 'wave', power: 1.25, charge: 4 },
     forms: [
       form('Lyra', { skin: SKIN, hair: '#3fc6ff', hairStyle: 'bob', outfit: '#1f2a5c', accent: '#ffd23f', boots: '#e9e4d4' }),
       form('Nova Lyra', { skin: SKIN, hair: '#9ae6ff', hairStyle: 'bob', outfit: '#16204a', accent: '#ffd23f', boots: '#e9e4d4', aura: '#9ae6ff' }),
@@ -313,7 +313,7 @@ export const FAMILIES: Family[] = [
     name: 'Zeno',
     title: 'Keeper of the Rift',
     base: { hp: 105, atk: 22, def: 26, spd: 26 },
-    special: { name: 'Rift Mend', kind: 'heal', power: 0.25 },
+    special: { name: 'Rift Rebirth', kind: 'revive', power: 0.4, charge: 4 },
     forms: [
       form('Zeno', { skin: '#a9b7e8', hair: '#e9e4ff', hairStyle: 'long', outfit: '#2b1f5c', accent: '#a78bfa', boots: '#1a1240' }),
       form('Unsealed Zeno', { skin: '#a9b7e8', hair: '#ffffff', hairStyle: 'long', outfit: '#1a1240', accent: '#ffd23f', boots: '#1a1240', aura: '#c9b8ff' }),
@@ -325,7 +325,7 @@ export const FAMILIES: Family[] = [
     title: 'Demon King',
     villain: true,
     base: { hp: 115, atk: 28, def: 23, spd: 20 },
-    special: { name: 'Soul Feast', kind: 'drain', power: 2.2 },
+    special: { name: 'Soul Feast', kind: 'drain', power: 2.2, charge: 3 },
     forms: [
       form('Grimm', { skin: '#c23a3a', hair: '#1b1530', hairStyle: 'horns', outfit: '#1b1530', accent: '#ffd23f', boots: '#1b1530' }),
       form('Demon Lord Grimm', { skin: '#a81f2f', hair: '#2a0a12', hairStyle: 'horns', outfit: '#2a0a12', accent: '#ff4a3d', boots: '#2a0a12', aura: '#ff4a3d' }),
@@ -338,7 +338,7 @@ export const FAMILIES: Family[] = [
     title: 'The Perfect Organism',
     villain: true,
     base: { hp: 108, atk: 26, def: 25, spd: 23 },
-    special: { name: 'Absorb', kind: 'drain', power: 2.1 },
+    special: { name: 'Absorb', kind: 'drain', power: 2.1, charge: 3 },
     forms: [
       form('Larval Sylas', { skin: '#6fa84a', hair: '#3d6b2a', hairStyle: 'crest', outfit: '#3d6b2a', accent: '#1b1530', boots: '#2a4a1d' }),
       form('Sylas', { skin: '#8fd16a', hair: '#2a4a1d', hairStyle: 'crest', outfit: '#2a4a1d', accent: '#e9e4d4', boots: '#1b1530' }),
@@ -351,7 +351,7 @@ export const FAMILIES: Family[] = [
     title: 'The Corrupted Echo',
     villain: true,
     base: { hp: 98, atk: 29, def: 20, spd: 26 },
-    special: { name: 'Void Cannon', kind: 'beam', power: 3.0 },
+    special: { name: 'Void Cannon', kind: 'beam', power: 3.0, charge: 4 },
     forms: [
       form('Kael', { skin: '#c9b8b0', hair: '#3a1f5c', hairStyle: 'spiky', outfit: '#3a1f5c', accent: '#ff4a3d', boots: '#1b1530' }),
       form('Dark Kael', { skin: '#b0a0a8', hair: '#6b2fd0', hairStyle: 'spikyTall', outfit: '#1b1530', accent: '#ff4a3d', boots: '#1b1530', aura: '#8b5cf6' }),
@@ -379,7 +379,8 @@ export type Role = 'Tank' | 'Striker' | 'Blaster' | 'Support' | 'Drainer';
 
 /** Battle role shown on cards and in the team arena, derived from stats and special. */
 export function roleFor(family: Family): Role {
-  if (family.special.kind === 'heal') return 'Support';
+  const kind = family.special.kind;
+  if (kind === 'heal' || kind === 'revive' || kind === 'rally') return 'Support';
   if (family.special.kind === 'drain') return 'Drainer';
   if (family.base.hp >= 120) return 'Tank';
   if (family.special.kind === 'wave') return 'Blaster';

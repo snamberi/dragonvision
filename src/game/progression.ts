@@ -5,6 +5,7 @@ import {
   MAX_STARS,
   MAX_TEAM_SIZE,
   RESET_GEM_COST,
+  levelCap,
   STARTING_COINS,
   STARTING_GEMS,
   STARTING_SPINS,
@@ -108,8 +109,11 @@ export function affordableLevels(level: number, coins: number, limit = MAX_LEVEL
 
 export function upgradeUnit(save: SaveData, uid: string, count: number): SaveData {
   const unit = findUnit(save, uid);
-  const levels = Math.min(count, MAX_LEVEL - unit.level);
-  if (levels <= 0) throw new Error('Already at max level');
+  const cap = levelCap(unit.star);
+  const levels = Math.min(count, cap - unit.level);
+  if (levels <= 0) {
+    throw new Error(cap >= MAX_LEVEL ? 'Already at max level' : `Level ${cap} is the cap for ${unit.star}★. Evolve to keep leveling.`);
+  }
   const cost = upgradeCost(unit.level, levels);
   if (cost > save.coins) throw new Error('Not enough coins');
   const next = replaceUnit(save, { ...unit, level: unit.level + levels, coinsSpent: unit.coinsSpent + cost });

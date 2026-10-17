@@ -4,6 +4,11 @@ export const MAX_LEVEL = 400;
 export const MAX_STARS = 21;
 /** Levels per star tier: a 2★ fighter is summoned between level 20 and 40, evolves at 40, etc. */
 export const LEVELS_PER_STAR = 20;
+
+/** Level wall: a fighter can't level past star × 20 until it evolves (21★ stays capped at 400). */
+export function levelCap(star: number): number {
+  return Math.min(MAX_LEVEL, star * LEVELS_PER_STAR);
+}
 export const DUPLICATES_TO_EVOLVE = 2;
 export const MAX_TEAM_SIZE = 5;
 
@@ -70,7 +75,6 @@ export const KI_START = 20;
 export const KI_CHARGE = 40;
 export const KI_PER_ATTACK = 10;
 export const KI_BLAST_COST = 30;
-export const SPECIAL_COST = 60;
 export const ATTACK_POWER = 1;
 export const KI_BLAST_POWER = 1.7;
 export const GUARD_REDUCTION = 0.5;
@@ -90,3 +94,16 @@ export const BLASTER_WAVE_BONUS = 1.15;
 export const SUPPORT_HEAL_BONUS = 1.2;
 export const DRAIN_SHARE = 0.5;
 export const DRAINER_DRAIN_SHARE = 0.75;
+/** Shields can't stack past this share of max HP. */
+export const MAX_SHIELD_SHARE = 0.4;
+/** Own turns a rally bonus lasts. */
+export const RALLY_TURNS = 2;
+
+// --- Buying spins ---
+/** A spin costs this share of your latest stage's first-clear coins, so replays can always earn more. */
+export const SPIN_PRICE_SHARE = 0.5;
+export const MIN_SPIN_PRICE = 100;
+
+export function spinPrice(clearedStage: number): number {
+  return Math.max(MIN_SPIN_PRICE, Math.round(stageCoinReward(Math.max(1, clearedStage)) * SPIN_PRICE_SHARE));
+}

@@ -1006,6 +1006,18 @@ div.card-open {
   margin: 10px 0 14px;
 }
 
+.buy-spins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 14px 0 6px;
+  padding: 8px 10px;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+}
+
 .pull-results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -1222,6 +1234,13 @@ div.card-open {
   display: none;
 }
 
+.fighter.ko.targetable {
+  opacity: 0.9;
+  filter: none;
+  border-color: var(--green);
+  cursor: pointer;
+}
+
 .fighter.shielded {
   opacity: 0.55;
   cursor: not-allowed;
@@ -1264,6 +1283,129 @@ div.card-open {
   white-space: pre-wrap;
   font-size: 16px;
   color: var(--muted);
+}
+
+.f-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ki-text {
+  color: var(--blue);
+}
+
+.pips {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.pips i {
+  width: 7px;
+  height: 7px;
+  background: #0a0620;
+  border: 1px solid #b794ff;
+}
+
+.pips i.on {
+  background: #b794ff;
+}
+
+.pips.ready i {
+  background: var(--gold);
+  border-color: var(--gold);
+  animation: pulse-glow 0.7s steps(2) infinite;
+}
+
+.pips.used {
+  font-family: var(--pixel);
+  font-size: 6px;
+  color: var(--muted);
+}
+
+@keyframes pulse-glow {
+  50% {
+    box-shadow: 0 0 6px var(--gold);
+  }
+}
+
+.f-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  min-height: 12px;
+  margin-top: 2px;
+}
+
+.status {
+  font-family: var(--pixel);
+  font-size: 6px;
+  padding: 2px 3px;
+  color: #120b2e;
+}
+
+.status.shield {
+  background: #e9e4d4;
+}
+
+.status.stun {
+  background: var(--gold);
+}
+
+.status.rally {
+  background: var(--orange);
+}
+
+.fighter.stunned .sprite {
+  filter: grayscale(0.6) brightness(1.2);
+}
+
+.btn.special.ready {
+  background: #8b4fff;
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold), 3px 3px 0 #0a0620;
+}
+
+.special-hint {
+  margin-top: 8px;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.float.heal,
+.float.revive {
+  color: var(--green);
+}
+
+.float.shield {
+  color: #e9e4d4;
+}
+
+.float.stun,
+.float.rally {
+  color: var(--gold);
+}
+
+.float.resist {
+  color: var(--muted);
+}
+
+.special-box {
+  margin: 6px 0;
+  padding: 8px;
+  background: var(--bg-2);
+  border: 2px solid #6b2fd0;
+}
+
+.level-wall {
+  padding: 8px 10px;
+  background: #3b2140;
+  border: 2px solid var(--orange);
 }
 
 .turn-banner {

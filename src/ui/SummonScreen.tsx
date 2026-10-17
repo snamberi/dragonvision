@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FAMILIES } from '../game/roster';
-import { summon, summonOdds, summonStarCap } from '../game/summon';
+import { spinPrice } from '../game/balance';
+import { buySpins, summon, summonOdds, summonStarCap } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
@@ -15,6 +16,7 @@ interface Props {
 export function SummonScreen({ save, update, onBack }: Props) {
   const [results, setResults] = useState<Unit[]>([]);
   const odds = summonOdds(save);
+  const price = spinPrice(save.clearedStage);
   const chanceOf = (familyId: string) => odds.filter((o) => o.familyId === familyId).reduce((sum, o) => sum + o.chance, 0);
 
   const pull = (count: number) => {
@@ -54,7 +56,22 @@ export function SummonScreen({ save, update, onBack }: Props) {
             Summon ×10
           </button>
         </div>
-        {save.spins === 0 && <p className="muted small-text">Clear new stages to earn spins: 1 per stage, 5 per mini-boss, 10 per boss.</p>}
+        <div className="buy-spins">
+          <span>
+            Buy spins: <span className="coin">● {price.toLocaleString()}</span> each
+          </span>
+          <div className="button-row">
+            <button className="btn small" disabled={save.coins < price} onClick={() => update((s) => buySpins(s, 1))}>
+              Buy 1
+            </button>
+            <button className="btn small" disabled={save.coins < price * 10} onClick={() => update((s) => buySpins(s, 10))}>
+              Buy 10
+            </button>
+          </div>
+        </div>
+        <p className="muted small-text">
+          Free spins: 1 for each new stage, 5 per mini-boss, 10 per boss. Replays earn coins you can spend here.
+        </p>
 
         {results.length > 0 && (
           <div className="pull-results">

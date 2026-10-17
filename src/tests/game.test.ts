@@ -85,15 +85,29 @@ describe('levels and resets', () => {
   });
 
   it('reset refunds only purchased levels and costs gems', () => {
-    let { save, unit } = withUnit({ ...newSave(), coins: 100_000, gems: 10 }, 'kairo', 2, 28);
+    let { save, unit } = withUnit({ ...newSave(), coins: 100_000, gems: 10 }, 'kairo', 3, 41);
     save = upgradeUnit(save, unit.uid, 17);
     const spent = 100_000 - save.coins;
     save = resetUnit(save, unit.uid);
     const after = save.units.find((u) => u.uid === unit.uid)!;
-    expect(after.level).toBe(28);
+    expect(after.level).toBe(41);
     expect(save.coins).toBe(100_000);
     expect(spent).toBeGreaterThan(0);
     expect(save.gems).toBe(10 - RESET_GEM_COST);
+  });
+});
+
+describe('level wall', () => {
+  it('stops leveling at star × 20 until the fighter evolves', () => {
+    let save: SaveData = { ...newSave(), coins: 1_000_000 };
+    save = upgradeUnit(save, 'u1', 50);
+    expect(save.units[0].level).toBe(20);
+    expect(() => upgradeUnit(save, 'u1', 1)).toThrow(/Evolve to keep leveling/);
+    save = withUnit(save, 'kairo', 1, 2).save;
+    save = withUnit(save, 'kairo', 1, 3).save;
+    save = evolveUnit(save, 'u1');
+    save = upgradeUnit(save, 'u1', 50);
+    expect(save.units.find((u) => u.uid === 'u1')!.level).toBe(40);
   });
 });
 
@@ -198,5 +212,18 @@ describe('battle', () => {
     expect(nextActor(state)?.side).toBe('player');
     state = performAction(state, { kind: 'charge' }).state;
     expect(state.turn).toBe('enemy');
+  });
+});
+
+describe('buying spins', () => {
+  it('trades coins for spins at a price that follows stage progress', async () => {
+    const { buySpins } = await import('../game/summon');
+    const { spinPrice } = await import('../game/balance');
+    const save: SaveData = { ...newSave(), coins: 10_000, clearedStage: 5 };
+    const next = buySpins(save, 3);
+    expect(next.spins).toBe(3);
+    expect(next.coins).toBe(10_000 - 3 * spinPrice(5));
+    expect(spinPrice(40)).toBeGreaterThan(spinPrice(5));
+    expect(() => buySpins({ ...save, coins: 0 }, 1)).toThrow(/Not enough coins/);
   });
 });

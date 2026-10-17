@@ -1,25 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { KI_BLAST_COST, KI_MAX, SPECIAL_COST } from '../game/balance';
+import { KI_BLAST_COST, KI_MAX } from '../game/balance';
 import {
   type Action,
   type ActionEvent,
   type ActionKind,
   type BattleState,
   type Fighter,
+  type Hit,
   canUse,
   chooseAction,
   createBattle,
-  legalTargets,
-  needsTarget,
   nextActor,
   performAction,
+  specialOf,
+  specialReady,
+  targetsFor,
 } from '../game/battle';
 import { teamSlots } from '../game/progression';
-import { getFamily } from '../game/roster';
 import { type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { Sprite, Stars } from './Sprite';
+import { describeSpecial } from './specialText';
 
 interface Props {
   save: SaveData;
@@ -29,6 +31,26 @@ interface Props {
 }
 
 const STEP_MS = 650;
+
+/** Floating text over a fighter for one hit. */
+function hitText(h: Hit): string {
+  switch (h.kind) {
+    case 'damage':
+      return h.absorbed > 0 && h.absorbed === h.amount ? `SHIELD -${h.absorbed}` : `-${(h.amount - h.absorbed).toLocaleString()}`;
+    case 'heal':
+      return `+${h.amount.toLocaleString()}`;
+    case 'revive':
+      return 'REVIVED';
+    case 'shield':
+      return `SHIELD +${h.amount.toLocaleString()}`;
+    case 'stun':
+      return 'STUNNED';
+    case 'resist':
+      return 'RESIST';
+    case 'rally':
+      return `ATK +${h.amount}%`;
+  }
+}
 
 export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
   const stage = useMemo(() => getStage(stageNumber), [stageNumber]);
@@ -64,9 +86,8 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     setBattle(state);
     setPending(null);
     setBusy(true);
-    const targets = ev.hits.filter((h) => !h.heal).map((h) => `${nameOf(h.targetId)} -${h.amount}${h.crit ? '!' : ''}`);
-    const heals = ev.hits.filter((h) => h.heal).map((h) => `${nameOf(h.targetId)} +${h.amount}`);
-    setLog((l) => [[nameOf(ev.actorId), ev.label, ...targets, ...heals].join(' · '), ...l].slice(0, 30));
+    const parts = ev.hits.map((h) => `${nameOf(h.targetId)} ${hitText(h)}${h.crit ? '!' : ''}`);
+    setLog((l) => [[nameOf(ev.actorId), ev.label, ...parts].join(' · '), ...l].slice(0, 30));
     setTimeout(() => {
       acting.current = false;
       setBusy(false);
@@ -93,14 +114,15 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
 
   const choose = (kind: ActionKind) => {
     if (!actor || !playerControls) return;
-    if (needsTarget(actor, kind)) setPending(kind);
+    if (targetsFor(battle, actor, kind)) setPending(kind);
     else act({ kind });
   };
 
-  const legal = new Set(legalTargets(battle, 'player').map((f) => f.id));
+  const targetIds = new Set(pending && actor ? (targetsFor(battle, actor, pending) ?? []).map((f) => f.id) : []);
+  const aimingAtEnemies = pending !== null && [...targetIds].some((id) => id.startsWith('e-'));
 
   const clickFighter = (f: Fighter) => {
-    if (!pending || !playerControls || !legal.has(f.id)) return;
+    if (!pending || !playerControls || !targetIds.has(f.id)) return;
     act({ kind: pending, targetId: f.id });
   };
 
@@ -109,11 +131,12 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
     const classes = ['fighter', f.side];
     if (f.hp <= 0) classes.push('ko');
     if (actor?.id === f.id && battle.result === 'ongoing') classes.push('active');
-    if (pending && legal.has(f.id)) classes.push('targetable');
-    if (pending && f.side === 'enemy' && f.hp > 0 && !legal.has(f.id)) classes.push('shielded');
+    if (targetIds.has(f.id)) classes.push('targetable');
+    if (aimingAtEnemies && f.side === 'enemy' && f.hp > 0 && !targetIds.has(f.id)) classes.push('shielded');
+    if (f.stunned) classes.push('stunned');
     if (f.row === 'back') classes.push('back-row');
     if (busy && ev?.actorId === f.id) classes.push(`do-${ev.kind}`);
-    if (busy && ev?.hits.some((h) => h.targetId === f.id && !h.heal)) classes.push('hit');
+    if (busy && ev?.hits.some((h) => h.targetId === f.id && h.kind === 'damage')) classes.push('hit');
     if (f.guarding) classes.push('guarding');
     if (f.rank !== 'minion') classes.push(f.rank);
     return classes.join(' ');
@@ -125,14 +148,13 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
         .filter((f) => f.side === side && f.row === row)
         .sort((a, b) => a.slot - b.slot)
         .map((f) => (
-          <button key={f.id} className={fighterClasses(f)} onClick={() => clickFighter(f)} disabled={f.side === 'player'}>
+          <button key={f.id} className={fighterClasses(f)} onClick={() => clickFighter(f)} disabled={!targetIds.has(f.id)}>
             {busy &&
               event?.data.hits
                 .filter((h) => h.targetId === f.id)
                 .map((h, i) => (
-                  <span key={`${event.id}-${i}`} className={`float ${h.heal ? 'heal' : ''} ${h.crit ? 'crit' : ''}`}>
-                    {h.heal ? '+' : '-'}
-                    {h.amount.toLocaleString()}
+                  <span key={`${event.id}-${i}`} className={`float ${h.kind} ${h.crit ? 'crit' : ''}`}>
+                    {hitText(h)}
                   </span>
                 ))}
             {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special') && (
@@ -151,12 +173,23 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
             <span className="bar ki">
               <i style={{ width: `${(f.ki / KI_MAX) * 100}%` }} />
             </span>
+            <span className="f-stats">
+              <span className="ki-text">Ki {f.ki}</span>
+              <ChargePips fighter={f} />
+            </span>
+            <span className="f-status">
+              {f.shield > 0 && <span className="status shield">SH {f.shield.toLocaleString()}</span>}
+              {f.stunned && <span className="status stun">STUN</span>}
+              {f.rallyTurns > 0 && <span className="status rally">ATK↑</span>}
+            </span>
           </button>
         ))}
     </div>
   );
 
-  const special = actor ? getFamily(actor.familyId).special : null;
+  const special = actor ? specialOf(actor) : null;
+  const specialBlocked =
+    actor && special && specialReady(actor) && !canUse(battle, actor, 'special') ? 'No fallen ally' : null;
 
   return (
     <div className="battle">
@@ -185,22 +218,30 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
           {battle.turn === 'player' && actor && !auto ? (
             <>
               <div className="action-who">
-                {pending ? `${actor.name}: pick a target — the front row shields the back row` : `${actor.name}'s move`} · Ki{' '}
-                {actor.ki}
+                {pending
+                  ? `${actor.name}: pick a target${aimingAtEnemies ? ' — the front row shields the back row' : ''}`
+                  : `${actor.name}'s move`}{' '}
+                · Ki {actor.ki}/{KI_MAX}
               </div>
               <div className="button-row">
                 <button className="btn" disabled={!playerControls} onClick={() => choose('attack')}>
                   Attack
                 </button>
-                <button className="btn" disabled={!playerControls || !canUse(actor, 'kiBlast')} onClick={() => choose('kiBlast')}>
-                  Ki Blast <small>{KI_BLAST_COST}</small>
+                <button className="btn" disabled={!playerControls || !canUse(battle, actor, 'kiBlast')} onClick={() => choose('kiBlast')}>
+                  Ki Blast <small>{KI_BLAST_COST} Ki</small>
                 </button>
                 <button
-                  className="btn special"
-                  disabled={!playerControls || !canUse(actor, 'special')}
+                  className={`btn special ${canUse(battle, actor, 'special') ? 'ready' : ''}`}
+                  disabled={!playerControls || !canUse(battle, actor, 'special')}
                   onClick={() => choose('special')}
+                  title={special ? describeSpecial(special) : undefined}
                 >
-                  {special?.name} <small>{SPECIAL_COST}</small>
+                  {special?.name}{' '}
+                  <small>
+                    {actor.specialSpent
+                      ? 'USED'
+                      : specialBlocked ?? (specialReady(actor) ? 'READY' : `${actor.charge}/${special?.charge}`)}
+                  </small>
                 </button>
                 <button className="btn" disabled={!playerControls} onClick={() => choose('charge')}>
                   Charge
@@ -214,6 +255,7 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
                   </button>
                 )}
               </div>
+              {special && <div className="special-hint">{describeSpecial(special)}</div>}
             </>
           ) : (
             <div className="action-who">{auto ? 'Auto battle…' : 'Enemy is moving…'}</div>
@@ -248,5 +290,18 @@ export function BattleScreen({ save, stageNumber, update, onExit }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+/** Special bar: one pip per move needed; full pips glow when the special is ready. */
+function ChargePips({ fighter }: { fighter: Fighter }) {
+  const need = specialOf(fighter).charge;
+  if (fighter.specialSpent) return <span className="pips used">USED</span>;
+  return (
+    <span className={`pips ${specialReady(fighter) ? 'ready' : ''}`} aria-label={`Special ${fighter.charge} of ${need}`}>
+      {Array.from({ length: need }, (_, i) => (
+        <i key={i} className={i < fighter.charge ? 'on' : ''} />
+      ))}
+    </span>
   );
 }

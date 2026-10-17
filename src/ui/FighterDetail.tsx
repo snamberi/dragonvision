@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST } from '../game/balance';
+import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap } from '../game/balance';
 import {
   affordableLevels,
   canReset,
@@ -13,10 +13,11 @@ import {
   upgradeCost,
   upgradeUnit,
 } from '../game/progression';
-import { formForStar, getFamily } from '../game/roster';
+import { formForStar, getFamily, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { Sprite, Stars } from './Sprite';
+import { describeSpecial } from './specialText';
 
 interface Props {
   save: SaveData;
@@ -43,7 +44,8 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
   const family = getFamily(unit.familyId);
   const stats = statsFor(unit.familyId, unit.star, unit.level);
   const evolve = checkEvolve(save, uid);
-  const maxBuy = affordableLevels(unit.level, save.coins);
+  const cap = levelCap(unit.star);
+  const maxBuy = affordableLevels(unit.level, save.coins, Math.max(0, cap - unit.level));
   const purchased = purchasedLevels(unit);
   const nextForm = unit.star < MAX_STARS ? formForStar(family, unit.star + 1).name : null;
 
@@ -61,7 +63,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
     else doEvolve();
   };
 
-  const levelButtons = [1, 10, 50].filter((n) => unit.level + n <= MAX_LEVEL);
+  const levelButtons = [1, 10, 50].filter((n) => unit.level + n <= cap);
 
   return (
     <div className="detail">
@@ -84,7 +86,11 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
             <span>DEF {stats.def.toLocaleString()}</span>
             <span>SPD {stats.spd}</span>
             <span>Power {power(unit.familyId, unit.star, unit.level).toLocaleString()}</span>
-            <span>Special: {family.special.name}</span>
+            <span>Role: {roleFor(family)}</span>
+          </div>
+          <div className="special-box">
+            <strong>{family.special.name}</strong> · charges in {family.special.charge} moves
+            <div className="muted small-text">{describeSpecial(family.special)}</div>
           </div>
           <div className="muted small-text">
             Summoned at Lv {unit.baseLevel} · {purchased} purchased level{purchased === 1 ? '' : 's'} ({unit.coinsSpent.toLocaleString()} coins)
@@ -93,9 +99,15 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
       </section>
 
       <section className="panel">
-        <h3>Level up</h3>
+        <h3>
+          Level up <span className="muted">· cap Lv {cap}</span>
+        </h3>
         {unit.level >= MAX_LEVEL ? (
           <p className="muted">Max level reached.</p>
+        ) : unit.level >= cap ? (
+          <p className="level-wall">
+            Level wall: {unit.star}★ fighters stop at Lv {cap}. Evolve to {unit.star + 1}★ to raise the cap to Lv {levelCap(unit.star + 1)}.
+          </p>
         ) : (
           <div className="button-row">
             {levelButtons.map((n) => {
