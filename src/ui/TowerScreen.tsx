@@ -18,8 +18,11 @@ export function TowerScreen({ save, onBack, onChallenge }: Props) {
   const teamPower = teamUnits(save).reduce((sum, u) => sum + power(u.familyId, u.star, u.level), 0);
   const floors = Array.from({ length: TOWER_FLOORS }, (_, i) => TOWER_FLOORS - i);
   const nextRef = useRef<HTMLElement>(null);
-  // Floors are listed top-down, so bring the floor to play into view.
-  useEffect(() => nextRef.current?.scrollIntoView({ block: 'center' }), []);
+  // Floors are listed top-down, so bring the floor to play into view. Braces matter: newer browsers return a
+  // promise from scrollIntoView, and React would call whatever the effect returns when the screen closes.
+  useEffect(() => {
+    nextRef.current?.scrollIntoView({ block: 'center' });
+  }, []);
 
   return (
     <div className="tower">

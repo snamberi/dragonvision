@@ -55,7 +55,9 @@ export function App() {
   const saveRef = useRef(save);
   saveRef.current = save;
 
-  useEffect(() => writeSave(save), [save]);
+  useEffect(() => {
+    writeSave(save);
+  }, [save]);
 
   // Every new screen starts at the top.
   useEffect(() => {
