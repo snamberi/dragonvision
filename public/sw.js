@@ -1,5 +1,5 @@
 // Offline support: serve from the cache first, refresh it in the background.
-const CACHE = 'dragonvision-v1';
+const CACHE = 'dragonvision-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(['./', './index.html', './manifest.webmanifest', './icon.svg'])));

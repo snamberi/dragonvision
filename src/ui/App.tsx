@@ -37,6 +37,9 @@ const TAB_LABELS: Record<Tab, string> = {
   fighters: 'Fighters',
 };
 
+// Narrow phones have no room for the longer labels.
+const TAB_SHORT: Partial<Record<Tab, string>> = { inventory: 'Items' };
+
 type View =
   | { kind: 'tab'; tab: Tab }
   | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number; mode?: 'boss' | 'survival' }
@@ -208,7 +211,9 @@ export function App() {
         <nav className="tabs">
           {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button key={t} className={t === tab ? 'active' : ''} onClick={() => setView({ kind: 'tab', tab: t })}>
-              <PixelIcon kind={t} size={22} />{TAB_LABELS[t]}
+              <PixelIcon kind={t} size={22} />
+              <span className="tab-long">{TAB_LABELS[t]}</span>
+              <span className="tab-short">{TAB_SHORT[t] ?? TAB_LABELS[t]}</span>
               {t === 'city' && save.spins > 0 && <span className="tab-count">{save.spins}</span>}
             </button>
           ))}

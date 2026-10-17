@@ -2791,3 +2791,61 @@ div.gear-open { cursor:default; }
 .save-code { width:100%; margin:8px 0; padding:8px; font:16px var(--body); color:var(--ink); background:var(--bg-2); border:2px solid var(--line); resize:vertical; }
 .file-btn { position:relative; overflow:hidden; cursor:pointer; }
 .file-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+/* ---------- Phone pass ---------- */
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.app { overflow-x:clip; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
+.topbar { padding-top:calc(10px + env(safe-area-inset-top)); }
+.tabs { padding-left:calc(8px + env(safe-area-inset-left)); padding-right:calc(8px + env(safe-area-inset-right)); }
+.tabs button { flex:1 1 0; min-width:0; }
+.tab-short { display:none; }
+/* Touch screens keep :hover after a tap, so lifts only happen with a real pointer. */
+@media (hover:none) {
+  .map-node:hover:not(:disabled), .btn:hover:not(:disabled), .card:hover { translate:none; }
+  .btn:hover:not(:disabled) { filter:none; }
+  .city-map .building:hover { margin-top:0; }
+}
+@media (max-width:700px) {
+  .app { padding-bottom:calc(78px + env(safe-area-inset-bottom)); }
+  .topbar { gap:6px; padding-left:10px; padding-right:10px; }
+  .logo { font-size:10px; }
+  .logo span { margin-left:3px; }
+  .wallet { gap:4px; }
+  .wallet>span { font-size:15px; }
+  .tabs { gap:4px; padding-top:6px; padding-bottom:calc(6px + env(safe-area-inset-bottom)); }
+  .tabs button { padding:7px 2px; gap:3px; font-size:8px; }
+  .tab-count { position:absolute; top:3px; right:4px; margin:0; padding:1px 3px; font-size:8px; background:var(--gold); color:#1b0f00; }
+  .tabs button { position:relative; }
+  .screen { padding:10px; }
+  .btn.small, select { min-height:40px; }
+  .btn { min-height:44px; }
+  select, input, textarea { font-size:16px !important; }
+  .chapter-title select, .sort-select, select { font-family:var(--body); }
+  .role-tag, .hud-card .role-tag, .arena-row-label, .card-ribbon, .card-team { font-size:7px; }
+  .building-name { font-size:9px; }
+  .modal-backdrop { padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
+  .modal, .stage-sheet { max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow-y:auto; overscroll-behavior:contain; }
+  .toast { bottom:calc(92px + env(safe-area-inset-bottom)); }
+  /* Battle */
+  .battle-top { flex-wrap:wrap; }
+  .turn-queue { min-width:0; max-width:100%; overflow-x:auto; scrollbar-width:none; }
+  .battle-title { white-space:normal; min-width:0; flex:1 1 180px; }
+  .battle-title small { font-size:14px; line-height:1.15; }
+  /* Leave room for both rows of commands below the field on short phones. */
+  .field { height:clamp(300px, calc(100dvh - 400px), 440px); min-height:0; }
+  .command-head { color:var(--ink); }
+  .special-hint { color:#d8cfee; font-size:16px; }
+  .cmd { font-size:8px; min-height:58px; }
+}
+@media (max-width:420px) {
+  .tab-long { display:none; }
+  .tab-short { display:inline; }
+  .logo { font-size:9px; }
+  .wallet>span { font-size:14px; padding:3px; }
+  .wallet .pixel-icon { width:16px; height:16px; }
+}
+@media (max-width:380px) {
+  .logo { display:flex; flex-direction:column; line-height:1.25; }
+  .logo span { margin-left:0; }
+}

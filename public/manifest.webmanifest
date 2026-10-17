@@ -2,6 +2,7 @@
   "name": "Dragon Vision",
   "short_name": "Dragon Vision",
   "description": "Collect fighters, evolve them and climb to the Vision Gate in this pixel 5v5 RPG.",
+  "id": "/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
