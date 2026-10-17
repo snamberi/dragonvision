@@ -2809,8 +2809,6 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 @media (max-width:700px) {
   .app { padding-bottom:calc(78px + env(safe-area-inset-bottom)); }
   .topbar { gap:6px; padding-left:10px; padding-right:10px; }
-  .logo { font-size:10px; }
-  .logo span { margin-left:3px; }
   .wallet { gap:4px; }
   .wallet>span { font-size:15px; }
   .tabs { gap:4px; padding-top:6px; padding-bottom:calc(6px + env(safe-area-inset-bottom)); }
@@ -2841,11 +2839,15 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 @media (max-width:420px) {
   .tab-long { display:none; }
   .tab-short { display:inline; }
-  .logo { font-size:9px; }
   .wallet>span { font-size:14px; padding:3px; }
   .wallet .pixel-icon { width:16px; height:16px; }
 }
-@media (max-width:380px) {
-  .logo { display:flex; flex-direction:column; line-height:1.25; }
-  .logo span { margin-left:0; }
+
+/* ---------- Brand logo ---------- */
+.logo { margin:0; display:flex; align-items:center; flex-shrink:0; line-height:0; }
+.logo img { display:block; height:34px; width:auto; image-rendering:auto; filter:drop-shadow(0 3px 0 #0b0718); }
+.logo-mark { display:none !important; }
+@media (max-width:520px) {
+  .logo-full { display:none !important; }
+  .logo-mark { display:block !important; height:36px !important; }
 }

@@ -114,9 +114,10 @@ export function App() {
   return (
     <div className={`app ${view.kind === 'tab' && view.tab === 'city' ? 'city-view' : ''}`}>
       <header className="topbar">
-        <div className="logo">
-          DRAGON<span>VISION</span>
-        </div>
+        <h1 className="logo">
+          <img className="logo-full" src={`${import.meta.env.BASE_URL}brand/logo-alt-light-transparent.png`} alt="Dragon Vision" />
+          <img className="logo-mark" src={`${import.meta.env.BASE_URL}brand/logo-icon-light-transparent.png`} alt="Dragon Vision" />
+        </h1>
         <div className="wallet">
           <span className="coin" title="Coins"><PixelIcon kind="coin" /> {save.coins.toLocaleString()}</span>
           <span className="gem" title="Gems"><PixelIcon kind="gem" /> {save.gems}</span>
