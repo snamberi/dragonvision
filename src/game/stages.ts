@@ -1,0 +1,143 @@
+import {
+  GEMS_BOSS,
+  GEMS_MINI_BOSS,
+  NORMAL_GEM_AMOUNT,
+  NORMAL_GEM_CHANCE,
+  REPLAY_COIN_SHARE,
+  SPINS_BOSS,
+  SPINS_MINI_BOSS,
+  SPINS_NORMAL,
+  STAGES_PER_CHAPTER,
+  TOTAL_STAGES,
+  enemyCountForStage,
+  enemyLevelForStage,
+  enemyStarForLevel,
+  stageCoinReward,
+} from './balance';
+import { FAMILIES } from './roster';
+import { type Rng, defaultRng, seededRng } from './rng';
+import type { SaveData } from './types';
+
+export type StageKind = 'normal' | 'miniBoss' | 'boss';
+
+export interface EnemySpec {
+  familyId: string;
+  star: number;
+  level: number;
+  rank: 'minion' | 'miniBoss' | 'boss';
+}
+
+export interface Stage {
+  number: number;
+  chapter: number;
+  chapterName: string;
+  kind: StageKind;
+  enemies: EnemySpec[];
+  coins: number;
+}
+
+export const CHAPTER_NAMES = [
+  'Cliffside Trials',
+  'Red Dune Raiders',
+  'Iron Legion',
+  'Pale Star Armada',
+  'Android Foundry',
+  'Mountain of Rage',
+  'Shattered Moon',
+  'Tyrant Ascendant',
+  'Rift of Echoes',
+  'The Vision Gate',
+];
+
+export function stageKind(stage: number): StageKind {
+  const pos = ((stage - 1) % STAGES_PER_CHAPTER) + 1;
+  if (pos === STAGES_PER_CHAPTER) return 'boss';
+  if (pos === STAGES_PER_CHAPTER / 2) return 'miniBoss';
+  return 'normal';
+}
+
+const villains = FAMILIES.filter((f) => f.villain);
+
+/** Stages are generated from their number, so the same stage always has the same enemies. */
+export function getStage(number: number): Stage {
+  const rng = seededRng(number * 7919);
+  const chapter = Math.ceil(number / STAGES_PER_CHAPTER);
+  const kind = stageKind(number);
+  const level = enemyLevelForStage(number);
+  const star = enemyStarForLevel(level);
+  const count = enemyCountForStage(number);
+  const enemies: EnemySpec[] = [];
+
+  if (kind !== 'normal') {
+    const leader = villains[(chapter - 1) % villains.length];
+    enemies.push({
+      familyId: leader.id,
+      star: Math.min(21, star + (kind === 'boss' ? 1 : 0)),
+      level: Math.min(400, level + (kind === 'boss' ? 6 : 3)),
+      rank: kind,
+    });
+  }
+  while (enemies.length < count) {
+    const family = FAMILIES[Math.floor(rng() * FAMILIES.length)];
+    const jitter = Math.floor(rng() * 5) - 2;
+    enemies.push({ familyId: family.id, star, level: Math.max(1, level + jitter), rank: 'minion' });
+  }
+
+  return {
+    number,
+    chapter,
+    chapterName: CHAPTER_NAMES[(chapter - 1) % CHAPTER_NAMES.length],
+    kind,
+    enemies,
+    coins: stageCoinReward(number),
+  };
+}
+
+export function allStageNumbers(): number[] {
+  return Array.from({ length: TOTAL_STAGES }, (_, i) => i + 1);
+}
+
+export function isUnlocked(save: SaveData, stage: number): boolean {
+  return stage <= save.clearedStage + 1 && stage <= TOTAL_STAGES;
+}
+
+export interface Rewards {
+  firstClear: boolean;
+  coins: number;
+  gems: number;
+  spins: number;
+}
+
+/**
+ * First clears pay full coins, spins (1 / 5 mini-boss / 10 boss) and gem chances.
+ * Replays pay 25% of the coins and nothing else.
+ */
+export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defaultRng): Rewards {
+  const stage = getStage(stageNumber);
+  const firstClear = stageNumber > save.clearedStage;
+  if (!firstClear) {
+    return { firstClear, coins: Math.round(stage.coins * REPLAY_COIN_SHARE), gems: 0, spins: 0 };
+  }
+  let gems = 0;
+  let spins = SPINS_NORMAL;
+  if (stage.kind === 'boss') {
+    gems = GEMS_BOSS;
+    spins = SPINS_BOSS;
+  } else if (stage.kind === 'miniBoss') {
+    gems = GEMS_MINI_BOSS;
+    spins = SPINS_MINI_BOSS;
+  } else if (rng() < NORMAL_GEM_CHANCE) {
+    gems = NORMAL_GEM_AMOUNT;
+  }
+  return { firstClear, coins: stage.coins, gems, spins };
+}
+
+export function applyRewards(save: SaveData, stageNumber: number, rewards: Rewards): SaveData {
+  return {
+    ...save,
+    coins: save.coins + rewards.coins,
+    gems: save.gems + rewards.gems,
+    spins: save.spins + rewards.spins,
+    clearedStage: rewards.firstClear ? Math.max(save.clearedStage, stageNumber) : save.clearedStage,
+  };
+}
