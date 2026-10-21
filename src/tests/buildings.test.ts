@@ -45,11 +45,11 @@ describe('10x summon pity system', () => {
     expect(units).toHaveLength(10);
   });
 
-  it('tracks the pity counter across pulls', () => {
-    let save: SaveData = { ...newSave(), spins: 10 };
+  it('tracks Dragon Fate across pulls', () => {
+    const save: SaveData = { ...newSave(), spins: 10 };
     const { save: after } = summonTen(save, seededRng(0));
-    // pity counter increments for each pull that did not yield 4★+
-    expect(typeof (after.pityPulls ?? 0)).toBe('number');
+    expect(typeof (after.fate ?? 0)).toBe('number');
+    expect((after.fate ?? 0)).toBeGreaterThan(0);
   });
 });
 
