@@ -1,4 +1,4 @@
-import { MAX_TEAM_SIZE } from './balance';
+import { MAX_TEAM_SIZE, FATE_RAGE_THRESHOLD, PITY_THRESHOLD } from './balance';
 import { newSave } from './progression';
 import { getFamily } from './roster';
 import type { SaveData } from './types';
@@ -48,6 +48,9 @@ function migrate(save: SaveData): SaveData {
     materials: { ...fresh.materials, ...save.materials },
     market: save.market ?? fresh.market,
     pityPulls: save.pityPulls ?? 0,
+    // Dragon Fate: migrate old pity counter (each PITY_THRESHOLD cycle ≈ half a Fate bar)
+    fate: save.fate ?? Math.min(FATE_RAGE_THRESHOLD, Math.round(((save.pityPulls ?? 0) / PITY_THRESHOLD) * FATE_RAGE_THRESHOLD)),
+    pullsSinceLastLucky: save.pullsSinceLastLucky ?? 0,
     upgrades: save.upgrades ?? undefined,
   };
 }

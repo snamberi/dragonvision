@@ -33,6 +33,7 @@ const varekBase: Look = {
 export const FAMILIES: Family[] = [
   {
     id: 'kairo',
+    tier: 'crystal',
     name: 'Kairo',
     title: 'The Wandering Spark',
     base: { hp: 100, atk: 26, def: 22, spd: 24 },
@@ -52,6 +53,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'varek',
+    tier: 'crystal',
     name: 'Varek',
     title: 'Exiled Prince',
     base: { hp: 95, atk: 28, def: 21, spd: 25 },
@@ -66,6 +68,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'tobi',
+    tier: 'common',
     name: 'Tobi',
     title: 'Monk of the Cliff Temple',
     base: { hp: 90, atk: 22, def: 22, spd: 28 },
@@ -84,6 +87,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'orrin',
+    tier: 'rare',
     name: 'Orrin',
     title: 'Horned Sage',
     base: { hp: 120, atk: 22, def: 28, spd: 18 },
@@ -110,6 +114,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'sora',
+    tier: 'rare',
     name: 'Sora',
     title: 'Hidden Prodigy',
     base: { hp: 95, atk: 25, def: 22, spd: 25 },
@@ -146,6 +151,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'mei',
+    tier: 'common',
     name: 'Mei',
     title: 'Storm Fist',
     base: { hp: 92, atk: 24, def: 21, spd: 30 },
@@ -172,6 +178,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'vorg',
+    tier: 'epic',
     name: 'Vorg',
     title: 'Tyrant of the Pale Stars',
     villain: true,
@@ -208,6 +215,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'nyx',
+    tier: 'common',
     name: 'Nyx-9',
     title: 'Rogue Android',
     villain: true,
@@ -226,6 +234,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'mogra',
+    tier: 'common',
     name: 'Mogra',
     title: 'Mountain Breaker',
     villain: true,
@@ -255,6 +264,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'jin',
+    tier: 'rare',
     name: 'Jin',
     title: 'Wandering Blade',
     base: { hp: 92, atk: 28, def: 20, spd: 27 },
@@ -267,6 +277,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'aya',
+    tier: 'common',
     name: 'Aya',
     title: 'Blossom Dancer',
     base: { hp: 88, atk: 24, def: 20, spd: 31 },
@@ -278,6 +289,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'bruno',
+    tier: 'common',
     name: 'Bruno',
     title: 'Iron Wall',
     base: { hp: 150, atk: 23, def: 30, spd: 13 },
@@ -289,6 +301,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'kenji',
+    tier: 'common',
     name: 'Kenji',
     title: 'Old Master of the Isle',
     base: { hp: 90, atk: 25, def: 24, spd: 22 },
@@ -300,6 +313,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'lyra',
+    tier: 'rare',
     name: 'Lyra',
     title: 'Star Ranger',
     base: { hp: 94, atk: 26, def: 21, spd: 26 },
@@ -312,6 +326,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'zeno',
+    tier: 'rare',
     name: 'Zeno',
     title: 'Keeper of the Rift',
     base: { hp: 105, atk: 22, def: 26, spd: 26 },
@@ -323,6 +338,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'grimm',
+    tier: 'epic',
     name: 'Grimm',
     title: 'Demon King',
     villain: true,

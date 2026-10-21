@@ -288,17 +288,28 @@ function CityGround({ layout }: { layout: Layout }) {
       {/* Sea by the port. */}
       <path d={`M${layout.sea.map(([x, y]) => `${x} ${y}`).join('L')}Z`} fill="#2f6f8f" />
       <path d={`M${layout.sea.map(([x, y]) => `${x} ${y + 6}`).join('L')}`} fill="none" stroke="#7fc6d8" strokeWidth="3" />
-      {/* Roads: dark curb, cobbles, then the paths to each door. */}
-      <path d={roadPath} fill="none" stroke="#5c4a3a" strokeWidth="40" strokeLinejoin="round" strokeLinecap="round" />
+      {/* Roads: dark curb, cobbles, center-line dashes, then the paths to each door. */}
+      <path d={roadPath} fill="none" stroke="#5c4a3a" strokeWidth="42" strokeLinejoin="round" strokeLinecap="round" />
       <path d={spurs} fill="none" stroke="#5c4a3a" strokeWidth="26" />
-      <path d={roadPath} fill="none" stroke="url(#city-cobble)" strokeWidth="32" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={roadPath} fill="none" stroke="url(#city-cobble)" strokeWidth="34" strokeLinejoin="round" strokeLinecap="round" />
       <path d={spurs} fill="none" stroke="url(#city-cobble)" strokeWidth="18" />
+      {/* Center-line dashes on the main boulevard */}
+      <path d={roadPath} fill="none" stroke="#e9d98a" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="14 10" opacity=".55" />
       {/* Central plaza and fountain. */}
       <circle cx={plaza.x} cy={plaza.y} r={plaza.r + 5} fill="#5c4a3a" />
       <circle cx={plaza.x} cy={plaza.y} r={plaza.r} fill="url(#city-cobble)" />
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.45} fill="#8f8aa8" />
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.34} fill="#3f9fd0" />
-      <rect x={plaza.x - 3} y={plaza.y - 16} width="6" height="16" fill="#e9fbff" />
+      {/* Fountain: outer stone basin */}
+      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.54} fill="#8a7a6a" />
+      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.50} fill="#4a8fbf" />
+      {/* Mid basin */}
+      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.32} fill="#7a6e5e" />
+      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.28} fill="#5cb0d8" />
+      {/* Center column and spray */}
+      <rect x={plaza.x - 2} y={plaza.y - 18} width="4" height="18" fill="#c8beb4" />
+      <ellipse cx={plaza.x} cy={plaza.y - 20} rx="7" ry="4" fill="#a8d8f0" opacity=".8" />
+      <ellipse cx={plaza.x - 5} cy={plaza.y - 16} rx="3" ry="2" fill="#c8eeff" opacity=".7" />
+      <ellipse cx={plaza.x + 5} cy={plaza.y - 16} rx="3" ry="2" fill="#c8eeff" opacity=".7" />
+      <ellipse cx={plaza.x} cy={plaza.y - 10} rx="5" ry="2.5" fill="#daf2ff" opacity=".6" />
       {flowers.map(([x, y], i) => (
         <rect key={`f${i}`} x={x} y={y} width="4" height="4" fill={['#ffd23f', '#ff8fbf', '#f4ecd8', '#b794ff'][i % 4]} />
       ))}

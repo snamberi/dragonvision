@@ -7,7 +7,7 @@ import { unitName } from '../game/progression';
 import { FAMILIES, GOLDEN_FAMILIES, getFamily } from '../game/roster';
 import { ItemIcon } from './ItemIcon';
 import { orbs } from './format';
-import { spinPrice, PITY_THRESHOLD } from '../game/balance';
+import { spinPrice, FATE_MAX, FATE_RAGE_THRESHOLD } from '../game/balance';
 import { buyGoldenOrbs, GOLDEN_ORB_PRICE, goldenSummonOdds, summonGolden, buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
@@ -106,7 +106,18 @@ export function SummonScreen({ save, update, onBack }: Props) {
         </div>
         {spinning && <div className="reveal-controls"><button className="btn small" onClick={finishReveal}>{results.length>1?'Reveal all':'Skip animation'}</button><span className="muted">{revealed} of {results.length} revealed</span></div>}
         <div className="spin-count"><ItemIcon icon={golden?'goldenOrb':'spinOrb'} size={32}/> {golden?`${balance} Golden Orbs`:orbs(balance)}</div>
-        {!golden && <p className="muted small-text pity-counter">Pity: {save.pityPulls ?? 0}/{PITY_THRESHOLD} — guaranteed 4★+ at {PITY_THRESHOLD} pulls</p>}
+        {!golden && (
+          <div className="fate-bar-wrap">
+            <div className="fate-bar-label">
+              <span>🔥 Dragon Fate {save.fate ?? 0}/{FATE_MAX}</span>
+              {(save.fate ?? 0) >= FATE_RAGE_THRESHOLD && <span className="fate-rage">DRAGON RAGE — Rare+ guaranteed!</span>}
+            </div>
+            <div className="fate-bar-track">
+              <div className="fate-bar-fill" style={{ width: `${save.fate ?? 0}%` }} />
+              <div className="fate-bar-rage-mark" style={{ left: `${FATE_RAGE_THRESHOLD}%` }} />
+            </div>
+          </div>
+        )}
         <div className="button-row">
           <button className="btn primary big" disabled={spinning || balance < 1} onClick={() => pull(1)}>
             Summon ×1
