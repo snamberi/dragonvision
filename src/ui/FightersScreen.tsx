@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { checkEvolve, evolveUnit, moveTeamMember, power, toggleTeamMember, unitName } from '../game/progression';
-import type { SaveData, GearItem } from '../game/types';
+import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
 import { TeamArena } from './TeamArena';

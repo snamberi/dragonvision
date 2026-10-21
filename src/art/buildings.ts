@@ -347,6 +347,39 @@ const GATE_PALETTE: Record<string, string> = {
   P: '#3b2a6b', p: '#5b3fa8', v: '#7a3fa8', V: '#b794ff', w: '#e9e4ff', W: '#ffffff', S: '#8f8aa8', s: '#5f5a7a',
 };
 
+const UPGRADES = [
+  '..........YYYY..........',
+  '.........YGGGY..........',
+  '........YGGGGGY.........',
+  '.......YGGGGGGGGY.......',
+  '....RRRRRRRRRRRRRRRR....',
+  '..RRRRRRRRRRRRRRRRRRRR..',
+  'RRDDDDDDDDDDDDDDDDDDDDRR',
+  '....WWWWWWWWWWWWWWWWWW..',
+  '....WppWWWWWWWWWWWWppW..',
+  '....WppWWWaaaaaaWWWppW..',
+  '....WppWWWaAAAAaWWWppW..',
+  '....WppWWWaAAAAaWWWppW..',
+  '....WppWWWaaaaaaWWWppW..',
+  '....WppWWWWWWWWWWWWppW..',
+  '..SSSSSSSSSSSSSSSSSSSS..',
+  '.SssssssssssssssssssssS.',
+  'SSSSSSSSSSSSSSSSSSSSSSSS',
+];
+
+const UPGRADES_PALETTE: Record<string, string> = {
+  Y: '#ffd23f',
+  G: '#ffe890',
+  R: '#5b2fc0',
+  D: '#3a1f88',
+  W: '#f4ecd8',
+  p: '#8a5a30',
+  a: '#b794ff',
+  A: '#7a50e0',
+  S: '#8f8aa8',
+  s: '#5f5a7a',
+};
+
 const cache = new Map<string, string>();
 
 function paintAscii(key: string, rows: string[], palette: Record<string, string>): string {
@@ -405,6 +438,7 @@ function paintAscii(key: string, rows: string[], palette: Record<string, string>
   return url;
 }
 
+export const upgradesHouseUrl = () => paintAscii('upgrades', UPGRADES, UPGRADES_PALETTE);
 export const shrineUrl = () => landmarkUrl('shrine') || paintAscii('shrine', SHRINE, SHRINE_PALETTE);
 export const lotUrl = () => paintAscii('lot', LOT, LOT_PALETTE);
 export const dojoUrl = () => landmarkUrl('dojo') || paintAscii('dojo', DOJO, DOJO_PALETTE);

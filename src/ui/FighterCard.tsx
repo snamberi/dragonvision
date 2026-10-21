@@ -4,6 +4,7 @@ import { unitName } from '../game/progression';
 import { getFamily, roleFor } from '../game/roster';
 import { ROLE_COLORS, tierFor } from './rarity';
 import { Sprite, Stars } from './Sprite';
+import type { NotifierColor } from './FightersScreen';
 
 interface Props {
   familyId: string;
@@ -12,15 +13,28 @@ interface Props {
   onClick?: () => void;
   highlight?: boolean;
   badge?: string;
+  notifierDot?: NotifierColor;
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
 }
 
+const DOT_COLORS: Record<NonNullable<NotifierColor>, string> = {
+  red: '#ff4444',
+  gold: '#ffd700',
+  blue: '#44aaff',
+};
+
+const DOT_LABELS: Record<NonNullable<NotifierColor>, string> = {
+  red: 'Can evolve',
+  gold: 'Gear available',
+  blue: 'Awakening available',
+};
+
 const SPARKLES = 4;
 
 /** Collectible card: border, background and effects scale with the star tier. */
-export function FighterCard({ familyId, star, level, onClick, highlight, badge, className = '', style, children }: Props) {
+export function FighterCard({ familyId, star, level, onClick, highlight, badge, notifierDot, className = '', style, children }: Props) {
   const tier = tierFor(star);
   const family = getFamily(familyId);
   const identity = identityFor(familyId);
@@ -30,6 +44,13 @@ export function FighterCard({ familyId, star, level, onClick, highlight, badge, 
     <>
       <span className="card-ribbon">{family.legendary ? 'LEGEND' : tier.label}</span>
       {badge && <span className="badge">{badge}</span>}
+      {notifierDot && (
+        <span
+          className="notifier-dot"
+          aria-label={DOT_LABELS[notifierDot]}
+          style={{ background: DOT_COLORS[notifierDot] }}
+        />
+      )}
       <div className={`card-art card-world-${identity.accessory}`}>
         <svg className="card-landscape" viewBox="0 0 180 160" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <circle cx="90" cy="66" r="41" fill="var(--family-color)" opacity=".1"/>

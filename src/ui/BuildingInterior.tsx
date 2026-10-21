@@ -1,7 +1,7 @@
 import { useId, type CSSProperties } from 'react';
 import { Sprite } from './Sprite';
-export type InteriorKind = 'dojo'|'armory'|'fusion'|'gravity'|'port'|'bounty'|'fortune'|'tower'|'hall'|'colosseum'|'gate'|'shop'|'summon';
-export const INTERIOR_TITLES:Record<string,InteriorKind>={'Training Dojo':'dojo','Armory':'armory','Fusion Lab':'fusion','Gravity Chamber':'gravity','Expedition Port':'port','Bounty Board':'bounty','Fortune Teller':'fortune','Rival Tower':'tower','Hall of Legends':'hall','Colosseum':'colosseum','Survival Gate':'gate','Shop':'shop','Summoning Shrine':'summon'};
+export type InteriorKind = 'dojo'|'armory'|'fusion'|'gravity'|'port'|'bounty'|'fortune'|'tower'|'hall'|'colosseum'|'gate'|'shop'|'summon'|'upgrades';
+export const INTERIOR_TITLES:Record<string,InteriorKind>={'Training Dojo':'dojo','Armory':'armory','Fusion Lab':'fusion','Gravity Chamber':'gravity','Expedition Port':'port','Bounty Board':'bounty','Fortune Teller':'fortune','Rival Tower':'tower','Hall of Legends':'hall','Colosseum':'colosseum','Survival Gate':'gate','Shop':'shop','Summoning Shrine':'summon','Upgrades House':'upgrades'};
 const ROOMS:Record<InteriorKind,{wall:string;floor:string;light:string;resident:string;caption:string}>={
  dojo:{wall:'#684b43',floor:'#765942',light:'#ffd898',resident:'mei',caption:'THE TRAINING HALL'},
  armory:{wall:'#3e3948',floor:'#4c4346',light:'#ffac65',resident:'bruno',caption:'THE EMBER FORGE'},
@@ -16,6 +16,7 @@ const ROOMS:Record<InteriorKind,{wall:string;floor:string;light:string;resident:
  gate:{wall:'#30283f',floor:'#42434e',light:'#b5a1ff',resident:'grimm',caption:'BEYOND THE VEIL'},
  shop:{wall:'#604348',floor:'#715148',light:'#ffd891',resident:'kenji',caption:'THE LANTERN MARKET'},
  summon:{wall:'#352743',floor:'#45374e',light:'#d7b4ff',resident:'orrin',caption:'THE SUMMONING SANCTUM'},
+ upgrades:{wall:'#2a2450',floor:'#3a3264',light:'#ffd23f',resident:'kairo',caption:'THE UPGRADES HOUSE'},
 };
 function Sword({x,y,flip=false}:{x:number;y:number;flip?:boolean}) {return <g transform={`translate(${x} ${y}) rotate(${flip?-22:22})`}><path d="M0 0L-5 6V48L0 54L5 48V6Z" fill="#c9dce8"/><path d="M0 4V45" stroke="#f5f3df" strokeWidth="2"/><path d="M-12 51H12" stroke="#d9a458" strokeWidth="5"/><path d="M0 53V70" stroke="#8e5d45" strokeWidth="5"/></g>}
 function Trophy({x,y}:{x:number;y:number}) {return <g transform={`translate(${x} ${y})`}><path d="M-14 0H14V17L5 26V36H15V42H-15V36H-5V26L-14 17Z" fill="#edbe61"/><path d="M-14 5H-25V16L-14 23M14 5H25V16L14 23" fill="none" stroke="#a77a3e" strokeWidth="5"/><path d="M-8 4V16L-3 23" stroke="#ffe8a0" strokeWidth="4"/></g>}

@@ -590,7 +590,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                     <GearCard item={rewards.gear} />
                   </li>
                 )}
-                {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (25% coins)</li>}
+                {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (7.5% coins)</li>}
               </ul>
             ) : (
               <p className="muted">Level up your fighters or replay earlier stages for coins.</p>

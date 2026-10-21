@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl } from '../art/buildings';
+import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl, upgradesHouseUrl } from '../art/buildings';
 import { ACHIEVEMENTS, achievementState } from '../game/achievements';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
 import { attemptsLeft, bossProgress } from '../game/worldBoss';
@@ -15,7 +15,7 @@ function marketFresh(save: SaveData): boolean {
   return save.market.day !== dayKey() || save.market.bought.length === 0;
 }
 
-export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall';
+export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall' | 'upgrades';
 
 interface Props {
   save: SaveData;
@@ -51,6 +51,7 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'gate', name: 'Survival Gate', art: gateUrl(), badge: save.survivalBest > 0 ? `BEST ${save.survivalBest}` : undefined },
     { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
+    { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl() },
   ];
 
   const layout = useCityLayout();
@@ -132,6 +133,7 @@ const WIDE: Layout = {
     { id: 'dojo', x: 970, y: 500 },
     { id: 'bounty', x: 250, y: 720 },
     { id: 'gravity', x: 470, y: 720 },
+    { id: 'upgrades', x: 690, y: 720 },
     { id: 'port', x: 900, y: 720 },
   ],
   roads: [
@@ -155,6 +157,7 @@ const TALL_ROWS: [Building, Building | null][] = [
   ['hall', 'colosseum'],
   ['tower', 'gate'],
   ['bounty', 'port'],
+  ['upgrades', null],
 ];
 const TALL_TOP = 370;
 const TALL_ROW = 255;

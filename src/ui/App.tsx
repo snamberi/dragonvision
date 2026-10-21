@@ -20,6 +20,7 @@ import { FortuneScreen } from './FortuneScreen';
 import { GravityScreen } from './GravityScreen';
 import { PortScreen } from './PortScreen';
 import { TowerScreen } from './TowerScreen';
+import { UpgradesHouseScreen } from './UpgradesHouseScreen';
 import { FusionScreen } from './FusionScreen';
 import { FighterDetail } from './FighterDetail';
 import { FightersScreen } from './FightersScreen';
@@ -75,6 +76,34 @@ export function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view]);
+
+  // Sync view state → URL hash so users can bookmark / share #/city etc.
+  useEffect(() => {
+    let hash = '';
+    if (view.kind === 'tab') hash = `#/${view.tab}`;
+    else if (view.kind === 'building') hash = `#/city/${view.building}`;
+    else if (view.kind === 'fighter') hash = `#/fighters/${view.uid}`;
+    else hash = '#/stages';
+    if (window.location.hash !== hash) history.replaceState(null, '', hash);
+  }, [view]);
+
+  // Read hash on first load and handle browser back/forward.
+  useEffect(() => {
+    const parseHash = (hash: string): View => {
+      // Strips leading "#/" from hash. Matches: "#/city/summon" → "city/summon". Rejects: "city" (no change). https://regex101.com/r/aG8eK1/1
+      const parts = hash.replace(/^#\//, '').split('/');
+      if (parts[0] === 'city' && parts[1]) return { kind: 'building', building: parts[1] as Building };
+      if (parts[0] === 'fighters' && parts[1]) return { kind: 'fighter', uid: parts[1] };
+      const tabMap: Record<string, Tab> = { home: 'home', city: 'city', stages: 'stages', inventory: 'inventory', fighters: 'fighters' };
+      return { kind: 'tab', tab: tabMap[parts[0]] ?? 'home' };
+    };
+    if (window.location.hash && window.location.hash !== '#/') {
+      setView(parseHash(window.location.hash));
+    }
+    const onPop = () => setView(parseHash(window.location.hash));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   // Battle music in fights, the city theme everywhere else.
   useEffect(() => {
@@ -215,6 +244,8 @@ export function App() {
             <ArmoryScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'fortune' ? (
             <FortuneScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'upgrades' ? (
+            <UpgradesHouseScreen save={save} update={update} onBack={toCity} />
           ) : (
             <TowerScreen
               save={save}

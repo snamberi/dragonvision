@@ -567,6 +567,18 @@ div.card-open {
   z-index: 3;
 }
 
+.notifier-dot {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #120b2e;
+  z-index: 4;
+  pointer-events: none;
+}
+
 .card-art {
   position: relative;
   display: flex;

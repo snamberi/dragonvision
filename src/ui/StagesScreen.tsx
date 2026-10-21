@@ -242,7 +242,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
 
         <div className="reward-line">
           {replay ? (
-            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins (25%){stage.kind === 'boss' ? ' · 5% legendary piece' : ', no Spin Orbs or gems'}</>
+            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins (7.5%){stage.kind === 'boss' ? ' · 5% legendary piece' : ', no Spin Orbs or gems'}</>
           ) : (
             <>
               First clear: {stage.coins.toLocaleString()} coins ·{' '}
@@ -275,7 +275,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
                 <option value="50">50 runs</option>
                 <option value="all">Until I stop</option>
               </select>
-              <span className="muted small-text">Replays this stage for 25% coins. Stops on a defeat.</span>
+              <span className="muted small-text">Replays this stage for 7.5% coins. Stops on a defeat.</span>
             </div>
           ) : stage.kind === 'normal' ? (
             <div className="auto-run">

@@ -9,7 +9,7 @@ import { gravityMultiplier, upgradeGravity } from '../game/gravity';
 import { addUnit, newSave, teamSlots, toggleTeamMember } from '../game/progression';
 import { seededRng } from '../game/rng';
 import { CHAPTER_NAMES, getStage } from '../game/stages';
-import { highestOwnedStar, summonTen } from '../game/summon';
+import { summonTen } from '../game/summon';
 import { applyTowerWin, towerStage } from '../game/tower';
 import type { SaveData } from '../game/types';
 
