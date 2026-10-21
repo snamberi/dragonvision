@@ -37,13 +37,13 @@ describe('training dojo', () => {
     expect(result.ok).toBe(false);
   });
 
-  it('trained levels survive a gem reset', () => {
+  it('gem reset drops level to 1 and refunds coin upgrades', () => {
     const r = withUnit({ ...newSave(), coins: 100_000, gems: 5 }, 'mei', 1, 5);
     let save = startTraining(r.save, r.unit.uid, 0);
     save = stopTraining(save, r.unit.uid, 4 * DOJO_MINUTES_PER_LEVEL * MIN);
     save = upgradeUnit(save, r.unit.uid, 5);
     save = resetUnit(save, r.unit.uid);
-    expect(save.units.find((u) => u.uid === r.unit.uid)!.level).toBe(9);
+    expect(save.units.find((u) => u.uid === r.unit.uid)!.level).toBe(1);
     expect(save.coins).toBe(100_000);
   });
 

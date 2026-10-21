@@ -23,22 +23,20 @@ function withUnit(save: SaveData, familyId: string, star: number, level: number)
 }
 
 describe('summon levels', () => {
-  it('keeps each star inside its level band', () => {
-    expect(summonLevelRange(1)).toEqual([1, 20]);
-    expect(summonLevelRange(2)).toEqual([20, 40]);
-    expect(summonLevelRange(20)).toEqual([380, 400]);
-    expect(summonLevelRange(21)).toEqual([400, 400]);
+  it('always returns [1, 1] regardless of star', () => {
+    expect(summonLevelRange(1)).toEqual([1, 1]);
+    expect(summonLevelRange(2)).toEqual([1, 1]);
+    expect(summonLevelRange(20)).toEqual([1, 1]);
+    expect(summonLevelRange(21)).toEqual([1, 1]);
   });
 
-  it('summons respect the band and spend a spin', () => {
+  it('summons always arrive at level 1 and spend a spin', () => {
     let save: SaveData = { ...newSave(), spins: 200 };
     const rng = seededRng(1);
     for (let i = 0; i < 200; i++) {
       const result = summon(save, rng);
-      const [min, max] = summonLevelRange(result.unit.star);
-      expect(result.unit.level).toBeGreaterThanOrEqual(min);
-      expect(result.unit.level).toBeLessThanOrEqual(max);
-      expect(result.unit.baseLevel).toBe(result.unit.level);
+      expect(result.unit.level).toBe(1);
+      expect(result.unit.baseLevel).toBe(1);
       save = result.save;
     }
     expect(save.spins).toBe(0);
@@ -84,13 +82,13 @@ describe('levels and resets', () => {
     expect(next.units[0].coinsSpent).toBe(upgradeCost(1, 10));
   });
 
-  it('reset refunds only purchased levels and costs gems', () => {
+  it('reset drops to level 1 and refunds all coins', () => {
     let { save, unit } = withUnit({ ...newSave(), coins: 100_000, gems: 10 }, 'kairo', 3, 41);
     save = upgradeUnit(save, unit.uid, 17);
     const spent = 100_000 - save.coins;
     save = resetUnit(save, unit.uid);
     const after = save.units.find((u) => u.uid === unit.uid)!;
-    expect(after.level).toBe(41);
+    expect(after.level).toBe(1);
     expect(save.coins).toBe(100_000);
     expect(spent).toBeGreaterThan(0);
     expect(save.gems).toBe(10 - RESET_GEM_COST);
@@ -98,16 +96,11 @@ describe('levels and resets', () => {
 });
 
 describe('level wall', () => {
-  it('stops leveling at star × 20 until the fighter evolves', () => {
+  it('can level past any star boundary — no level wall', () => {
     let save: SaveData = { ...newSave(), coins: 1_000_000 };
     save = upgradeUnit(save, 'u1', 50);
-    expect(save.units[0].level).toBe(20);
-    expect(() => upgradeUnit(save, 'u1', 1)).toThrow(/Evolve to keep leveling/);
-    save = withUnit(save, 'kairo', 1, 2).save;
-    save = withUnit(save, 'kairo', 1, 3).save;
-    save = evolveUnit(save, 'u1');
-    save = upgradeUnit(save, 'u1', 50);
-    expect(save.units.find((u) => u.uid === 'u1')!.level).toBe(40);
+    // No wall at star×20 anymore — fighter can level freely up to MAX_LEVEL
+    expect(save.units[0].level).toBeGreaterThan(20);
   });
 });
 

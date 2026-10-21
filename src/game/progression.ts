@@ -1,11 +1,9 @@
 import {
   DUPLICATES_TO_EVOLVE,
-  LEVELS_PER_STAR,
   MAX_LEVEL,
   MAX_STARS,
   MAX_TEAM_SIZE,
   RESET_GEM_COST,
-  levelCap,
   STARTING_COINS,
   STARTING_GEMS,
   STARTING_SPINS,
@@ -50,16 +48,14 @@ export function unitName(unit: Pick<Unit, 'familyId' | 'star'>): string {
   return formForStar(getFamily(unit.familyId), unit.star).name;
 }
 
-/** Summoned level range for a star tier: 2★ fighters arrive between level 20 and 40. */
-export function summonLevelRange(star: number): [number, number] {
-  const min = Math.max(1, (star - 1) * LEVELS_PER_STAR);
-  const max = Math.min(MAX_LEVEL, star * LEVELS_PER_STAR);
-  return [Math.min(min, MAX_LEVEL), max];
+/** All fighters summon at level 1 regardless of star. */
+export function summonLevelRange(_star: number): [number, number] {
+  return [1, 1];
 }
 
-/** Level a fighter must reach before evolving out of `star`. */
-export function evolveLevelRequirement(star: number): number {
-  return Math.min(MAX_LEVEL, star * LEVELS_PER_STAR);
+/** Evolution has no level requirement — only duplicates needed. */
+export function evolveLevelRequirement(_star: number): number {
+  return 1;
 }
 
 export function newSave(): SaveData {
@@ -135,11 +131,8 @@ export function affordableLevels(level: number, coins: number, limit = MAX_LEVEL
 
 export function upgradeUnit(save: SaveData, uid: string, count: number): SaveData {
   const unit = findUnit(save, uid);
-  const cap = levelCap(unit.star);
-  const levels = Math.min(count, cap - unit.level);
-  if (levels <= 0) {
-    throw new Error(cap >= MAX_LEVEL ? 'Already at max level' : `Level ${cap} is the cap for ${unit.star}★. Evolve to keep leveling.`);
-  }
+  const levels = Math.min(count, MAX_LEVEL - unit.level);
+  if (levels <= 0) throw new Error('Already at max level');
   const cost = upgradeCost(unit.level, levels);
   if (cost > save.coins) throw new Error('Not enough coins');
   const next = replaceUnit(save, { ...unit, level: unit.level + levels, coinsSpent: unit.coinsSpent + cost });
@@ -158,15 +151,15 @@ export function purchasedLevels(unit: Unit): number {
 }
 
 export function canReset(save: SaveData, unit: Unit): boolean {
-  return purchasedLevels(unit) > 0 && save.gems >= RESET_GEM_COST;
+  return (unit.level > 1 || unit.coinsSpent > 0) && save.gems >= RESET_GEM_COST;
 }
 
-/** Drops purchased levels back to the summoned level and refunds their coins. */
+/** Drops all levels back to 1 and refunds all spent coins. */
 export function resetUnit(save: SaveData, uid: string): SaveData {
   const unit = findUnit(save, uid);
-  if (purchasedLevels(unit) <= 0) throw new Error('Nothing to reset');
+  if (unit.level <= 1 && unit.coinsSpent <= 0) throw new Error('Nothing to reset');
   if (save.gems < RESET_GEM_COST) throw new Error('Not enough gems');
-  const next = replaceUnit(save, { ...unit, level: freeLevel(unit), coinsSpent: 0 });
+  const next = replaceUnit(save, { ...unit, level: 1, baseLevel: 1, coinsSpent: 0, trainedLevels: 0 });
   return { ...next, coins: save.coins + unit.coinsSpent, gems: save.gems - RESET_GEM_COST };
 }
 
