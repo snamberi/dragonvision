@@ -62,8 +62,36 @@ export const COLLECTION_SLOTS_PER_UPGRADE = 10;
 /** Extra gear slots per storage upgrade level. */
 export const GEAR_SLOTS_PER_UPGRADE = 5;
 
-// --- Pity system ---
-/** After this many pulls without a 4★+, the next pull is guaranteed 4★+. */
+// --- Dragon Fate system ---
+/** Fate bar starts here; rises each pull toward FATE_MAX. */
+export const FATE_START = 0;
+/** Fate bar ceiling. */
+export const FATE_MAX = 100;
+/** Points added per normal (non-Lucky, non-Rage) pull. */
+export const FATE_PER_PULL = 4;
+/** At this Fate level Dragon Rage triggers: next pull guaranteed Rare+. */
+export const FATE_RAGE_THRESHOLD = 56;
+/** Fate drained when Dragon Rage fires. */
+export const FATE_RAGE_DRAIN = 56;
+/** Base Lucky Pull chance per pull (7 %). */
+export const LUCKY_PULL_CHANCE = 0.07;
+/** Lucky Pull chance bonus per 5 pulls without one. */
+export const LUCKY_PULL_BONUS_PER_5 = 0.005;
+/** Lucky Pull: take the better of two star rolls. */
+export const LUCKY_PULL_ROLLS = 2;
+/** On a 10-pull, this pull index (0-based) gets a secret +10 Fate boost. */
+export const TEN_PULL_FATE_BOOST_INDEX = 9;
+export const TEN_PULL_FATE_BOOST = 10;
+const TIER_RATE_COMMON = 68;
+const TIER_RATE_RARE = 22;
+const TIER_RATE_EPIC = 8.5;
+const TIER_RATE_CRYSTAL = 1.5;
+/** Tier drop rate weights: common / rare / epic / crystal. */
+export const TIER_RATES: Record<string, number> = { common: TIER_RATE_COMMON, rare: TIER_RATE_RARE, epic: TIER_RATE_EPIC, crystal: TIER_RATE_CRYSTAL };
+/** Dragon Rage minimum tier. */
+export const RAGE_MIN_TIER: string = 'rare';
+
+// --- Legacy pity (kept for migration reference) ---
 export const PITY_THRESHOLD = 70;
 
 export function enemyLevelForStage(stage: number): number {

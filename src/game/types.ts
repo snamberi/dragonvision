@@ -51,6 +51,9 @@ export interface Form {
   look: Look;
 }
 
+/** Rarity bucket a family belongs to; controls its base drop rate in the Dragon Fate system. */
+export type FamilyTier = 'common' | 'rare' | 'epic' | 'crystal';
+
 export interface Family {
   id: string;
   /** Short name used when a form has no distinct name. */
@@ -65,6 +68,8 @@ export interface Family {
   legendary?: boolean;
   /** Star of the first form (legendaries start above 1★). */
   firstStar?: number;
+  /** Rarity tier for Dragon Fate drop-rate bucketing. Defaults to 'common' if omitted. */
+  tier?: FamilyTier;
 }
 
 /** One fighter the player owns. */
@@ -152,8 +157,12 @@ export interface SaveData {
   materials: Record<MaterialId, number>;
   /** The Shop's daily stock (the Armory keeps its own in `shop`). */
   market: { day: string; refreshes: number; bought: number[] };
-  /** Pulls since the last 4★+ result; resets to 0 on a 4★+ pull. */
+  /** Legacy pity counter; migrated to `fate` on first load. */
   pityPulls?: number;
+  /** Dragon Fate bar (0–100). Rises each pull; Dragon Rage guaranteed Rare+ at ≥56. */
+  fate?: number;
+  /** Pulls since the last Lucky Pull triggered; resets when one fires. */
+  pullsSinceLastLucky?: number;
   /** Upgrades House purchases. */
   upgrades?: {
     /** Extra collection slots bought (+10 each, up to MAX_COLLECTION_UPGRADES). */
