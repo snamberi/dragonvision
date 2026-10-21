@@ -1,5 +1,6 @@
 import { useActionFeedback } from './useActionFeedback';
 import { SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
+import { RUNE_FRAG_COST, RUNE_TEMPLATES, craftRune } from '../game/rune';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -60,6 +61,42 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
             <SetBonusText key={set.id} setId={set.id} />
           ))}
         </div>
+      </section>
+
+      <section className="panel rune-forge">
+        <div className="section-head">
+          <h3>Rune Forge</h3>
+          <span className="muted small-text">◇ {save.runeFragments ?? 0} fragments · {RUNE_FRAG_COST} per rune</span>
+        </div>
+        <p className="muted small-text">Craft runes and equip them on fighters (2 slots each). Runes boost ATK, DEF or HP.</p>
+        <div className="rune-grid">
+          {RUNE_TEMPLATES.map((tmpl, i) => {
+            const canCraft = (save.runeFragments ?? 0) >= RUNE_FRAG_COST;
+            return (
+              <div key={i} className={`rune-card ${tmpl.slot}`}>
+                <span className="rune-name">{tmpl.name}</span>
+                <span className="rune-slot-tag">{tmpl.slot}</span>
+                <span className="rune-effect muted small-text">{tmpl.effect}</span>
+                <button className="btn small" disabled={!canCraft} onClick={() => update((s) => craftRune(s, i), `${tmpl.name} crafted`)}>
+                  Craft ◇ {RUNE_FRAG_COST}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        {(save.runes ?? []).length > 0 && (
+          <div className="rune-inventory">
+            <h4>Your runes ({save.runes?.length ?? 0})</h4>
+            <div className="rune-grid">
+              {(save.runes ?? []).map((r) => (
+                <div key={r.id} className={`rune-card owned ${r.slot}`}>
+                  <span className="rune-name">{r.name}</span>
+                  <span className="rune-effect muted small-text">{r.effect}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="panel">

@@ -304,7 +304,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     const target = battle.fighters.find(t => t.id === ev.hits.find(h => h.kind === 'damage')?.targetId);
     if (!target || (phase !== 'release' && phase !== 'impact')) return fieldPosition(f);
     const point = fighterFootPoint(target);
-    return { left: `${point.x / 10 + (f.side === 'player' ? 9 : -9)}%`, top: `${point.y / 5}%`, zIndex: 100 };
+    return { left: `${point.x / 10 + (f.side === 'player' ? -9 : 9)}%`, top: `${point.y / 5}%`, zIndex: 100 };
   };
 
   const poseFor = (f: Fighter): SpritePose => {
@@ -343,7 +343,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
           {queue.map((f, i) => (
             <span key={f.id} className={`queue-slot ${f.side} ${i === 0 ? 'now' : ''}`}>
               {i === 0 && <b>NEXT</b>}
-              <Portrait familyId={f.familyId} star={f.star} size={30} flip={f.side === 'player'} />
+              <Portrait familyId={f.familyId} star={f.star} size={30} flip={f.side === 'enemy'} />
             </span>
           ))}
         </div>
@@ -391,7 +391,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
             {busy && (phase === 'impact' || phase === 'recover') && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && <span key={`impact-${event.id}`} className={`impact-burst ${bigAction?'impact-major':'impact-minor'}`} aria-hidden="true" />}
             {busy && event?.data.actorId === f.id && (event.data.kind === 'charge' || phase === 'anticipation' && bigAction) && <span className="charge-aura" aria-hidden="true" />}
             <span className="unit-shadow" aria-hidden="true" />
-            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 132 : 104} flip={f.side === 'player'} pose={poseFor(f)} animated={f.hp > 0} />
+            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 132 : 104} flip={f.side === 'enemy'} pose={poseFor(f)} animated={f.hp > 0} />
             <span className="unit-tags">
               {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="status taunt">TAUNT</span>}
               {actor && aimingAtEnemies && targetIds.has(f.id) && classEdge(actor.role, f.role) !== 'neutral' && (

@@ -1869,10 +1869,10 @@ div.card-open {
 
 /* Attacks lunge toward the other side. */
 .unit.player.do-attack .sprite {
-  animation: lunge-left 0.45s steps(3);
+  animation: lunge-right 0.45s steps(3);
 }
 .unit.enemy.do-attack .sprite {
-  animation: lunge-right 0.45s steps(3);
+  animation: lunge-left 0.45s steps(3);
 }
 .unit.do-charge .sprite,
 .unit.do-special .sprite {
@@ -1925,15 +1925,15 @@ div.card-open {
 }
 
 .beam-h.player {
-  right: 60%;
-  transform-origin: right;
+  left: 60%;
+  transform-origin: left;
   background: linear-gradient(90deg, rgba(63, 198, 255, 0.2), #fff);
   box-shadow: 0 0 10px var(--blue);
 }
 
 .beam-h.enemy {
-  left: 60%;
-  transform-origin: left;
+  right: 60%;
+  transform-origin: right;
   background: linear-gradient(90deg, #fff, rgba(255, 74, 61, 0.2));
   box-shadow: 0 0 10px var(--red);
 }
@@ -2592,13 +2592,13 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
 .unit.active .unit-shadow { box-shadow:0 0 0 2px #ffe0a4,0 0 18px #ffe0a466; }
 .unit-hp { box-shadow:0 2px #080913; border:1px solid #191329; }
 .attack-fx { position:absolute; top:50%; width:clamp(110px,32vw,470px); height:var(--beam-size); z-index:5; pointer-events:none; color:var(--energy); animation:energy-fire var(--duration) steps(7) both; filter:drop-shadow(0 0 5px var(--energy)); }
-.attack-fx.enemy { left:65%; transform-origin:left; }
-.attack-fx.player { right:65%; transform-origin:right; }
+.attack-fx.player { left:65%; transform-origin:left; }
+.attack-fx.enemy { right:65%; transform-origin:right; }
 .energy-core { position:absolute; inset:25% 0; background:#fff8e7; box-shadow:0 -4px var(--energy),0 4px var(--energy); }
 .energy-trail { position:absolute; inset:-12px 0; border-top:2px solid currentColor; border-bottom:2px solid currentColor; opacity:.5; }
 .energy-ring { position:absolute; top:-15px; width:12px; height:40px; border:3px solid currentColor; }
-.energy-head { position:absolute; right:-9px; top:-10px; width:26px; height:30px; background:#fff8e7; box-shadow:0 0 0 5px var(--energy); clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%); }
-.player .energy-head { right:auto; left:-9px; }
+.energy-head { position:absolute; left:-9px; top:-10px; width:26px; height:30px; background:#fff8e7; box-shadow:0 0 0 5px var(--energy); clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%); }
+.enemy .energy-head { left:auto; right:-9px; }
 .pattern-1 .energy-core { clip-path:polygon(0 0,100% 35%,100% 65%,0 100%); inset:-8px 0; }
 .pattern-2 .energy-core { background:repeating-linear-gradient(90deg,#fff 0 10px,var(--energy) 10px 18px); }
 .pattern-3 .energy-trail { transform:skewY(4deg); box-shadow:0 6px currentColor; }
@@ -2990,3 +2990,52 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 
 /* ---------- Studio ---------- */
 .studio-mark { margin:16px 0 0; padding-top:10px; border-top:1px dashed #3a2f5c; font-size:15px; letter-spacing:.06em; color:var(--muted); text-align:center; }
+
+/* ---------- Warn box (collection full, etc.) ---------- */
+.warn-box { display:flex; align-items:center; gap:8px; padding:10px 14px; background:#3a1c0a; border:2px solid #e06c1f; color:#ffb87a; font-size:16px; margin:8px 0; }
+
+/* ---------- Expedition safe/risky ---------- */
+.path-select { margin-bottom:8px; }
+.risky-btn { background:#4a1a2a; border-color:#c0305a; color:#ff8fa8; }
+.risky-btn:hover { background:#5a1f33; }
+.warn-text { color:#ff9ab0; margin:0 0 8px; }
+.trip.risky { border-left:3px solid #c0305a; }
+.trip.risky b { color:#ff9ab0; }
+
+/* ---------- Tower biomes ---------- */
+.floor.biome-lava { background:linear-gradient(135deg, #2a1200 0%, #1a1434 100%); border-color:#c04010; }
+.floor.biome-lava .floor-num { color:#ff6030; }
+.biome-tag { display:inline-block; margin-left:6px; padding:0 5px; font-size:11px; background:#4a2010; border:1px solid #c04010; color:#ff9060; vertical-align:middle; }
+.floor.biome-ice { background:linear-gradient(135deg, #0a1a2a 0%, #1a1434 100%); border-color:#4090d0; }
+.floor.biome-ice .floor-num { color:#80c8ff; }
+.floor.biome-ice .biome-tag { background:#102040; border-color:#4090d0; color:#80c8ff; }
+.floor.biome-shadow { background:linear-gradient(135deg, #0a0015 0%, #1a1434 100%); border-color:#8030c0; }
+.floor.biome-shadow .floor-num { color:#c080ff; }
+.floor.biome-shadow .biome-tag { background:#200a30; border-color:#8030c0; color:#c080ff; }
+
+/* ---------- Weekly challenges ---------- */
+.weekly-challenges h3 { margin-bottom:4px; }
+.challenge-row { display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto; gap:2px 8px; padding:8px 0; border-bottom:1px solid var(--border); }
+.challenge-row:last-child { border-bottom:none; }
+.challenge-label { font-size:16px; font-weight:600; }
+.challenge-reward { text-align:right; }
+.challenge-bar { grid-column:1/-1; height:8px; background:var(--bg-2); border:1px solid var(--border); }
+.challenge-fill { height:100%; background:linear-gradient(90deg, #7c4fcf, #a370ff); transition:width .3s; }
+.challenge-progress { grid-column:1/-1; }
+.challenge-row.done .challenge-fill { background:linear-gradient(90deg,#3da86a,#5ad48c); }
+.challenge-row.done .challenge-label { color:var(--muted); }
+
+/* ---------- Rune Forge ---------- */
+.rune-forge .section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.rune-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:8px; }
+.rune-card { display:flex; flex-direction:column; gap:4px; padding:10px 8px; background:var(--bg-2); border:2px solid #5a4a7a; }
+.rune-card.offense { border-color:#c07030; }
+.rune-card.defense { border-color:#3070c0; }
+.rune-name { font-weight:700; font-size:15px; }
+.rune-slot-tag { font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.7; }
+.rune-card.offense .rune-slot-tag { color:#e09060; }
+.rune-card.defense .rune-slot-tag { color:#6090e0; }
+.rune-effect { font-size:13px; flex:1; }
+.rune-inventory { margin-top:12px; }
+.rune-inventory h4 { margin:0 0 6px; font-size:16px; }
+.rune-card.owned { opacity:.85; }

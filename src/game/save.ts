@@ -52,6 +52,9 @@ function migrate(save: SaveData): SaveData {
     fate: save.fate ?? Math.min(FATE_RAGE_THRESHOLD, Math.round(((save.pityPulls ?? 0) / PITY_THRESHOLD) * FATE_RAGE_THRESHOLD)),
     pullsSinceLastLucky: save.pullsSinceLastLucky ?? 0,
     upgrades: save.upgrades ?? undefined,
+    runes: save.runes ?? [],
+    runeFragments: save.runeFragments ?? 0,
+    units: save.units.map((u) => ({ runeSlots: [null, null], ...u })),
   };
 }
 

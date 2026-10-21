@@ -7,6 +7,18 @@ import { BuildingHeader } from './BuildingHeader';
 import { Portrait, Stars } from './Sprite';
 import { orbs } from './format';
 
+const BIOME_LAVA_FLOOR = 10;
+const BIOME_ICE_FLOOR = 20;
+const BIOME_SHADOW_FLOOR = 30;
+const BIOME_LABELS: Record<string, string> = { lava: '🌋 Volcanic', ice: '❄ Frozen', shadow: '🌑 Shadow' };
+
+function biomeFor(floor: number): string {
+  if (floor >= BIOME_SHADOW_FLOOR) return 'shadow';
+  if (floor >= BIOME_ICE_FLOOR) return 'ice';
+  if (floor >= BIOME_LAVA_FLOOR) return 'lava';
+  return '';
+}
+
 interface Props {
   save: SaveData;
   onBack: () => void;
@@ -41,10 +53,12 @@ export function TowerScreen({ save, onBack, onChallenge }: Props) {
           const cleared = floor <= save.towerFloor;
           const isNext = floor === next && !done;
           const enemyPower = stage.enemies.reduce((sum, e) => sum + power(e.familyId, e.star, e.level), 0);
+          const biome = biomeFor(floor);
           return (
-            <section key={floor} ref={isNext ? nextRef : undefined} className={`panel floor ${cleared ? 'cleared' : ''} ${isNext ? 'next' : ''} ${floor > next ? 'locked' : ''}`}>
+            <section key={floor} ref={isNext ? nextRef : undefined} className={`panel floor ${cleared ? 'cleared' : ''} ${isNext ? 'next' : ''} ${floor > next ? 'locked' : ''} ${biome ? `biome-${biome}` : ''}`}>
               <div className="floor-num">
                 {floor}F{stage.kind !== 'normal' && <span className={`tag ${stage.kind === 'boss' ? 'boss' : 'mini'}`}>{stage.kind === 'boss' ? 'BOSS' : 'MINI'}</span>}
+                {biome && <span className="biome-tag">{BIOME_LABELS[biome]}</span>}
               </div>
               <div className="floor-body">
                 <b>{stage.chapterName}</b>

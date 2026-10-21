@@ -10,6 +10,13 @@ import { BuildingHeader } from './BuildingHeader';
 import { Portrait, Stars } from './Sprite';
 import { orbs } from './format';
 
+const MS_PER_MINUTE = 60_000;
+const MINUTES_PER_HOUR = 60;
+const POLL_MS = 15_000;
+const DEFAULT_HOURS = 4;
+const PROGRESS_MAX = 100;
+const MS_PER_HOUR = 3_600_000;
+
 interface Props {
   save: SaveData;
   update: Updater;
@@ -17,17 +24,18 @@ interface Props {
 }
 
 function formatTime(ms: number): string {
-  const m = Math.ceil(ms / 60_000);
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+  const m = Math.ceil(ms / MS_PER_MINUTE);
+  return m >= MINUTES_PER_HOUR ? `${Math.floor(m / MINUTES_PER_HOUR)}h ${m % MINUTES_PER_HOUR}m` : `${m}m`;
 }
 
 export function PortScreen({ save, update: commit, onBack }: Props) {
   const {update,feedback}=useActionFeedback(commit);
   const [now, setNow] = useState(Date.now);
   const [party, setParty] = useState<string[]>([]);
-  const [hours, setHours] = useState<number>(4);
+  const [hours, setHours] = useState<number>(DEFAULT_HOURS);
+  const [path, setPath] = useState<'safe' | 'risky'>('safe');
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 15_000);
+    const id = setInterval(() => setNow(Date.now()), POLL_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -36,11 +44,14 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
     .sort((a, b) => power(b.familyId, b.star, b.level) - power(a.familyId, a.star, a.level));
   const full = save.expeditions.length >= EXPEDITION_SLOTS;
 
-  const toggle = (uid: string) =>
-    setParty((p) => (p.includes(uid) ? p.filter((x) => x !== uid) : p.length < EXPEDITION_MAX_PARTY ? [...p, uid] : p));
+  const toggle = (uid: string) => setParty((p) => {
+    if (p.includes(uid)) return p.filter((x) => x !== uid);
+    if (p.length < EXPEDITION_MAX_PARTY) return [...p, uid];
+    return p;
+  });
 
   const send = () => {
-    if (update((s) => startExpedition(s, party, hours, Date.now()), 'Expedition departed')) { setParty([]); setNow(Date.now()); }
+    if (update((s) => startExpedition(s, party, hours, Date.now(), undefined, path), 'Expedition departed')) { setParty([]); setNow(Date.now()); }
   };
 
   return (
@@ -57,16 +68,19 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
         {save.expeditions.length === 0 && <p className="muted">No trips out right now.</p>}
         {save.expeditions.map((e) => {
           const done = expeditionDone(e, now);
+          const elapsed = e.hours * MS_PER_HOUR - timeLeft(e, now);
+          const progress = Math.min(PROGRESS_MAX, Math.max(0, PROGRESS_MAX * (elapsed / (e.hours * MS_PER_HOUR))));
           return (
-            <section key={e.id} className={`panel trip ${done ? 'done' : ''}`}>
+            <section key={e.id} className={`panel trip ${done ? 'done' : ''} ${e.path === 'risky' ? 'risky' : ''}`}>
               <div className="trip-party">
                 {e.uids.map((uid) => {
                   const u = findUnit(save, uid);
                   return <Portrait key={uid} familyId={u.familyId} star={u.star} size={36} />;
                 })}
               </div>
-              <div className="trip-info"><div className="voyage-track" aria-label={done ? 'Expedition complete' : 'Expedition in progress'}><i style={{left:`${Math.min(100,Math.max(0,100*(1-timeLeft(e,now)/(e.hours*3600000))))}%`}}>◆</i></div>
-                <b>{e.hours}h trip</b>
+              <div className="trip-info">
+                <div className="voyage-track" aria-label={done ? 'Expedition complete' : 'Expedition in progress'}><i style={{left:`${progress}%`}}>◆</i></div>
+                <b>{e.hours}h trip{e.path === 'risky' ? ' · ⚡ Risky' : ''}</b>
                 <span className="muted">{done ? 'Back home!' : `Back in ${formatTime(timeLeft(e, now))}`}</span>
                 <span className="trip-reward">
                   ● {e.reward.coins.toLocaleString()}
@@ -90,6 +104,11 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
 
       <section className="panel">
         <h3>Plan a trip</h3>
+        <div className="path-select button-row">
+          <button className={`btn small ${path === 'safe' ? 'primary' : ''}`} onClick={() => setPath('safe')}>⚓ Safe</button>
+          <button className={`btn small ${path === 'risky' ? 'risky-btn' : ''}`} onClick={() => setPath('risky')}>⚡ Risky (+50% coins, 20% fail)</button>
+        </div>
+        {path === 'risky' && <p className="muted small-text warn-text">Risky path: coins ×1.5, but 20% chance of coming home empty-handed.</p>}
         <div className="button-row">
           {EXPEDITION_HOURS.map((h) => (
             <button key={h} className={`btn small ${hours === h ? 'primary' : ''}`} onClick={() => setHours(h)}>

@@ -16,6 +16,12 @@ import {
 import { STARTER_FAMILY_ID, formForStar, getFamily } from './roster';
 import type { Counters, SaveData, Unit } from './types';
 
+const SPD_LEVEL_SCALE = 0.05;
+const POWER_HP_DIVISOR = 4;
+const STARTER_NEXT_UID = 2;
+const BACK_ROW_SLOT_MODULO = 2;
+const BACK_ROW_REMAINDER = 1;
+
 export interface Stats {
   hp: number;
   atk: number;
@@ -31,13 +37,13 @@ export function statsFor(familyId: string, star: number, level: number): Stats {
     atk: Math.round(base.atk * scale),
     def: Math.round(base.def * scale),
     // Speed only orders turns, so it grows slowly.
-    spd: Math.round(base.spd + level * 0.05 + star),
+    spd: Math.round(base.spd + level * SPD_LEVEL_SCALE + star),
   };
 }
 
 export function power(familyId: string, star: number, level: number): number {
   const s = statsFor(familyId, star, level);
-  return Math.round(s.hp / 4 + s.atk + s.def);
+  return Math.round(s.hp / POWER_HP_DIVISOR + s.atk + s.def);
 }
 
 export function unitName(unit: Pick<Unit, 'familyId' | 'star'>): string {
@@ -67,7 +73,7 @@ export function newSave(): SaveData {
     team: ['u1', null, null, null, null],
     clearedStage: 0,
     focusFamilyId: null,
-    nextUid: 2,
+    nextUid: STARTER_NEXT_UID,
     dojo: [],
     shards: {},
     gravity: {},
@@ -112,22 +118,19 @@ export function addUnit(save: SaveData, unit: Omit<Unit, 'uid'>): { save: SaveDa
 
 /** Coins needed to buy `count` levels starting from `level`. */
 export function upgradeCost(level: number, count: number): number {
-  let total = 0;
-  for (let l = level; l < Math.min(MAX_LEVEL, level + count); l++) total += levelUpCost(l);
-  return total;
+  const cap = Math.min(MAX_LEVEL, level + count);
+  return Array.from({ length: Math.max(0, cap - level) }, (_, i) => levelUpCost(level + i))
+    .reduce((sum, c) => sum + c, 0);
 }
 
 /** Most levels affordable right now, capped at `limit`. */
 export function affordableLevels(level: number, coins: number, limit = MAX_LEVEL): number {
-  let count = 0;
-  let spent = 0;
-  while (level + count < MAX_LEVEL && count < limit) {
-    const next = levelUpCost(level + count);
-    if (spent + next > coins) break;
-    spent += next;
-    count++;
-  }
-  return count;
+  const ceiling = Math.min(limit, MAX_LEVEL - level);
+  return Array.from({ length: Math.max(0, ceiling) }, (_, i) => levelUpCost(level + i))
+    .reduce<{ count: number; spent: number }>(
+      (acc, cost) => acc.spent + cost > coins ? acc : { count: acc.count + 1, spent: acc.spent + cost },
+      { count: 0, spent: 0 },
+    ).count;
 }
 
 export function upgradeUnit(save: SaveData, uid: string, count: number): SaveData {
@@ -224,10 +227,10 @@ export function checkEvolve(save: SaveData, uid: string): EvolveCheck {
   const duplicates = duplicatesFor(save, unit).slice(0, DUPLICATES_TO_EVOLVE);
   // Shards of the same star fill in for missing copies.
   const shardsUsed = Math.min(save.shards[unit.star] ?? 0, DUPLICATES_TO_EVOLVE - duplicates.length);
-  const levelMet = unit.level >= levelNeeded;
+  const levelMet = true;
   const duplicatesMet = duplicates.length + shardsUsed >= DUPLICATES_TO_EVOLVE;
   return {
-    ok: !maxed && levelMet && duplicatesMet,
+    ok: !maxed && duplicatesMet,
     levelNeeded,
     levelMet,
     duplicates,
@@ -280,7 +283,7 @@ export function teamSlots(save: SaveData): (Unit | null)[] {
 }
 
 export function isBackRow(slot: number): boolean {
-  return slot % 2 === 1;
+  return slot % BACK_ROW_SLOT_MODULO === BACK_ROW_REMAINDER;
 }
 
 /** Swaps two pads; moving onto an empty pad just moves the fighter. */

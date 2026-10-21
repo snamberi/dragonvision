@@ -9,6 +9,7 @@ import { ItemIcon } from './ItemIcon';
 import { orbs } from './format';
 import { spinPrice, FATE_MAX, FATE_RAGE_THRESHOLD } from '../game/balance';
 import { buyGoldenOrbs, GOLDEN_ORB_PRICE, goldenSummonOdds, summonGolden, buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
+import { collectionCap } from '../game/upgrades';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
@@ -49,6 +50,7 @@ export function SummonScreen({ save, update, onBack }: Props) {
   },[phase,revealIndex,results.length]);
   const featured=results[revealIndex];
   const glow=golden?'#ffdc7d':featured?tierFor(featured.star).color:'#c7a1ff';
+  const collFull = save.units.length >= collectionCap(save);
   const odds = golden ? goldenSummonOdds(save) : summonOdds(save);
   const price = spinPrice(save.clearedStage);
   const chanceOf = (familyId: string) => odds.filter((o) => o.familyId === familyId).reduce((sum, o) => sum + o.chance, 0);
@@ -118,14 +120,20 @@ export function SummonScreen({ save, update, onBack }: Props) {
             </div>
           </div>
         )}
-        <div className="button-row">
-          <button className="btn primary big" disabled={spinning || balance < 1} onClick={() => pull(1)}>
-            Summon ×1
-          </button>
-          <button className="btn big" disabled={spinning || balance < 10} onClick={() => pull(10)}>
-            Summon ×10
-          </button>
-        </div>
+        {collFull && !golden ? (
+          <div className="warn-box">
+            <span>⚠ Collection full — sell or fuse fighters before summoning.</span>
+          </div>
+        ) : (
+          <div className="button-row">
+            <button className="btn primary big" disabled={spinning || balance < 1} onClick={() => pull(1)}>
+              Summon ×1
+            </button>
+            <button className="btn big" disabled={spinning || balance < 10} onClick={() => pull(10)}>
+              Summon ×10
+            </button>
+          </div>
+        )}
         <p className="muted small-text">
           {golden ? 'Golden summons use only the exclusive pool. Each pull has the same odds; ×10 has no extra guarantee or legendary-piece drop.' : <>Every normal pull has a 0.5% bonus legendary-piece chance. ×10 upgrades an eligible fighter you owned before the batch when one is available. Today's lucky fighter: <b>{getFamily(luckyFamilyId()).name}</b>.</>}
         </p>

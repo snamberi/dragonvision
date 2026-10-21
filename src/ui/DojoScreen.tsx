@@ -9,6 +9,44 @@ import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { Portrait, Sprite, Stars } from './Sprite';
 
+const CHALLENGE_GOAL_WINS = 3;
+const CHALLENGE_GOAL_TRAIN = 5;
+const CHALLENGE_GOAL_STAGES = 2;
+const CHALLENGE_MAX_PROGRESS = 100;
+const DOJO_POLL_MS = 5_000;
+
+interface WeeklyChallenge {
+  id: string;
+  label: string;
+  goal: number;
+  reward: string;
+  progress: (save: SaveData) => number;
+}
+
+const WEEKLY_CHALLENGES: WeeklyChallenge[] = [
+  {
+    id: 'win_battles',
+    label: 'Win 3 battles',
+    goal: CHALLENGE_GOAL_WINS,
+    reward: '● 500 coins',
+    progress: (s) => Math.min(CHALLENGE_GOAL_WINS, s.weeklyWins ?? 0),
+  },
+  {
+    id: 'train_fighters',
+    label: 'Send 5 fighters to the Dojo',
+    goal: CHALLENGE_GOAL_TRAIN,
+    reward: '◆ 2 gems',
+    progress: (s) => Math.min(CHALLENGE_GOAL_TRAIN, s.weeklyTrains ?? 0),
+  },
+  {
+    id: 'clear_stages',
+    label: 'Clear 2 new stages',
+    goal: CHALLENGE_GOAL_STAGES,
+    reward: '🎰 1 Spin Orb',
+    progress: (s) => Math.min(CHALLENGE_GOAL_STAGES, s.weeklyStages ?? 0),
+  },
+];
+
 interface Props {
   save: SaveData;
   update: Updater;
@@ -20,7 +58,7 @@ export function DojoScreen({ save, update: commit, onBack }: Props) {
   const [now, setNow] = useState(Date.now);
   // Tick so progress bars move while the screen is open.
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 5000);
+    const id = setInterval(() => setNow(Date.now()), DOJO_POLL_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -62,7 +100,7 @@ export function DojoScreen({ save, update: commit, onBack }: Props) {
                 {p.ready > 0 && <b className="dojo-ready"> +{p.ready}</b>} / cap {levelCap(unit.star)}
               </div>
               <span className="bar xp">
-                <i style={{ width: `${p.partial * 100}%` }} />
+                <i style={{ width: `${p.partial * CHALLENGE_MAX_PROGRESS}%` }} />
               </span>
               <div className="muted small-text">{p.capped ? 'At the level wall. Evolve to keep training.' : 'Training…'}</div>
               <div className="button-row">
@@ -100,6 +138,26 @@ export function DojoScreen({ save, update: commit, onBack }: Props) {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="panel weekly-challenges">
+        <h3>Weekly Challenges</h3>
+        <p className="muted small-text">Resets each week. Earn bonus rewards for training hard.</p>
+        {WEEKLY_CHALLENGES.map((ch) => {
+          const current = ch.progress(save);
+          const done = current >= ch.goal;
+          const pct = Math.min(CHALLENGE_MAX_PROGRESS, (current / ch.goal) * CHALLENGE_MAX_PROGRESS);
+          return (
+            <div key={ch.id} className={`challenge-row ${done ? 'done' : ''}`}>
+              <span className="challenge-label">{ch.label}</span>
+              <span className="challenge-reward muted small-text">{ch.reward}</span>
+              <div className="challenge-bar">
+                <div className="challenge-fill" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="challenge-progress muted small-text">{current}/{ch.goal}{done ? ' ✓' : ''}</span>
+            </div>
+          );
+        })}
       </section>
     </div>
   );

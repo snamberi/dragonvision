@@ -150,9 +150,6 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
         ) : (
           <>
             <ul className="req-list">
-              <li className={evolve.levelMet ? 'met' : ''}>
-                Reach level {evolve.levelNeeded} ({unit.level}/{evolve.levelNeeded})
-              </li>
               <li className={evolve.duplicatesMet ? 'met' : ''}>
                 2 more copies of {unitName(unit)} {unit.star}★ ({evolve.duplicates.length + evolve.shardsUsed}/2) — any level
                 {evolve.shardsUsed > 0 && ` (${evolve.shardsUsed} from shards)`}

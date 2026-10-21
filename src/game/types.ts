@@ -88,6 +88,8 @@ export interface Unit {
   gear?: Partial<Record<GearSlotKey, string>>;
   /** Awakening nodes unlocked, by node id. */
   awakened?: string[];
+  /** Two rune slots: [offense rune id | null, defense rune id | null]. */
+  runeSlots?: (string | null)[];
 }
 
 export type GearSlotKey = 'weapon' | 'armor' | 'acc1' | 'acc2';
@@ -170,6 +172,14 @@ export interface SaveData {
     /** Extra gear storage levels bought (+5 slots each, up to MAX_STORAGE_UPGRADES). */
     storageLevel: number;
   };
+  /** Runes in the player's inventory (equipped or not). */
+  runes?: import('./rune').Rune[];
+  /** Rune fragments accumulated from battle drops and quests. */
+  runeFragments?: number;
+  /** Weekly challenge counters; reset to 0 each week. */
+  weeklyWins?: number;
+  weeklyTrains?: number;
+  weeklyStages?: number;
 }
 
 export interface HomeData {
@@ -200,6 +210,8 @@ export interface Expedition {
   hours: number;
   /** Rolled when the party leaves, so reopening the game can't reroll them. */
   reward: { coins: number; spins: number; gems: number };
+  /** Safe path returns guaranteed reward; risky path has a 20% fail chance but 1.5× reward. */
+  path?: 'safe' | 'risky';
 }
 
 export interface BountyPeriod {

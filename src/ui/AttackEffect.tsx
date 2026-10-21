@@ -6,7 +6,7 @@ import type { SpecialKind } from '../game/types';
 
 /** Shared with the battle layout. SVG coordinates track each actual hit target. */
 export function fighterFootPoint(f:Pick<Fighter,'side'|'row'|'slot'>) {
-  return { x:(f.side==='enemy'?(f.row==='front'?31:12):(f.row==='front'?69:88))*10, y:([57,66,75,84,93][f.slot]??75)*5 };
+  return { x:(f.side==='player'?(f.row==='front'?31:12):(f.row==='front'?69:88))*10, y:([57,66,75,84,93][f.slot]??75)*5 };
 }
 export function fighterPoint(f:Pick<Fighter,'side'|'row'|'slot'>) {
   const foot=fighterFootPoint(f);return {...foot,y:foot.y-42};
