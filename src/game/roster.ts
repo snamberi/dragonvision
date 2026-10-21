@@ -352,6 +352,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'sylas',
+    tier: 'epic',
     name: 'Sylas',
     title: 'The Perfect Organism',
     villain: true,
@@ -365,6 +366,7 @@ export const FAMILIES: Family[] = [
   },
   {
     id: 'kael',
+    tier: 'epic',
     name: 'Kael',
     title: 'The Corrupted Echo',
     villain: true,
