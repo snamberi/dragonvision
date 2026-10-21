@@ -1,3 +1,5 @@
+import { ActivityScene } from './ActivityScene';
+import { useActionFeedback } from './useActionFeedback';
 import { useEffect, useState } from 'react';
 import { EXPEDITION_HOURS, EXPEDITION_MAX_PARTY, EXPEDITION_SLOTS } from '../game/balance';
 import { claimExpedition, expeditionDone, recallExpedition, startExpedition, timeLeft } from '../game/expedition';
@@ -19,7 +21,8 @@ function formatTime(ms: number): string {
   return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
 }
 
-export function PortScreen({ save, update, onBack }: Props) {
+export function PortScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   const [now, setNow] = useState(Date.now);
   const [party, setParty] = useState<string[]>([]);
   const [hours, setHours] = useState<number>(4);
@@ -37,17 +40,18 @@ export function PortScreen({ save, update, onBack }: Props) {
     setParty((p) => (p.includes(uid) ? p.filter((x) => x !== uid) : p.length < EXPEDITION_MAX_PARTY ? [...p, uid] : p));
 
   const send = () => {
-    if (update((s) => startExpedition(s, party, hours, Date.now()))) setParty([]);
+    if (update((s) => startExpedition(s, party, hours, Date.now()), 'Expedition departed')) { setParty([]); setNow(Date.now()); }
   };
 
   return (
-    <div className="port">
+    <div className="port area-polished">{feedback}
       <BuildingHeader title="Expedition Port" onBack={onBack}>
         <p className="muted">
           Send up to {EXPEDITION_MAX_PARTY} idle fighters on a trip. They come back with coins, plus Spin Orbs on longer trips and a
           chance of gems. Bigger parties bring back more. {EXPEDITION_SLOTS} trips can be out at once.
         </p>
       </BuildingHeader>
+      <ActivityScene kind="port" status={`${save.expeditions.length} expeditions at sea · ${party.length} fighters selected`} active={save.expeditions.length > 0}/>
 
       <div className="trip-list">
         {save.expeditions.length === 0 && <p className="muted">No trips out right now.</p>}
@@ -61,7 +65,7 @@ export function PortScreen({ save, update, onBack }: Props) {
                   return <Portrait key={uid} familyId={u.familyId} star={u.star} size={36} />;
                 })}
               </div>
-              <div className="trip-info">
+              <div className="trip-info"><div className="voyage-track" aria-label={done ? 'Expedition complete' : 'Expedition in progress'}><i style={{left:`${Math.min(100,Math.max(0,100*(1-timeLeft(e,now)/(e.hours*3600000))))}%`}}>◆</i></div>
                 <b>{e.hours}h trip</b>
                 <span className="muted">{done ? 'Back home!' : `Back in ${formatTime(timeLeft(e, now))}`}</span>
                 <span className="trip-reward">
@@ -71,11 +75,11 @@ export function PortScreen({ save, update, onBack }: Props) {
                 </span>
               </div>
               {done ? (
-                <button className="btn small primary" onClick={() => update((s) => claimExpedition(s, e.id, Date.now()))}>
+                <button className="btn small primary" onClick={() => update((s) => claimExpedition(s, e.id, Date.now()), 'Expedition rewards collected')}>
                   Collect
                 </button>
               ) : (
-                <button className="btn small" onClick={() => update((s) => recallExpedition(s, e.id))}>
+                <button className="btn small" onClick={() => update((s) => recallExpedition(s, e.id), 'Party recalled · no reward')}>
                   Recall (no reward)
                 </button>
               )}
@@ -100,7 +104,7 @@ export function PortScreen({ save, update, onBack }: Props) {
         <div className="spare-grid trip-pick">
           {idle.length === 0 && <p className="muted">No idle fighters. Team, Dojo and traveling fighters can't go.</p>}
           {idle.map((u) => (
-            <button key={u.uid} className={`spare ${party.includes(u.uid) ? 'picked' : ''}`} onClick={() => toggle(u.uid)}>
+            <button key={u.uid} className={`spare ${party.includes(u.uid) ? 'picked' : ''}`} onClick={() => toggle(u.uid)} aria-pressed={party.includes(u.uid)}>
               <Portrait familyId={u.familyId} star={u.star} size={36} />
               <span className="spare-name">{unitName(u)}</span>
               <span className="muted">

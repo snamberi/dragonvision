@@ -1,6 +1,8 @@
+import { ActivityScene } from './ActivityScene';
+import { useActionFeedback } from './useActionFeedback';
 import { useState } from 'react';
 import { ACHIEVEMENTS, achievementState, allForms, claimAchievement, setTitle, unlockedTitles } from '../game/achievements';
-import { FAMILIES, FUSIONS, LEGENDARIES } from '../game/roster';
+import { FAMILIES, GOLDEN_FAMILIES, FUSIONS, LEGENDARIES } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
@@ -13,15 +15,18 @@ interface Props {
   onBack: () => void;
 }
 
-export function HallScreen({ save, update, onBack }: Props) {
+export function HallScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
+  const [showAll,setShowAll]=useState(false);
   const [tab, setTab] = useState<'achievements' | 'collection'>('achievements');
   const titles = unlockedTitles(save);
   const seen = new Set(save.seenForms);
   return (
-    <div className="hall">
+    <div className="hall area-polished">{feedback}
       <BuildingHeader title="Hall of Legends" onBack={onBack}>
         <p className="muted">Achievements pay gems and Spin Orbs, and many unlock a title shown on your Home screen. The collection log keeps every form you have ever owned.</p>
       </BuildingHeader>
+      <ActivityScene kind="hall" status={`${save.achievements.length} achievements claimed · ${seen.size} forms discovered`} active={false}/>
       <div className="button-row">
         <button className={`btn small ${tab === 'achievements' ? 'primary' : ''}`} onClick={() => setTab('achievements')}>
           Achievements
@@ -70,7 +75,7 @@ export function HallScreen({ save, update, onBack }: Props) {
                           .join(' · ')}
                       </span>
                     </div>
-                    <button className="btn small primary" disabled={!st.complete || st.claimed} onClick={() => update((s) => claimAchievement(s, a.id))}>
+                    <button className="btn small primary" disabled={!st.complete || st.claimed} onClick={() => update((s) => claimAchievement(s, a.id), 'Achievement reward collected')}>
                       {st.claimed ? 'Claimed' : 'Claim'}
                     </button>
                   </div>
@@ -80,7 +85,7 @@ export function HallScreen({ save, update, onBack }: Props) {
           </section>
         </>
       ) : (
-        [...FAMILIES, ...FUSIONS, ...LEGENDARIES].map((f) => (
+        <>{(showAll?[...FAMILIES, ...GOLDEN_FAMILIES, ...FUSIONS, ...LEGENDARIES]:[...FAMILIES, ...GOLDEN_FAMILIES, ...FUSIONS, ...LEGENDARIES].slice(0,10)).map((f) => (
           <section key={f.id} className="panel collection-row">
             <h3>
               {f.name} <span className="muted">· {f.title}</span>
@@ -97,7 +102,7 @@ export function HallScreen({ save, update, onBack }: Props) {
               })}
             </div>
           </section>
-        ))
+        ))}<button className="btn small" aria-expanded={showAll} onClick={()=>setShowAll(!showAll)}>{showAll?'Show fewer':'Show all characters'}</button></>
       )}
     </div>
   );

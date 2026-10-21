@@ -2,6 +2,7 @@ import { addUnit, summonLevelRange } from './progression';
 import { LEGENDARIES, getFamily } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { SaveData, Unit } from './types';
+import { collectionCap } from './upgrades';
 
 export const PIECES_TO_FORGE = 10;
 /** Chance per summon of a bonus legendary piece. Focus and the lucky fighter don't change it. */
@@ -32,6 +33,7 @@ export function forgeLegend(save: SaveData, familyId: string): { save: SaveData;
   const family = getFamily(familyId);
   if (!family.legendary) throw new Error('Only legendary fighters can be forged');
   if ((save.pieces[familyId] ?? 0) < PIECES_TO_FORGE) throw new Error(`Needs ${PIECES_TO_FORGE} pieces`);
+  if (save.units.length >= collectionCap(save)) throw new Error('Collection is full — upgrade the Upgrades House or manage your fighters');
   const star = family.firstStar ?? 1;
   const [level] = summonLevelRange(star);
   const paid = { ...save, pieces: { ...save.pieces, [familyId]: save.pieces[familyId] - PIECES_TO_FORGE } };

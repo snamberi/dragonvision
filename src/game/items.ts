@@ -6,7 +6,7 @@ import { LEGENDARIES, getFamily } from './roster';
 import type { MaterialId, SaveData } from './types';
 
 export type ItemCategory = 'items' | 'materials' | 'shards' | 'pieces';
-export type ItemIconId = 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll';
+export type ItemIconId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll';
 
 export interface InventoryEntry {
   key: string;
@@ -37,6 +37,7 @@ export function inventoryEntries(save: SaveData): InventoryEntry[] {
       text: 'Summons one fighter at the Summoning Shrine in the City.',
     });
   }
+  if ((save.goldenOrbs??0)>0) entries.push({key:'goldenOrb',name:'Golden Orb',count:save.goldenOrbs!,category:'items',icon:'goldenOrb',text:'Summons one of the ten exclusive Golden fighters at the Shrine. Costs 60 gems per orb.'});
   for (const id of Object.keys(MATERIALS) as MaterialId[]) {
     if (save.materials[id] > 0) {
       entries.push({ key: id, name: MATERIALS[id].name, count: save.materials[id], category: 'materials', icon: id, text: MATERIALS[id].text });

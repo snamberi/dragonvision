@@ -1,3 +1,5 @@
+import { NEW_NORMAL_FAMILIES, GOLDEN_FAMILIES } from './newFighters';
+export { GOLDEN_FAMILIES } from './newFighters';
 import type { Family, Form, Look } from './types';
 
 // Original Vision-universe fighters. Silhouettes and palettes are deliberately our own.
@@ -358,6 +360,7 @@ export const FAMILIES: Family[] = [
       form('Void Kael', { skin: '#9a8a94', hair: '#ff2f4a', hairStyle: 'spikyTall', outfit: '#0a0618', accent: '#ff2f4a', boots: '#0a0618', aura: '#ff2f4a' }),
     ],
   },
+  ...NEW_NORMAL_FAMILIES,
 ];
 
 export const STARTER_FAMILY_ID = 'kairo';
@@ -572,7 +575,7 @@ export const FUSION_RECIPES: FusionRecipe[] = [
   { result: 'grylas', parts: ['grimm', 'sylas'], minStar: 6 },
 ];
 
-const byId = new Map([...FAMILIES, ...FUSIONS, ...LEGENDARIES].map((f) => [f.id, f]));
+const byId = new Map([...FAMILIES, ...GOLDEN_FAMILIES, ...FUSIONS, ...LEGENDARIES].map((f) => [f.id, f]));
 
 export function getFamily(id: string): Family {
   const family = byId.get(id);

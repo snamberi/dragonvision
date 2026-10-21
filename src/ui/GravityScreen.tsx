@@ -1,7 +1,9 @@
+import { ActivityScene } from './ActivityScene';
+import { useActionFeedback } from './useActionFeedback';
 import type { CSSProperties } from 'react';
 import { GRAVITY_MAX_LEVEL, GRAVITY_PER_LEVEL, gravityCost } from '../game/balance';
 import { ROLES, gravityLevel, upgradeGravity } from '../game/gravity';
-import { FAMILIES, roleFor } from '../game/roster';
+import { FAMILIES, GOLDEN_FAMILIES, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
@@ -13,25 +15,27 @@ interface Props {
   onBack: () => void;
 }
 
-export function GravityScreen({ save, update, onBack }: Props) {
+export function GravityScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   return (
-    <div className="gravity">
+    <div className="gravity area-polished">{feedback}
       <BuildingHeader title="Gravity Chamber" onBack={onBack}>
         <p className="muted">
           Train under heavy gravity. Each level gives every fighter of that role +{Math.round(GRAVITY_PER_LEVEL * 100)}% HP,
           attack and defense in battle, forever. Up to level {GRAVITY_MAX_LEVEL}.
         </p>
       </BuildingHeader>
+      <ActivityScene kind="gravity" status={'Permanent training for every fighter role'} active={false}/>
       <div className="gravity-grid">
         {ROLES.map((role) => {
           const level = gravityLevel(save, role);
           const maxed = level >= GRAVITY_MAX_LEVEL;
           const cost = gravityCost(level);
-          const members = FAMILIES.filter((f) => roleFor(f) === role).map((f) => f.name);
+          const members = [...FAMILIES, ...GOLDEN_FAMILIES].filter((f) => roleFor(f) === role).map((f) => f.name);
           return (
             <section key={role} className="panel gravity-card" style={{ '--role': ROLE_COLORS[role] } as CSSProperties}>
               <span className="role-tag">{role}</span>
-              <div className="gravity-level">
+              <div key={level} className="gravity-level upgrade-reveal">
                 Lv {level}
                 <small>/{GRAVITY_MAX_LEVEL}</small>
               </div>
@@ -41,7 +45,7 @@ export function GravityScreen({ save, update, onBack }: Props) {
               <div className="muted small-text">
                 +{Math.round(level * GRAVITY_PER_LEVEL * 100)}% stats · {members.join(', ')}
               </div>
-              <button className="btn small primary" disabled={maxed || save.coins < cost} onClick={() => update((s) => upgradeGravity(s, role))}>
+              <button className="btn small primary" disabled={maxed || save.coins < cost} onClick={() => update((s) => upgradeGravity(s, role), `${role} training upgraded`)}>
                 {maxed ? 'Maxed' : `Train ● ${cost.toLocaleString()}`}
               </button>
             </section>

@@ -48,7 +48,23 @@ export const GEMS_MINI_BOSS = 5;
 export const GEMS_BOSS = 15;
 export const NORMAL_GEM_CHANCE = 0.01;
 export const NORMAL_GEM_AMOUNT = 1;
-export const REPLAY_COIN_SHARE = 0.25;
+export const REPLAY_COIN_SHARE = 0.075;
+
+// --- Collection cap ---
+export const BASE_COLLECTION_CAP = 250;
+export const UPGRADE_COLLECTION_COST = 500;
+export const BASE_GEAR_SLOTS = 20;
+export const UPGRADE_STORAGE_COST = 300;
+export const MAX_COLLECTION_UPGRADES = 10;
+export const MAX_STORAGE_UPGRADES = 10;
+/** Extra slots per collection upgrade level. */
+export const COLLECTION_SLOTS_PER_UPGRADE = 10;
+/** Extra gear slots per storage upgrade level. */
+export const GEAR_SLOTS_PER_UPGRADE = 5;
+
+// --- Pity system ---
+/** After this many pulls without a 4★+, the next pull is guaranteed 4★+. */
+export const PITY_THRESHOLD = 70;
 
 export function enemyLevelForStage(stage: number): number {
   return Math.min(MAX_LEVEL, Math.round(1 + 2.2 * (stage - 1)));

@@ -1,3 +1,4 @@
+import { useActionFeedback } from './useActionFeedback';
 import { SHOP_REFRESH_GEMS } from '../game/gear';
 import { goodName } from '../game/items';
 import { LEGENDARY_SLOT, type MarketGood, buyMarketOffer, marketStock, refreshMarket, syncMarket } from '../game/market';
@@ -39,7 +40,8 @@ function goodText(good: MarketGood): string {
   }
 }
 
-export function ShopScreen({ save, update, onBack }: Props) {
+export function ShopScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   const today = syncMarket(save, dayKey());
   const stock = marketStock(today);
   const tickets = save.materials.refreshTicket;
@@ -54,7 +56,7 @@ export function ShopScreen({ save, update, onBack }: Props) {
         <GoodIcon good={offer.good} size={offer.legendary ? 72 : 56} />
         <b>{goodName(offer.good)}</b>
         <span className="muted small-text">{goodText(offer.good)}</span>
-        <button className={`btn small ${offer.legendary ? 'primary' : ''}`} disabled={sold || !affordable} onClick={() => update((s) => buyMarketOffer(s, i))}>
+        <button className={`btn small ${offer.legendary ? 'primary' : ''}`} disabled={sold || !affordable} onClick={() => update((s) => buyMarketOffer(s, i), 'Purchase added to Inventory')}>
           {sold ? (
             'Sold out'
           ) : offer.gems > 0 ? (
@@ -68,7 +70,7 @@ export function ShopScreen({ save, update, onBack }: Props) {
   };
 
   return (
-    <div className="shop">
+    <div className="shop area-polished">{feedback}
       <BuildingHeader title="Shop" onBack={onBack}>
         <p className="muted">Six new offers every day, plus one legendary offer in gold. Each offer sells once.</p>
       </BuildingHeader>

@@ -1,12 +1,12 @@
+import { PixelBackdrop } from './PixelBackdrop';
 import { PixelIcon } from './PixelIcon';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playMusic, unlockAudio } from '../audio/sound';
 import { recordForms } from '../game/achievements';
 import { syncBounties } from '../game/bounty';
 import { syncWorldBoss } from '../game/worldBoss';
-import { loadSave, writeSave, hasSave } from '../game/save';
+import { loadSave, writeSave } from '../game/save';
 import { loginReady } from '../game/login';
-import { unseenReleases } from '../content/changelog';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
 import { type Building, CityScreen } from './CityScreen';
@@ -39,8 +39,8 @@ export type Tab = 'home' | 'city' | 'inventory' | 'stages' | 'fighters';
 const TAB_LABELS: Record<Tab, string> = {
   home: 'Home',
   city: 'City',
+  stages: 'PLAY',
   inventory: 'Inventory',
-  stages: 'Stages',
   fighters: 'Fighters',
 };
 
@@ -55,19 +55,13 @@ type View =
 
 export type Updater = (change: (save: SaveData) => SaveData) => boolean;
 
-type Popup = 'news' | 'updates' | 'login' | 'settings' | null;
-
-// Read before the first save is written, so a returning player is told apart from a new one.
-const returning = hasSave();
+type Popup = 'updates' | 'login' | 'settings' | null;
 
 export function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
-  const [news] = useState(() => unseenReleases(returning));
-  // On launch: what's new first (after an update), then the daily login reward.
-  const [popup, setPopup] = useState<Popup>(() => (news.length ? 'news' : loginReady(save) ? 'login' : null));
-  const closePopup = useCallback(() => {
-    setPopup((p) => (p === 'news' && loginReady(saveRef.current) ? 'login' : null));
-  }, []);
+  // New letters and daily supplies wait in the yard, keeping the welcome unobstructed.
+  const [popup, setPopup] = useState<Popup>(null);
+  const closePopup = useCallback(() => setPopup(null), []);
   const [view, setView] = useState<View>({ kind: 'tab', tab: 'home' });
   const [toast, setToast] = useState<string | null>(null);
   const saveRef = useRef(save);
@@ -131,7 +125,7 @@ export function App() {
   );
 
   return (
-    <div className={`app ${view.kind === 'tab' && view.tab === 'city' ? 'city-view' : ''}`}>
+    <div className={`app ${view.kind === 'tab' && view.tab === 'city' ? 'city-view' : ''} ${view.kind === 'tab' && view.tab === 'home' ? 'home-view' : ''}`}>
       <header className="topbar">
         <h1 className="logo">
           <img className="logo-full" src={`${import.meta.env.BASE_URL}brand/logo-alt-light-transparent.png`} alt="Dragon Vision" />
@@ -156,7 +150,7 @@ export function App() {
         </div>
       </header>
 
-      <main className="screen">
+      <main className="screen">{!(view.kind === 'tab' && ['home', 'city'].includes(view.tab)) && <div className="screen-pixel-backdrop"><PixelBackdrop/></div>}
         {view.kind === 'battle' ? (
           <BattleScreen
             key={view.seq}
@@ -229,7 +223,7 @@ export function App() {
             />
           )
         ) : view.tab === 'home' ? (
-          <HomeScreen />
+          <HomeScreen save={save} update={update} onTravel={tab=>setView({kind:'tab',tab})} onUpdates={()=>setPopup('updates')}/>
         ) : view.tab === 'city' ? (
           <CityScreen save={save} onOpen={(building) => setView({ kind: 'building', building })} />
         ) : view.tab === 'inventory' ? (
@@ -244,7 +238,7 @@ export function App() {
       {view.kind !== 'battle' && (
         <nav className="tabs">
           {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
-            <button key={t} className={t === tab ? 'active' : ''} onClick={() => setView({ kind: 'tab', tab: t })}>
+            <button key={t} className={`${t === tab ? 'active' : ''} ${t === 'stages' ? 'play-tab' : ''}`} onClick={() => setView({ kind: 'tab', tab: t })}>
               <PixelIcon kind={t} size={22} />
               <span className="tab-long">{TAB_LABELS[t]}</span>
               <span className="tab-short">{TAB_SHORT[t] ?? TAB_LABELS[t]}</span>
@@ -253,7 +247,6 @@ export function App() {
         </nav>
       )}
 
-      {popup === 'news' && <WhatsNew releases={news} onClose={closePopup} />}
       {popup === 'updates' && <WhatsNew onClose={closePopup} />}
       {popup === 'login' && <LoginPopup save={save} update={update} onClose={closePopup} />}
       {popup === 'settings' && (

@@ -673,10 +673,11 @@ const GEAR: Record<string, [string[], Palette]> = {
   'void-fang': [VOID_FANG, VOID],
 };
 
-export type ItemArtId = 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll' | 'coins' | 'gems';
+export type ItemArtId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll' | 'coins' | 'gems';
 
 const ITEMS: Record<ItemArtId, [string[], Palette]> = {
   spinOrb: [SPIN_ORB, SPIN_ORB_PALETTE],
+  goldenOrb: [SPIN_ORB, { ...SPIN_ORB_PALETTE, G:'#f2c454', g:'#aa6e29', h:'#fff3ae', W:'#fffbe0', d:'#6c431e', L:'#ffe59a', D:'#9c5b21', S:'#fff6ce' }],
   shard: [SHARD, SHARD_PALETTE],
   piece: [PIECE, PIECE_PALETTE],
   refreshTicket: [REFRESH_TICKET, REFRESH_TICKET_PALETTE],

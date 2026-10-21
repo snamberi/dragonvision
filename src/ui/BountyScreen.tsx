@@ -1,3 +1,4 @@
+import { useActionFeedback } from './useActionFeedback';
 import { BOUNTIES, bountyProgress, claimBounty } from '../game/bounty';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -14,9 +15,10 @@ function rewardText(r: { coins?: number; spins?: number; gems?: number }): strin
   return [r.coins && `● ${r.coins.toLocaleString()}`, r.spins && orbs(r.spins), r.gems && `◆ ${r.gems}`].filter(Boolean).join(' · ');
 }
 
-export function BountyScreen({ save, update, onBack }: Props) {
+export function BountyScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   return (
-    <div className="bounty">
+    <div className="bounty area-polished">{feedback}
       <BuildingHeader title="Bounty Board" onBack={onBack}>
         <p className="muted">Daily bounties reset at midnight, weekly ones on Monday. Progress counts from when each period starts.</p>
       </BuildingHeader>
@@ -38,7 +40,7 @@ export function BountyScreen({ save, update, onBack }: Props) {
                       {done}/{b.goal} · {rewardText(b.reward)}
                     </span>
                   </div>
-                  <button className="btn small primary" disabled={!complete || claimed} onClick={() => update((s) => claimBounty(s, b.id))}>
+                  <button className="btn small primary" disabled={!complete || claimed} onClick={() => update((s) => claimBounty(s, b.id), 'Bounty reward collected')}>
                     {claimed ? 'Claimed' : 'Claim'}
                   </button>
                 </div>

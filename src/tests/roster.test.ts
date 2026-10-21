@@ -3,8 +3,8 @@ import { paintFighter } from '../art/sprite';
 import { FAMILIES } from '../game/roster';
 
 describe('roster', () => {
-  it('has 18 characters with unique ids and form names', () => {
-    expect(FAMILIES).toHaveLength(18);
+  it('has 28 normal characters with unique ids and form names', () => {
+    expect(FAMILIES).toHaveLength(28);
     expect(new Set(FAMILIES.map((f) => f.id)).size).toBe(FAMILIES.length);
     const names = FAMILIES.flatMap((f) => f.forms.map((form) => form.name));
     expect(new Set(names).size).toBe(names.length);

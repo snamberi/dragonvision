@@ -101,9 +101,13 @@ export interface DojoSlot {
 
 export interface SaveData {
   version: 1;
+  /** Personal home preferences and persistent mailbox receipts; optional for older saves. */
+  home?: HomeData;
   coins: number;
   gems: number;
   spins: number;
+  /** Separate shrine currency; absent on older saves. */
+  goldenOrbs?: number;
   units: Unit[];
   /**
    * Five formation slots (null = empty pad), at most one fighter per family.
@@ -148,6 +152,24 @@ export interface SaveData {
   materials: Record<MaterialId, number>;
   /** The Shop's daily stock (the Armory keeps its own in `shop`). */
   market: { day: string; refreshes: number; bought: number[] };
+  /** Pulls since the last 4★+ result; resets to 0 on a 4★+ pull. */
+  pityPulls?: number;
+  /** Upgrades House purchases. */
+  upgrades?: {
+    /** Extra collection slots bought (+10 each, up to MAX_COLLECTION_UPGRADES). */
+    collectionCap: number;
+    /** Extra gear storage levels bought (+5 slots each, up to MAX_STORAGE_UPGRADES). */
+    storageLevel: number;
+  };
+}
+
+export interface HomeData {
+  name: string;
+  residentUid: string | null;
+  palette: 'ember' | 'jade' | 'violet';
+  banner: 'sun' | 'moon' | 'leaf';
+  readMail: string[];
+  claimedMail: string[];
 }
 
 /** Refresh Tickets refresh a shop for free; Respec Scrolls reset an awakening tree for free. */

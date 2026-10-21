@@ -169,7 +169,7 @@ describe('stages and rewards', () => {
     expect(rewardsFor({ ...save, clearedStage: 4 }, 5, () => 0.5).spins).toBe(5);
     expect(rewardsFor({ ...save, clearedStage: 9 }, 10, () => 0.5).spins).toBe(10);
     const replay = rewardsFor({ ...save, clearedStage: 10 }, 10, () => 0);
-    expect(replay).toMatchObject({ firstClear: false, spins: 0, gems: 0, coins: Math.round(getStage(10).coins * 0.25) });
+    expect(replay).toMatchObject({ firstClear: false, spins: 0, gems: 0, coins: Math.round(getStage(10).coins * 0.075) });
   });
 
   it('first clear advances progress, replay does not', () => {

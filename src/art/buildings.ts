@@ -1,3 +1,4 @@
+import { landmarkUrl } from './landmarks';
 // Pixel buildings drawn from ASCII maps: each character is one pixel, '.' is empty.
 
 const SHRINE = [
@@ -352,39 +353,69 @@ function paintAscii(key: string, rows: string[], palette: Record<string, string>
   const hit = cache.get(key);
   if (hit) return hit;
   const canvas = document.createElement('canvas');
-  canvas.width = Math.max(...rows.map((r) => r.length)) * 3;
-  canvas.height = rows.length * 3;
+  canvas.width = Math.max(...rows.map((r) => r.length)) * 6;
+  canvas.height = rows.length * 6;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
   rows.forEach((row, y) =>
     [...row].forEach((ch, x) => {
       const color = palette[ch];
       if (!color) return;
-      ctx.fillStyle = color;
-      ctx.fillRect(x * 3, y * 3, 3, 3);
-      ctx.fillStyle = 'rgba(255,244,210,.19)';
-      if (rows[y-1]?.[x] !== ch) ctx.fillRect(x*3, y*3, 3, 1);
-      ctx.fillStyle = 'rgba(15,12,40,.22)';
-      ctx.fillRect(x*3+2, y*3+1, 1, 2);
-      if ((x+y)%3 === 0) ctx.fillRect(x*3, y*3+2, 2, 1);
+      const px=x*6, py=y*6;
+      ctx.fillStyle = color; ctx.fillRect(px,py,6,6);
+      ctx.fillStyle='rgba(255,237,191,.27)';
+      if(rows[y-1]?.[x]!==ch) ctx.fillRect(px,py,6,1);
+      ctx.fillStyle='rgba(13,13,35,.28)'; ctx.fillRect(px+5,py+1,1,5);
+      if ('SsWCP'.includes(ch)) {
+        ctx.fillRect(px,py+5,6,1); ctx.fillRect(px+(y%2?2:4),py+2,1,3);
+        ctx.fillStyle='rgba(255,255,230,.1)';ctx.fillRect(px+1,py+1,3,1);
+      } else if ('RrTtDd'.includes(ch)) {
+        ctx.fillRect(px,py+4,6,1);ctx.fillStyle='rgba(255,234,175,.22)';ctx.fillRect(px+1,py+1,3,2);
+      } else if ('Yyw'.includes(ch)) {
+        ctx.fillStyle='rgba(255,246,192,.55)';ctx.fillRect(px+1,py+1,3,3);
+      } else if ('B'.includes(ch)) {
+        ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(px,py,6,2);
+      }
+
     }),
   );
+  // Facade fixtures: warm lanterns, planted entrances, and destination emblems.
+  const w=canvas.width, h=canvas.height;
+  if (!['port','lot','board','gate'].includes(key)) {
+    for (const x of [w*.23,w*.77]) {
+      ctx.fillStyle='#342d38';ctx.fillRect(Math.round(x)-3,h-34,6,14);
+      ctx.fillStyle='#bc874c';ctx.fillRect(Math.round(x)-4,h-30,8,10);
+      ctx.fillStyle='#ffe7a1';ctx.fillRect(Math.round(x)-2,h-29,4,7);
+    }
+    for (const x of [5,w-13]) {
+      ctx.fillStyle='#8c6352';ctx.fillRect(x,h-11,8,7);
+      ctx.fillStyle='#2b574b';ctx.fillRect(x-2,h-18,12,8);
+      ctx.fillStyle='#74945c';ctx.fillRect(x,h-21,7,6);
+    }
+  }
+  if (key==='armory') {
+    ctx.fillStyle='#d8e9ed';ctx.fillRect(w/2-2,h-39,4,19);
+    ctx.fillStyle='#e9be65';ctx.fillRect(w/2-7,h-24,14,3);
+  }
+  if(key==='lab'||key==='gravity') {
+    ctx.fillStyle='#8be6cf';for(let i=0;i<3;i++)ctx.fillRect(w/2-9+i*8,h-44,4,4);
+  }
   const url = canvas.toDataURL();
   cache.set(key, url);
   return url;
 }
 
-export const shrineUrl = () => paintAscii('shrine', SHRINE, SHRINE_PALETTE);
+export const shrineUrl = () => landmarkUrl('shrine') || paintAscii('shrine', SHRINE, SHRINE_PALETTE);
 export const lotUrl = () => paintAscii('lot', LOT, LOT_PALETTE);
-export const dojoUrl = () => paintAscii('dojo', DOJO, DOJO_PALETTE);
-export const labUrl = () => paintAscii('lab', LAB, LAB_PALETTE);
-export const gravityUrl = () => paintAscii('gravity', GRAVITY, GRAVITY_PALETTE);
-export const portUrl = () => paintAscii('port', PORT, PORT_PALETTE);
-export const boardUrl = () => paintAscii('board', BOARD, BOARD_PALETTE);
-export const tentUrl = () => paintAscii('tent', TENT, TENT_PALETTE);
-export const towerUrl = () => paintAscii('tower', TOWER, TOWER_PALETTE);
-export const shopUrl = () => paintAscii('shop', SHOP, SHOP_PALETTE);
-export const armoryUrl = () => paintAscii('armory', ARMORY, ARMORY_PALETTE);
-export const hallUrl = () => paintAscii('hall', HALL, HALL_PALETTE);
-export const colosseumUrl = () => paintAscii('colosseum', COLOSSEUM, COLOSSEUM_PALETTE);
-export const gateUrl = () => paintAscii('gate', GATE, GATE_PALETTE);
+export const dojoUrl = () => landmarkUrl('dojo') || paintAscii('dojo', DOJO, DOJO_PALETTE);
+export const labUrl = () => landmarkUrl('lab') || paintAscii('lab', LAB, LAB_PALETTE);
+export const gravityUrl = () => landmarkUrl('gravity') || paintAscii('gravity', GRAVITY, GRAVITY_PALETTE);
+export const portUrl = () => landmarkUrl('port') || paintAscii('port', PORT, PORT_PALETTE);
+export const boardUrl = () => landmarkUrl('board') || paintAscii('board', BOARD, BOARD_PALETTE);
+export const tentUrl = () => landmarkUrl('tent') || paintAscii('tent', TENT, TENT_PALETTE);
+export const towerUrl = () => landmarkUrl('tower') || paintAscii('tower', TOWER, TOWER_PALETTE);
+export const shopUrl = () => landmarkUrl('shop') || paintAscii('shop', SHOP, SHOP_PALETTE);
+export const armoryUrl = () => landmarkUrl('armory') || paintAscii('armory', ARMORY, ARMORY_PALETTE);
+export const hallUrl = () => landmarkUrl('hall') || paintAscii('hall', HALL, HALL_PALETTE);
+export const colosseumUrl = () => landmarkUrl('colosseum') || paintAscii('colosseum', COLOSSEUM, COLOSSEUM_PALETTE);
+export const gateUrl = () => landmarkUrl('gate') || paintAscii('gate', GATE, GATE_PALETTE);

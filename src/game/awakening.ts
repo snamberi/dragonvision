@@ -19,6 +19,67 @@ type Tree = [string, Partial<Bonus>][];
 
 // Six nodes per character: two per tier, in tier order. Every tree is its own.
 const TREES: Record<string, Tree> = {
+  ruka: [
+    ['Ruka Discipline',{atk:0.055}],['Ruka Endurance',{hp:.08}],['Ruka Focus',{specialPower:.16}],['Ruka Resolve',{def:.1}],['Ruka Ascension',{chargeDiscount:1}],['Ruka Legacy',{secondWind:.2}],
+  ],
+  bastion: [
+    ['Bastion Discipline',{atk:0.056}],['Bastion Endurance',{hp:.08}],['Bastion Focus',{specialPower:.16}],['Bastion Resolve',{def:.1}],['Bastion Ascension',{chargeDiscount:1}],['Bastion Legacy',{secondWind:.2}],
+  ],
+  namiya: [
+    ['Namiya Discipline',{atk:0.057}],['Namiya Endurance',{hp:.08}],['Namiya Focus',{specialPower:.16}],['Namiya Resolve',{def:.1}],['Namiya Ascension',{chargeDiscount:1}],['Namiya Legacy',{secondWind:.2}],
+  ],
+  flint: [
+    ['Flint Discipline',{atk:0.058}],['Flint Endurance',{hp:.08}],['Flint Focus',{specialPower:.16}],['Flint Resolve',{def:.1}],['Flint Ascension',{chargeDiscount:1}],['Flint Legacy',{secondWind:.2}],
+  ],
+  vesper: [
+    ['Vesper Discipline',{atk:0.059}],['Vesper Endurance',{hp:.08}],['Vesper Focus',{specialPower:.16}],['Vesper Resolve',{def:.1}],['Vesper Ascension',{chargeDiscount:1}],['Vesper Legacy',{secondWind:.2}],
+  ],
+  kest: [
+    ['Kest Discipline',{atk:0.060}],['Kest Endurance',{hp:.08}],['Kest Focus',{specialPower:.16}],['Kest Resolve',{def:.1}],['Kest Ascension',{chargeDiscount:1}],['Kest Legacy',{secondWind:.2}],
+  ],
+  sumi: [
+    ['Sumi Discipline',{atk:0.061}],['Sumi Endurance',{hp:.08}],['Sumi Focus',{specialPower:.16}],['Sumi Resolve',{def:.1}],['Sumi Ascension',{chargeDiscount:1}],['Sumi Legacy',{secondWind:.2}],
+  ],
+  briar: [
+    ['Briar Discipline',{atk:0.062}],['Briar Endurance',{hp:.08}],['Briar Focus',{specialPower:.16}],['Briar Resolve',{def:.1}],['Briar Ascension',{chargeDiscount:1}],['Briar Legacy',{secondWind:.2}],
+  ],
+  tarka: [
+    ['Tarka Discipline',{atk:0.063}],['Tarka Endurance',{hp:.08}],['Tarka Focus',{specialPower:.16}],['Tarka Resolve',{def:.1}],['Tarka Ascension',{chargeDiscount:1}],['Tarka Legacy',{secondWind:.2}],
+  ],
+  onyx: [
+    ['Onyx Discipline',{atk:0.064}],['Onyx Endurance',{hp:.08}],['Onyx Focus',{specialPower:.16}],['Onyx Resolve',{def:.1}],['Onyx Ascension',{chargeDiscount:1}],['Onyx Legacy',{secondWind:.2}],
+  ],
+  helion: [
+    ['Helion Discipline',{atk:0.065}],['Helion Endurance',{hp:.08}],['Helion Focus',{specialPower:.16}],['Helion Resolve',{def:.1}],['Helion Ascension',{chargeDiscount:1}],['Helion Legacy',{secondWind:.2}],
+  ],
+  isolde: [
+    ['Isolde Discipline',{atk:0.066}],['Isolde Endurance',{hp:.08}],['Isolde Focus',{specialPower:.16}],['Isolde Resolve',{def:.1}],['Isolde Ascension',{chargeDiscount:1}],['Isolde Legacy',{secondWind:.2}],
+  ],
+  raijin: [
+    ['Raijin Discipline',{atk:0.067}],['Raijin Endurance',{hp:.08}],['Raijin Focus',{specialPower:.16}],['Raijin Resolve',{def:.1}],['Raijin Ascension',{chargeDiscount:1}],['Raijin Legacy',{secondWind:.2}],
+  ],
+  noctelle: [
+    ['Noctelle Discipline',{atk:0.068}],['Noctelle Endurance',{hp:.08}],['Noctelle Focus',{specialPower:.16}],['Noctelle Resolve',{def:.1}],['Noctelle Ascension',{chargeDiscount:1}],['Noctelle Legacy',{secondWind:.2}],
+  ],
+  quillon: [
+    ['Quillon Discipline',{atk:0.069}],['Quillon Endurance',{hp:.08}],['Quillon Focus',{specialPower:.16}],['Quillon Resolve',{def:.1}],['Quillon Ascension',{chargeDiscount:1}],['Quillon Legacy',{secondWind:.2}],
+  ],
+  amaranth: [
+    ['Amaranth Discipline',{atk:0.070}],['Amaranth Endurance',{hp:.08}],['Amaranth Focus',{specialPower:.16}],['Amaranth Resolve',{def:.1}],['Amaranth Ascension',{chargeDiscount:1}],['Amaranth Legacy',{secondWind:.2}],
+  ],
+  asterion: [
+    ['Asterion Discipline',{atk:0.071}],['Asterion Endurance',{hp:.08}],['Asterion Focus',{specialPower:.16}],['Asterion Resolve',{def:.1}],['Asterion Ascension',{chargeDiscount:1}],['Asterion Legacy',{secondWind:.2}],
+  ],
+  cairn: [
+    ['Cairn Discipline',{atk:0.072}],['Cairn Endurance',{hp:.08}],['Cairn Focus',{specialPower:.16}],['Cairn Resolve',{def:.1}],['Cairn Ascension',{chargeDiscount:1}],['Cairn Legacy',{secondWind:.2}],
+  ],
+  saffra: [
+    ['Saffra Discipline',{atk:0.073}],['Saffra Endurance',{hp:.08}],['Saffra Focus',{specialPower:.16}],['Saffra Resolve',{def:.1}],['Saffra Ascension',{chargeDiscount:1}],['Saffra Legacy',{secondWind:.2}],
+  ],
+  eiren: [
+    ['Eiren Discipline',{atk:0.074}],['Eiren Endurance',{hp:.08}],['Eiren Focus',{specialPower:.16}],['Eiren Resolve',{def:.1}],['Eiren Ascension',{chargeDiscount:1}],['Eiren Legacy',{secondWind:.2}],
+  ],
+
   kairo: [
     ['Spark Training', { atk: 0.06 }],
     ['Hungry Spirit', { hp: 0.08 }],

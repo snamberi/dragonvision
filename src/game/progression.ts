@@ -62,6 +62,7 @@ export function newSave(): SaveData {
     coins: STARTING_COINS,
     gems: STARTING_GEMS,
     spins: STARTING_SPINS,
+    goldenOrbs: 0,
     units: [{ uid: 'u1', familyId: STARTER_FAMILY_ID, star: 1, level: 1, baseLevel: 1, coinsSpent: 0 }],
     team: ['u1', null, null, null, null],
     clearedStage: 0,
@@ -88,6 +89,7 @@ export function newSave(): SaveData {
     pieces: {},
     materials: { refreshTicket: 0, respecScroll: 0 },
     market: { day: '', refreshes: 0, bought: [] },
+    pityPulls: 0,
   };
 }
 

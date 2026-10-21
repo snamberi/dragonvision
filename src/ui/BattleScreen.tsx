@@ -1,6 +1,9 @@
+import { basicMotion } from '../art/combatMotion';
 import { WeatherLayer, WorldScene } from './WorldScene';
 import { WEATHER_TEXT, arenaForStage } from '../game/arenas';
-import { AttackEffect } from './AttackEffect';
+import { AttackEffect, fighterFootPoint } from './AttackEffect';
+import type { SpritePose } from '../art/sprite';
+import { identityFor } from '../art/identity';
 import { PixelIcon } from './PixelIcon';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KI_BLAST_COST, KI_MAX } from '../game/balance';
@@ -57,7 +60,7 @@ interface Props {
   onContinue: (stage: number, run: Run) => void;
 }
 
-const STEP_MS = 650;
+const STEP_MS = 1500;
 const SPEEDS = [1, 2, 4] as const;
 const SPEED_KEY = 'dragonvision.speed';
 
@@ -96,10 +99,8 @@ function hitText(h: Hit): string {
  * the front row stands nearer the middle.
  */
 function fieldPosition(f: Fighter): CSSProperties {
-  const front = f.row === 'front';
-  const x = f.side === 'enemy' ? (front ? 31 : 12) : front ? 69 : 88;
-  const y = [42, 56, 70, 84, 98][f.slot] ?? 70;
-  return { left: `${x}%`, top: `${y}%`, zIndex: Math.round(y) };
+  const point = fighterFootPoint(f);
+  return { left: `${point.x / 10}%`, top: `${point.y / 5}%`, zIndex: Math.round(point.y / 5) };
 }
 
 export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update, onExit, onContinue }: Props) {
@@ -127,6 +128,9 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   );
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<'idle'|'anticipation'|'release'|'impact'|'recover'>('idle');
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const [pending, setPending] = useState<ActionKind | null>(null);
   const [auto, setAuto] = useState(run.mode !== 'single');
   const [speed, setSpeed] = useState(() => (run.mode === 'single' ? loadSpeed() : Math.max(2, loadSpeed())));
@@ -137,7 +141,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   // Blocks a second action from a fast double tap before React re-renders.
   const acting = useRef(false);
   const rewarded = useRef(false);
-  const step = STEP_MS / speed;
+  const [actionMs, setActionMs] = useState(STEP_MS);
 
   const actor = nextActor(battle);
   const playerControls = battle.result === 'ongoing' && battle.turn === 'player' && !auto && !busy;
@@ -156,18 +160,29 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     const { state, event: ev } = result;
     eventId.current += 1;
     setEvent({ id: eventId.current, data: ev });
-    setBattle(state);
     setPending(null);
     setBusy(true);
-    const parts = ev.hits.map((h) => `${nameOf(h.targetId)} ${hitText(h)}${h.crit ? '!' : ''}`);
-    setLog((l) => [[nameOf(ev.actorId), ev.label, ...parts].join(' · '), ...l].slice(0, 30));
-    if (ev.kind === 'special' || ev.kind === 'combo') sfx(ev.hits.every((h) => h.kind !== 'damage') ? 'heal' : 'special');
-    else if (ev.hits.some((h) => h.crit)) sfx('crit');
-    else if (ev.hits.some((h) => h.kind === 'damage')) sfx('hit');
-    setTimeout(() => {
-      acting.current = false;
-      setBusy(false);
-    }, step);
+    setPhase('anticipation');
+    const big = ev.kind === 'special' || ev.kind === 'combo';
+    const ms = (big ? 3100 : STEP_MS) / speed;
+    setActionMs(ms);
+    // The resolver runs once. Timers only stage that result for the animation.
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    const later = (fn: () => void, at: number) => timers.current.push(setTimeout(fn, at));
+    later(() => setPhase('release'), ms * .28);
+    later(() => {
+      setBattle(state);
+      setPhase('impact');
+      const parts = ev.hits.map((h) => `${nameOf(h.targetId)} ${hitText(h)}${h.crit ? '!' : ''}`);
+      setLog((l) => [[nameOf(ev.actorId), ev.label, ...parts].join(' · '), ...l].slice(0, 30));
+      if (big) sfx(ev.hits.every((h) => h.kind !== 'damage') ? 'heal' : 'special');
+      else if (ev.hits.some((h) => h.crit)) sfx('crit');
+      else if (ev.hits.some((h) => h.kind === 'damage')) sfx('hit');
+    }, ms * .6);
+    later(() => setPhase('recover'), ms * .71);
+    later(() => { acting.current = false; setBusy(false); setPhase('idle'); }, ms);
+
   };
 
   // Enemy turns and Auto mode play themselves one action at a time.
@@ -181,7 +196,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
 
   // Pay out once when the battle ends, and decide whether an auto run continues.
   useEffect(() => {
-    if (battle.result === 'ongoing' || rewarded.current) return;
+    if (busy || battle.result === 'ongoing' || rewarded.current) return;
     // Survival waves roll on in their own effect below.
     if (mode === 'survival' && battle.result === 'won') return;
     rewarded.current = true;
@@ -224,18 +239,18 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     };
     const decision = nextInRun(total, stageNumber);
     setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
-  }, [battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run, mode, bossStart, wave]);
+  }, [busy, battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run, mode, bossStart, wave]);
 
   // Survival: after a cleared wave, the next one starts with the same fighters and no healing.
   useEffect(() => {
-    if (mode !== 'survival' || battle.result !== 'won') return;
+    if (busy || mode !== 'survival' || battle.result !== 'won') return;
     const id = setTimeout(() => {
       setWave(wave + 1);
       setBattle((b) => nextWave(b, squad, wave + 1, { bonusFor: (u) => unitBonus(save, u) }));
     }, 900);
     return () => clearTimeout(id);
     // Only the result and wave should restart this timer.
-  }, [mode, battle.result, wave]);
+  }, [busy, mode, battle.result, wave]);
 
   // Auto runs roll into the next battle after a short pause.
   useEffect(() => {
@@ -275,13 +290,35 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     if (actor?.id === f.id && battle.result === 'ongoing') classes.push('active');
     if (targetIds.has(f.id)) classes.push('targetable');
     if (aimingAtEnemies && f.side === 'enemy' && f.hp > 0 && !targetIds.has(f.id)) classes.push('shielded');
-    if (busy && ev?.actorId === f.id) classes.push(`do-${ev.kind}`);
-    if (busy && ev?.hits.some((h) => h.targetId === f.id && h.kind === 'damage')) classes.push('hit');
+    if (busy && ev?.actorId === f.id) classes.push(`do-${ev.kind}`, `motion-${basicMotion(f.familyId)}`);
+    if (busy && (phase === 'impact' || phase === 'recover') && ev?.hits.some((h) => h.targetId === f.id && h.kind === 'damage')) classes.push('hit');
     if (f.guarding) classes.push('guarding');
     if (f.stunned) classes.push('stunned');
     if (f.rank !== 'minion') classes.push(f.rank);
     return classes.join(' ');
   };
+
+  const movingPosition = (f: Fighter): CSSProperties => {
+    const ev = event?.data;
+    if (!busy || ev?.actorId !== f.id || ev.kind !== 'attack' || basicMotion(f.familyId) === 'projectile') return fieldPosition(f);
+    const target = battle.fighters.find(t => t.id === ev.hits.find(h => h.kind === 'damage')?.targetId);
+    if (!target || (phase !== 'release' && phase !== 'impact')) return fieldPosition(f);
+    const point = fighterFootPoint(target);
+    return { left: `${point.x / 10 + (f.side === 'player' ? 9 : -9)}%`, top: `${point.y / 5}%`, zIndex: 100 };
+  };
+
+  const poseFor = (f: Fighter): SpritePose => {
+    if (busy && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && (phase === 'impact' || phase === 'recover')) return 'hurt';
+    if (busy && event?.data.actorId === f.id) {
+      if (event.data.kind === 'guard') return 'guard';
+      if (event.data.kind === 'charge' || phase === 'anticipation') return 'charge';
+      return 'punch';
+    }
+    if (!busy && battle.result === (f.side === 'player' ? 'won' : 'lost') && f.hp > 0) return 'victory';
+    return f.guarding ? 'guard' : 'idle';
+  };
+  const specialActor = event ? battle.fighters.find(f => f.id === event.data.actorId) : null;
+  const bigAction = busy && (event?.data.kind === 'special' || event?.data.kind === 'combo');
 
   // Turn order: who is still to move this turn, then the other side by speed.
   const queue = useMemo(() => {
@@ -300,7 +337,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const showControls = battle.result === 'ongoing' && battle.turn === 'player' && actor !== null && !auto;
 
   return (
-    <div className="battle">
+    <div className={`battle phase-${phase}`} style={{'--action-ms':`${actionMs}ms`} as CSSProperties}>
       <div className="battle-top">
         <div className="turn-queue" aria-label="Turn order">
           {queue.map((f, i) => (
@@ -324,37 +361,37 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
         </div>
       </div>
 
-      <div className={`field ${busy && (event?.data.kind === 'special' || event?.data.kind === 'combo') ? 'special-impact' : ''}`}><WorldScene arena={arena} />
+      <div className={`field ${bigAction && phase === 'impact' && event?.data.hits.some(h => h.kind === 'damage') ? 'special-impact' : ''}`}><WorldScene arena={arena} />
         <WeatherLayer weather={battle.weather} />
+        {bigAction && specialActor && <div className={`special-callout ${phase}`} style={{'--energy':identityFor(specialActor.familyId).color} as CSSProperties} role="status"><Portrait familyId={specialActor.familyId} star={specialActor.star} size={42}/><span><small>{specialActor.name}</small><b>{event!.data.label}</b></span></div>}
+        {busy && event && phase !== 'anticipation' && <AttackEffect key={`fx-${event.id}`} event={event.data} fighters={battle.fighters} duration={actionMs * .72} />}
+
         {battle.fighters.map((f) => (
           <button
             key={f.id}
             className={fighterClasses(f)}
-            style={fieldPosition(f)}
+            style={movingPosition(f)}
             onClick={() => clickFighter(f)}
             disabled={!targetIds.has(f.id)}
             aria-label={`${f.name}, ${f.hp} of ${f.maxHp} HP`}
           >
-            {busy &&
+            {busy && (phase === 'impact' || phase === 'recover') &&
               event?.data.hits
                 .filter((h) => h.targetId === f.id)
                 .map((h, i) => (
-                  <span key={`${event.id}-${i}`} className={`float ${h.kind} ${h.crit ? 'crit' : ''}`}>
+                  <span key={`${event.id}-${i}`} style={{top:`${-14-i*25}px`}} className={`float ${h.kind} ${h.crit ? 'crit' : ''}`}>
                     {hitText(h)}
                   </span>
                 ))}
-            {busy && event?.data.actorId === f.id && (event.data.kind === 'kiBlast' || event.data.kind === 'special' || event.data.kind === 'combo') && (
-              <AttackEffect key={`fx-${event.id}`} familyId={f.familyId} side={f.side} special={event.data.kind === 'special' || event.data.kind === 'combo'} support={event.data.kind === 'special' && ['heal','revive','shield','rally'].includes(specialOf(f).kind)} duration={step} />
-            )}
             <span className="unit-hp">
               <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
               {f.shield > 0 && <i className="shield-bar" style={{ width: `${Math.min(100, (f.shield / f.maxHp) * 100)}%` }} />}
             </span>
             {f.rank !== 'minion' && <span className="rank-tag">{f.rank === 'boss' ? 'BOSS' : 'MINI-BOSS'}</span>}
-            {busy && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && <span key={`impact-${event.id}`} className="impact-burst" aria-hidden="true" />}
-            {busy && event?.data.actorId === f.id && event.data.kind === 'charge' && <span className="charge-aura" aria-hidden="true" />}
+            {busy && (phase === 'impact' || phase === 'recover') && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && <span key={`impact-${event.id}`} className={`impact-burst ${bigAction?'impact-major':'impact-minor'}`} aria-hidden="true" />}
+            {busy && event?.data.actorId === f.id && (event.data.kind === 'charge' || phase === 'anticipation' && bigAction) && <span className="charge-aura" aria-hidden="true" />}
             <span className="unit-shadow" aria-hidden="true" />
-            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 112 : 88} flip={f.side === 'player'} />
+            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 132 : 104} flip={f.side === 'player'} pose={poseFor(f)} animated={f.hp > 0} />
             <span className="unit-tags">
               {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="status taunt">TAUNT</span>}
               {actor && aimingAtEnemies && targetIds.has(f.id) && classEdge(actor.role, f.role) !== 'neutral' && (
@@ -497,7 +534,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
         <div className="run-toast">Wave {wave} cleared! Next wave coming, no healing…</div>
       )}
 
-      {battle.result !== 'ongoing' && runAfter?.next === undefined && !(mode === 'survival' && battle.result === 'won') && (
+      {!busy && battle.result !== 'ongoing' && runAfter?.next === undefined && !(mode === 'survival' && battle.result === 'won') && (
         <div className="modal-backdrop">
           <div className="modal panel result">
             <h2>
@@ -511,6 +548,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                     ? 'VICTORY'
                     : 'DEFEAT'}
             </h2>
+            {battle.result === 'won' && <div className="victory-lineup" aria-label="Victorious team">{team.filter(f=>f.hp>0).map(f=><Sprite key={f.id} familyId={f.familyId} star={f.star} pose="victory" size={84}/>)}</div>}
             {bossDamage !== null && (
               <p className="boss-damage">
                 You dealt <b>{bossDamage.toLocaleString()}</b> damage to the world boss

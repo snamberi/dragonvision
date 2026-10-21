@@ -1,0 +1,45 @@
+/* The central expedition button stays prominent on every screen. */
+.tabs button.play-tab,.tabs button.play-tab.active {flex:1.3 1 0;max-width:260px;min-height:62px;margin-top:-16px;color:#35200d;font-size:17px;border:3px solid #ffed92;background:linear-gradient(#ffe878 0 48%,#ffd13e 48% 88%,#e9a62b 88%);box-shadow:0 5px 0 #8e5926,0 0 24px #ffc84b35,inset 0 3px #fff4b8;text-shadow:0 1px #fff3b0;letter-spacing:2px;}
+.tabs button.play-tab:hover {filter:brightness(1.12);transform:translateY(-2px)}
+.tabs button.play-tab:focus-visible {outline:3px solid white;outline-offset:3px}
+.app {isolation:isolate}
+.screen-pixel-backdrop {position:fixed;inset:0;z-index:-1;pointer-events:none;background:#171d30;}
+.screen-pixel-backdrop svg {position:absolute;bottom:0;width:100%;height:min(65vh,600px);opacity:.65}
+.app:not(.home-view):not(.city-view) .panel {background-color:#201d32;background-image:linear-gradient(135deg,#443344db,#201b32eb),repeating-linear-gradient(0deg,transparent 0 23px,#b0986c25 24px 25px);border-color:#7a6276;box-shadow:inset 0 2px #b99c7830,0 7px 0 #100f2040}
+.inventory-mural {position:relative;height:210px;overflow:hidden;border:3px solid #a07a50;box-shadow:inset 0 0 0 3px #231c2f,0 5px 0 #100e20;margin:0 0 22px;background:#282032;}
+.inventory-mural>svg {width:100%;height:100%;position:absolute;inset:0;}
+.inventory-mural>div {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(90deg,#17172822,#171728c9 28%,#171728c9 70%,#17172822);text-align:center;padding:18px;}
+.inventory-mural small {font:10px var(--pixel);letter-spacing:3px;color:#dac39a;}
+.inventory-mural h2 {font:26px var(--pixel);color:#ffe3a0;margin:18px 0 10px;text-shadow:3px 3px #241a25;}
+.inventory-mural p {margin:0;color:#e5d6bd;font-size:20px;}
+.inventory .bag {background-image:linear-gradient(#242033ee,#241f32ef),repeating-linear-gradient(90deg,#60493a 0 47px,#352b2e 47px 50px)!important;}
+.building-art {filter:drop-shadow(3px 6px 0 #18232c70) drop-shadow(-1px -1px 0 #ffe6a240);}
+.building:hover .building-art {filter:drop-shadow(0 0 9px #ffda88aa);}
+.battle .unit {transition:left calc(var(--action-ms)*.23) cubic-bezier(.2,.7,.3,1),top calc(var(--action-ms)*.23) ease;}
+.battle .unit.motion-teleport {transition:none;}
+.battle .unit.do-attack .sprite {animation:none;translate:none;}
+.phase-release .unit.do-attack.motion-teleport .sprite {animation:teleport-arrive calc(var(--action-ms)*.24) steps(6) both;}
+.phase-recover .unit.do-attack.motion-teleport .sprite {animation:teleport-arrive calc(var(--action-ms)*.2) steps(6) both;}
+.phase-release .unit.do-attack.motion-rush .sprite {filter:drop-shadow(14px 0 0 #c3e7fa38) drop-shadow(25px 0 0 #c3e7fa18);}
+.phase-anticipation .unit.do-attack .sprite {scale:.96 1.03;}
+.phase-impact .unit.do-attack .sprite {scale:1.08 .98;}
+.phase-impact .unit.hit.enemy .sprite {translate:-14px -3px;}
+.phase-impact .unit.hit.player .sprite {translate:14px -3px;}
+.battle .sprite {transition:scale .12s,translate .12s;}
+.travelling-ki {animation:ki-flight var(--fx-duration) linear both;filter:drop-shadow(0 0 9px currentColor);}
+@keyframes ki-flight {0%{transform:translateX(0);opacity:0}8%{opacity:1}44%,55%{transform:translateX(var(--travel));opacity:1}70%,100%{transform:translateX(var(--travel));opacity:0}}
+@keyframes teleport-arrive {0%{opacity:0;filter:brightness(4);scale:.25 1.7}35%{opacity:.4;filter:brightness(3);scale:.5 1.3}100%{opacity:1;filter:brightness(1);scale:1}}
+.battle.phase-anticipation .special-callout {animation:callout-in .35s steps(8) both;}
+@keyframes callout-in {from{opacity:0;translate:0 -12px}to{opacity:1;translate:0 0}}
+@media(max-width:600px){.tabs button.play-tab,.tabs button.play-tab.active{font-size:13px;min-height:65px;margin-top:-13px;letter-spacing:1px;gap:5px;}.inventory-mural{height:170px}.inventory-mural h2{font-size:21px}.inventory-mural p{font-size:17px}.inventory-mural small{font-size:8px;letter-spacing:2px}}
+@media(prefers-reduced-motion:reduce){.battle .unit,.battle .sprite{transition:none}.battle .unit .sprite,.travelling-ki{animation:none!important}.travelling-ki{transform:translateX(var(--travel))}.tabs button.play-tab:hover{transform:none}}
+.summon-banners {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
+.banner-tab {display:flex;align-items:center;gap:12px;text-align:left;border:2px solid #6c647f;padding:12px;background:#23263c;color:#e8e4ef;cursor:pointer;}
+.banner-tab span {display:grid;gap:7px}.banner-tab b {font:11px var(--pixel)}.banner-tab small {font-size:17px;line-height:1.25;}
+.banner-tab.selected {border-color:#aae1ba;box-shadow:inset 0 -4px #74b997; background:#283e39;}
+.banner-tab.golden {color:#ffe4a2}.banner-tab.golden.selected {background:#4b3827;border-color:#ffdb78;box-shadow:inset 0 -4px #c89b47;}
+.golden-shrine .summon-main {border-color:#d9b25f}.golden-shrine .focus-item {opacity:1;cursor:default;border-color:#77613f;}
+.golden-shrine .summon-content h2 {color:#ffe09a}.golden-shrine .portal-ring {border-color:#edcc7e;}
+.collection-more {display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;margin:24px 0 14px;}
+.focus-list .show-all {width:100%;margin-top:10px}.summon .spin-count {display:flex;align-items:center;justify-content:center;gap:9px;}
+@media(max-width:600px){.summon-banners{gap:6px}.banner-tab{padding:8px;gap:6px;flex-wrap:wrap}.banner-tab b{font-size:10px}.banner-tab small{font-size:15px}}

@@ -1,3 +1,4 @@
+import { useActionFeedback } from './useActionFeedback';
 import { SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
@@ -11,13 +12,14 @@ interface Props {
   onBack: () => void;
 }
 
-export function ArmoryScreen({ save, update, onBack }: Props) {
+export function ArmoryScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   const today = syncShop(save, dayKey());
   const stock = shopStock(today);
   const loose = save.items.filter((i) => !wearer(save, i.id));
 
   return (
-    <div className="armory">
+    <div className="armory area-polished">{feedback}
       <BuildingHeader title="Armory" onBack={onBack}>
         <p className="muted">
           Weapons, armor and accessories. Each fighter wears 1 weapon, 1 armor and 2 accessories. New stock every day; better
@@ -42,7 +44,7 @@ export function ArmoryScreen({ save, update, onBack }: Props) {
             const affordable = save.coins >= offer.coins && save.gems >= offer.gems;
             return (
               <GearCard key={i} item={offer}>
-                <button className="btn small primary" disabled={sold || !affordable} onClick={() => update((s) => buyOffer(s, i))}>
+                <button className="btn small primary" disabled={sold || !affordable} onClick={() => update((s) => buyOffer(s, i), 'Equipment added to Inventory')}>
                   {sold ? 'Sold out' : `● ${offer.coins.toLocaleString()}${offer.gems ? ` + ◆ ${offer.gems}` : ''}`}
                 </button>
               </GearCard>

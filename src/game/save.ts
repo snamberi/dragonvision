@@ -24,6 +24,7 @@ function migrate(save: SaveData): SaveData {
   return {
     ...save,
     team,
+    goldenOrbs: Number.isSafeInteger(save.goldenOrbs) && save.goldenOrbs! >= 0 ? save.goldenOrbs : 0,
     dojo,
     shards: save.shards ?? {},
     // Striker was renamed Assassin.
@@ -46,6 +47,8 @@ function migrate(save: SaveData): SaveData {
     pieces: save.pieces ?? {},
     materials: { ...fresh.materials, ...save.materials },
     market: save.market ?? fresh.market,
+    pityPulls: save.pityPulls ?? 0,
+    upgrades: save.upgrades ?? undefined,
   };
 }
 

@@ -10,6 +10,48 @@ export interface Release {
 
 export const RELEASES: Release[] = [
   {
+    id: 13,
+    title: 'Twenty new fighters. A Golden Shrine.',
+    items: [
+      '**20 new fighters:** ten join normal summons and ten are exclusive to Golden Summoning, each with forms, specials and awakening trees.',
+      '**Golden Orbs:** buy one for 60 gems or ten for 600 gems. Each summon uses one Golden Orb. Check each pool’s rules at the Shrine.',
+      '**Recognizable fighters:** new weapon silhouettes, headgear, facial details and armor help distinguish the roster.',
+      '**A clearer collection:** see ten fighters at a time, then choose Show all. City structures also have new architectural artwork.',
+    ],
+  },
+  {
+    id: 12,
+    title: 'Life in the sanctuary',
+    items: [
+      '**Animated workshops:** training dummies, hovering energy cores, a sailing ship, and a trophy display bring city activities to life.',
+      '**Clear results:** training, upgrades, purchases, expeditions and claims confirm when they succeed.',
+      '**Distinct materials:** woven training mats, lab consoles, bounty notices and shop shelves give each destination its own look.',
+      '**Small-screen polish:** improved mobile layouts, dialog entrances, progress transitions and reduced-motion support.',
+    ],
+  },
+  {
+    id: 11,
+    title: 'A brighter city. Bigger battles.',
+    items: [
+      '**Ready to play:** the large yellow PLAY button is now at the center of the navigation, with Inventory to its right.',
+      '**Pixel scenery:** a new treasure vault for Inventory and a pixel landscape behind the other menus.',
+      '**City craftsmanship:** detailed roof tiles, masonry, lanterns, planted entrances and destination emblems.',
+      '**Fighter movement:** teleport strikes, close-range rushes and travelling Ki balls for normal attacks, based on the fighter.',
+      '**Take in the action:** longer attack and special sequences, with 1×, 2× and 4× speeds still available.',
+    ],
+  },
+  {
+    id: 10,
+    title: 'Welcome to your sanctuary',
+    items: [
+      '**A home of your own:** a cozy house, garden pond, mailbox, daily supply chest and training yard.',
+      '**Make it yours:** choose a name, roof color, banner and favorite resident from your fighters. Your choices travel with your save.',
+      '**Your mailbox:** read the latest updates and collect a one-time housewarming parcel.',
+      '**Practice and trophies:** preview your resident’s signature move, display earned achievements and collect their rewards.',
+      '**New fighter visuals:** distinct silhouettes, animated poses, signature attacks, improved cards and illustrated city interiors.',
+    ],
+  },
+  {
     id: 9,
     title: 'Legendary fighters, the Shop and a new Inventory',
     items: [

@@ -1,6 +1,6 @@
 import { awakeningTree } from './awakening';
 import { equippedItems } from './gear';
-import { FAMILIES, FUSIONS, LEGENDARIES, formForStar, getFamily } from './roster';
+import { FAMILIES, GOLDEN_FAMILIES, FUSIONS, LEGENDARIES, formForStar, getFamily } from './roster';
 import type { SaveData } from './types';
 
 export interface Achievement {
@@ -19,7 +19,7 @@ const maxStar = (save: SaveData) => Math.max(0, ...save.units.map((u) => u.star)
 
 /** Every form in the game, as "familyId:formIndex". */
 export function allForms(): string[] {
-  return [...FAMILIES, ...FUSIONS, ...LEGENDARIES].flatMap((f) => f.forms.map((_, i) => `${f.id}:${i}`));
+  return [...FAMILIES, ...GOLDEN_FAMILIES, ...FUSIONS, ...LEGENDARIES].flatMap((f) => f.forms.map((_, i) => `${f.id}:${i}`));
 }
 
 export function formKey(familyId: string, star: number): string {
@@ -47,7 +47,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'stage-190', name: 'Halfway There', text: 'Clear stage 190', goal: 190, progress: (s) => s.clearedStage, reward: { gems: 25 }, title: 'Veteran' },
   { id: 'stage-380', name: 'Gatebreaker', text: 'Clear the Vision Gate (stage 380)', goal: 380, progress: (s) => s.clearedStage, reward: { gems: 100 }, title: 'Gatebreaker' },
   { id: 'chars-10', name: 'Growing Roster', text: 'Own 10 different characters', goal: 10, progress: (s) => owned(s).size, reward: { spins: 10 } },
-  { id: 'chars-all', name: 'Full Roster', text: 'Own all 18 characters', goal: 18, progress: (s) => FAMILIES.filter((f) => owned(s).has(f.id)).length, reward: { gems: 30 }, title: 'Collector' },
+  { id: 'chars-all', name: 'Full Roster', text: 'Own 18 normal-pool characters', goal: 18, progress: (s) => FAMILIES.filter((f) => owned(s).has(f.id)).length, reward: { gems: 30 }, title: 'Collector' },
   { id: 'forms-30', name: 'Form Hunter', text: 'Unlock 30 forms in the collection', goal: 30, progress: (s) => s.seenForms.length, reward: { gems: 15 } },
   { id: 'forms-all', name: 'Archivist', text: 'Unlock every form', goal: allForms().length, progress: (s) => s.seenForms.length, reward: { gems: 60 }, title: 'Archivist' },
   { id: 'star-10', name: 'Ascended', text: 'Raise a fighter to 10★', goal: 10, progress: maxStar, reward: { gems: 15 }, title: 'Ascended' },

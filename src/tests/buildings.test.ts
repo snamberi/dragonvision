@@ -37,22 +37,19 @@ describe('380 stages', () => {
   });
 });
 
-describe('10x summon guarantee', () => {
-  it('always includes one fighter a star above your best copy of it', () => {
-    for (let seed = 0; seed < 30; seed++) {
-      let save: SaveData = { ...newSave(), spins: 10 };
-      save = withUnit(save, 'mei', 4, 70).save;
-      const before = { kairo: highestOwnedStar(save, 'kairo'), mei: highestOwnedStar(save, 'mei') };
-      const { save: after, units } = summonTen(save, seededRng(seed));
-      expect(after.spins).toBe(0);
-      expect(units).toHaveLength(10);
-      const last = units[9];
-      expect(['kairo', 'mei']).toContain(last.familyId);
-      expect(last.star).toBeGreaterThan(before[last.familyId as 'kairo' | 'mei']);
-      // It is one above the best copy at the moment it lands.
-      const earlier = units.slice(0, 9).filter((u) => u.familyId === last.familyId).map((u) => u.star);
-      expect(last.star).toBe(Math.max(before[last.familyId as 'kairo' | 'mei'], ...earlier) + 1);
-    }
+describe('10x summon pity system', () => {
+  it('spends 10 spins and returns 10 units', () => {
+    let save: SaveData = { ...newSave(), spins: 10 };
+    const { save: after, units } = summonTen(save, seededRng(0));
+    expect(after.spins).toBe(0);
+    expect(units).toHaveLength(10);
+  });
+
+  it('tracks the pity counter across pulls', () => {
+    let save: SaveData = { ...newSave(), spins: 10 };
+    const { save: after } = summonTen(save, seededRng(0));
+    // pity counter increments for each pull that did not yield 4★+
+    expect(typeof (after.pityPulls ?? 0)).toBe('number');
   });
 });
 

@@ -1,3 +1,6 @@
+import { ActivityScene } from './ActivityScene';
+import { useActionFeedback } from './useActionFeedback';
+import { BuildingHeader } from './BuildingHeader';
 import { useState } from 'react';
 import { SHARD_FUSION_COST } from '../game/balance';
 import { canFuse as fusionCheck, fuseFighters, fuseShard, fusionParts, sellPrice, sellSpares, spareUnits } from '../game/fusion';
@@ -13,7 +16,8 @@ interface Props {
   onBack: () => void;
 }
 
-export function FusionScreen({ save, update, onBack }: Props) {
+export function FusionScreen({ save, update: commit, onBack }: Props) {
+  const {update,feedback}=useActionFeedback(commit);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const spares = spareUnits(save);
   const chosen = spares.filter((s) => picked.has(s.unit.uid)).map((s) => s.unit);
@@ -38,13 +42,8 @@ export function FusionScreen({ save, update, onBack }: Props) {
   };
 
   return (
-    <div className="fusion">
-      <button className="btn ghost" onClick={onBack}>
-        ← City
-      </button>
-      <section className="panel">
-        <div className="eyebrow">Vision City</div>
-        <h2>Fusion Lab</h2>
+    <div className="fusion area-polished">{feedback}
+      <BuildingHeader title="Fusion Lab" onBack={onBack}>
         <p className="muted">
           Turn spare copies into something useful. Fuse {SHARD_FUSION_COST} copies of the same star into an <b>evolution shard</b>,
           which counts as one duplicate when evolving any fighter of that star. Or sell copies for coins. Your team, Dojo fighters
@@ -62,7 +61,8 @@ export function FusionScreen({ save, update, onBack }: Props) {
             ))
           )}
         </div>
-      </section>
+      </BuildingHeader>
+      <ActivityScene kind="fusion" status={`${chosen.length} copies selected · ${SHARD_FUSION_COST} matching copies make a shard`} active={chosen.length > 0}/>
 
       <section className="panel">
         <h3>Fighter Fusion</h3>
@@ -96,7 +96,7 @@ export function FusionScreen({ save, update, onBack }: Props) {
                   title={check.reason}
                   onClick={() => {
                     if (window.confirm(`Fuse ${getFamily(recipe.parts[0]).name} and ${getFamily(recipe.parts[1]).name} into ${getFamily(recipe.result).name}? This can't be undone.`)) {
-                      update((s) => fuseFighters(s, recipe.result).save);
+                      update((s) => fuseFighters(s, recipe.result).save, 'Fusion complete · new fighter created');
                     }
                   }}
                 >

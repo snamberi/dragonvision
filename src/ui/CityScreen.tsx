@@ -127,7 +127,7 @@ const WIDE: Layout = {
     { id: 'fortune', x: 130, y: 500 },
     { id: 'shop', x: 290, y: 500 },
     { id: 'armory', x: 450, y: 500 },
-    { id: 'summon', x: 620, y: 500 },
+    { id: 'summon', x: 620, y: 270 },
     { id: 'fusion', x: 800, y: 500 },
     { id: 'dojo', x: 970, y: 500 },
     { id: 'bounty', x: 250, y: 720 },
