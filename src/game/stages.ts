@@ -37,6 +37,8 @@ export interface Stage {
   chapter: number;
   chapterName: string;
   kind: StageKind;
+  /** The enemy class that dominates this chapter — tells players what counter to bring. */
+  dominantRole: Role;
   enemies: EnemySpec[];
   coins: number;
   /** Shown instead of "Stage N" (Rival Tower floors). */
@@ -153,6 +155,7 @@ export function getStage(number: number): Stage {
     chapter,
     chapterName: CHAPTER_NAMES[(chapter - 1) % CHAPTER_NAMES.length],
     kind,
+    dominantRole,
     enemies,
     coins: stageCoinReward(number),
     weather: arenaForStage(number).weather,
@@ -178,6 +181,9 @@ export interface Rewards {
   piece?: string;
 }
 
+/** Extra gems awarded on first clear of key milestone stages to celebrate progress. */
+const MILESTONE_GEMS: Record<number, number> = { 10: 5, 20: 10, 50: 15, 100: 20, 180: 30 };
+
 /**
  * First clears pay full coins, spins (1 / 5 mini-boss / 10 boss) and gem chances.
  * Replays pay 25% of the coins and nothing else.
@@ -200,6 +206,7 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
   } else if (rng() < NORMAL_GEM_CHANCE) {
     gems = NORMAL_GEM_AMOUNT;
   }
+  gems += MILESTONE_GEMS[stageNumber] ?? 0;
   const rewards: Rewards = { firstClear, coins: stage.coins, gems, spins, ...(piece && { piece }) };
   if (stage.kind !== 'normal') {
     const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];

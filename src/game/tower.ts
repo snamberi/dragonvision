@@ -48,6 +48,7 @@ export function towerStage(floor: number): Stage {
     chapter: 0,
     chapterName: theme.name,
     kind,
+    dominantRole: 'Tank',
     enemies,
     coins: towerRewards(floor).coins,
     label: `Tower ${floor}F`,

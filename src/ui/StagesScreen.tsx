@@ -221,6 +221,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
               {stage.kind === 'miniBoss' && <span className="tag mini">MINI-BOSS</span>}
             </h2>
             {stage.weather && stage.weather !== 'clear' && <div className="muted small-text">{WEATHER_TEXT[stage.weather]}</div>}
+            <div className="muted small-text">Dominant class: <strong>{stage.dominantRole}</strong> — bring a counter</div>
           </div>
           <div className="power-compare">
             <span>Your team {teamPower.toLocaleString()}</span>
@@ -242,7 +243,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
 
         <div className="reward-line">
           {replay ? (
-            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins (7.5%){stage.kind === 'boss' ? ' · 5% legendary piece' : ', no Spin Orbs or gems'}</>
+            <>Replay: {Math.round(stage.coins * REPLAY_COIN_SHARE).toLocaleString()} coins ({Math.round(REPLAY_COIN_SHARE * 100)}%){stage.kind === 'boss' ? ' · 5% legendary piece' : ', no Spin Orbs or gems'}</>
           ) : (
             <>
               First clear: {stage.coins.toLocaleString()} coins ·{' '}
@@ -250,7 +251,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
                 ? '10 Spin Orbs · 15 gems · Rare+ gear · 5% legendary piece'
                 : stage.kind === 'miniBoss'
                   ? '5 Spin Orbs · 5 gems · Uncommon+ gear'
-                  : '1 Spin Orb · 1% gem chance'}
+                  : '1 Spin Orb · 4% gem chance'}
             </>
           )}
         </div>

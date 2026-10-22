@@ -51,6 +51,7 @@ export function bossStage(save: SaveData): Stage {
     chapter: 0,
     chapterName: 'Colosseum',
     kind: 'boss',
+    dominantRole: 'Tank',
     enemies: [{ familyId: boss.familyId, star: boss.star, level: boss.level, rank: 'boss', hpPool: { max: boss.pool, left } }],
     coins: 0,
     label: 'World Boss',

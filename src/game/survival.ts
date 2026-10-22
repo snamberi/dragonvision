@@ -25,6 +25,7 @@ export function survivalWave(team: (Unit | null)[], wave: number): Stage {
     chapter: 0,
     chapterName: 'Survival Gate',
     kind: wave % 5 === 0 ? 'miniBoss' : 'normal',
+    dominantRole: 'Tank',
     enemies,
     coins: 0,
     label: `Survival · Wave ${wave}`,
