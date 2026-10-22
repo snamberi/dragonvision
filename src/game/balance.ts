@@ -48,7 +48,7 @@ export const GEMS_MINI_BOSS = 5;
 export const GEMS_BOSS = 15;
 export const NORMAL_GEM_CHANCE = 0.04;
 export const NORMAL_GEM_AMOUNT = 1;
-export const REPLAY_COIN_SHARE = 0.25;
+export const REPLAY_COIN_SHARE = 0.11;
 
 // --- Collection cap ---
 export const BASE_COLLECTION_CAP = 250;
