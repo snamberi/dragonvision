@@ -29,6 +29,10 @@ import { InventoryScreen } from './InventoryScreen';
 import { StagesScreen } from './StagesScreen';
 import { SummonScreen } from './SummonScreen';
 import { ShopScreen } from './ShopScreen';
+import { DungeonScreen } from './DungeonScreen';
+import { RaidScreen } from './RaidScreen';
+import { ClimbScreen } from './ClimbScreen';
+import { JournalScreen } from './JournalScreen';
 import { Modal } from './Modal';
 import { SettingsPanel } from './SettingsPanel';
 import { WhatsNew } from './WhatsNew';
@@ -246,6 +250,19 @@ export function App() {
             <FortuneScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'upgrades' ? (
             <UpgradesHouseScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'dungeon' ? (
+            <DungeonScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'raid' ? (
+            <RaidScreen save={save} update={update} onBack={toCity} />
+          ) : view.building === 'climb' ? (
+            <ClimbScreen
+              save={save}
+              update={update}
+              onBack={toCity}
+              onChallenge={(floor) => setView({ kind: 'battle', stage: floor, run: newRun('single'), seq: Date.now() })}
+            />
+          ) : view.building === 'journal' ? (
+            <JournalScreen save={save} update={update} onBack={toCity} />
           ) : (
             <TowerScreen
               save={save}

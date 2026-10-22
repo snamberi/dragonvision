@@ -15,7 +15,7 @@ function marketFresh(save: SaveData): boolean {
   return save.market.day !== dayKey() || save.market.bought.length === 0;
 }
 
-export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall' | 'upgrades';
+export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall' | 'upgrades' | 'dungeon' | 'raid' | 'climb' | 'journal';
 
 interface Props {
   save: SaveData;
@@ -52,6 +52,10 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
     { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl() },
+    { id: 'dungeon', name: 'Daily Dungeon', art: dojoUrl(), badge: (save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0) ? 'OPEN' : undefined },
+    { id: 'raid', name: 'Boss Raid', art: colosseumUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage/1000).toFixed(0)}K` : undefined },
+    { id: 'climb', name: 'Infinite Climb', art: towerUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
+    { id: 'journal', name: "Collector's Journal", art: hallUrl() },
   ];
 
   const layout = useCityLayout();
@@ -118,7 +122,7 @@ interface Layout {
 const WIDE: Layout = {
   id: 'wide',
   w: 1200,
-  h: 780,
+  h: 1100,
   plotW: 150,
   plots: [
     { id: 'hall', x: 190, y: 270 },
@@ -135,12 +139,17 @@ const WIDE: Layout = {
     { id: 'gravity', x: 470, y: 720 },
     { id: 'upgrades', x: 690, y: 720 },
     { id: 'port', x: 900, y: 720 },
+    { id: 'dungeon', x: 200, y: 940 },
+    { id: 'raid', x: 450, y: 940 },
+    { id: 'climb', x: 700, y: 940 },
+    { id: 'journal', x: 950, y: 940 },
   ],
   roads: [
     [[110, 270], [1110, 270]],
     [[30, 500], [1170, 500]],
     [[150, 720], [1040, 720]],
-    [[620, 270], [620, 720]],
+    [[150, 940], [1040, 940]],
+    [[620, 270], [620, 940]],
     [[110, 270], [80, 330], [80, 500]],
     [[1110, 270], [1140, 380], [1140, 500]],
     [[150, 720], [110, 640], [110, 500]],
@@ -158,6 +167,8 @@ const TALL_ROWS: [Building, Building | null][] = [
   ['tower', 'gate'],
   ['bounty', 'port'],
   ['upgrades', null],
+  ['dungeon', 'raid'],
+  ['climb', 'journal'],
 ];
 const TALL_TOP = 370;
 const TALL_ROW = 255;
