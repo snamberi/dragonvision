@@ -98,14 +98,14 @@ describe('the Shop', () => {
 
 describe('items and materials', () => {
   it('lists Spin Orbs, materials, shards and pieces', () => {
-    const save: SaveData = { ...newSave(), spins: 3, shards: { 2: 1 }, pieces: { volkan: 4 }, materials: { refreshTicket: 0, respecScroll: 2 } };
+    const save: SaveData = { ...newSave(), spins: 3, shards: { 2: 1 }, pieces: { volkan: 4 }, materials: { refreshTicket: 0, respecScroll: 2, transcendenceCrystal: 0, sigMaterial: 0, relicShard: 0, dungeonKey: 0 } };
     const entries = inventoryEntries(save);
     expect(entries.map((e) => e.key)).toEqual(['spins', 'respecScroll', 'shard-2', 'piece-volkan']);
     expect(entries.find((e) => e.key === 'spins')!.icon).toBe('spinOrb');
   });
 
   it('uses a Respec Scroll before gems', () => {
-    let save: SaveData = { ...newSave(), gems: 50, materials: { refreshTicket: 0, respecScroll: 1 } };
+    let save: SaveData = { ...newSave(), gems: 50, materials: { refreshTicket: 0, respecScroll: 1, transcendenceCrystal: 0, sigMaterial: 0, relicShard: 0, dungeonKey: 0 } };
     save = { ...save, units: [{ ...save.units[0], star: 12, awakened: ['kairo-0'] }] };
     const a = respecAwakening(save, 'u1');
     expect(a.materials.respecScroll).toBe(0);

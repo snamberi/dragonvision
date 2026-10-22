@@ -55,6 +55,17 @@ function migrate(save: SaveData): SaveData {
     runes: save.runes ?? [],
     runeFragments: save.runeFragments ?? 0,
     units: save.units.map((u) => ({ runeSlots: [null, null], ...u })),
+    // New feature defaults
+    dungeon: save.dungeon ?? undefined,
+    raid: save.raid ?? undefined,
+    sideQuests: save.sideQuests ?? {},
+    relics: save.relics ?? [],
+    equippedRelic: save.equippedRelic ?? null,
+    ownedSkins: save.ownedSkins ?? [],
+    wantedPosters: save.wantedPosters ?? [],
+    climbBest: save.climbBest ?? 0,
+    climbWeek: save.climbWeek ?? '',
+    journalComplete: save.journalComplete ?? {},
   };
 }
 

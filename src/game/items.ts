@@ -6,7 +6,7 @@ import { LEGENDARIES, getFamily } from './roster';
 import type { MaterialId, SaveData } from './types';
 
 export type ItemCategory = 'items' | 'materials' | 'shards' | 'pieces';
-export type ItemIconId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll';
+export type ItemIconId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll' | 'transcendenceCrystal' | 'sigMaterial' | 'relicShard' | 'dungeonKey';
 
 export interface InventoryEntry {
   key: string;
@@ -23,6 +23,10 @@ export interface InventoryEntry {
 export const MATERIALS: Record<MaterialId, { name: string; text: string }> = {
   refreshTicket: { name: 'Refresh Ticket', text: 'Restocks the Shop or the Armory for free (used before gems).' },
   respecScroll: { name: 'Respec Scroll', text: "Resets a fighter's awakening points for free (used before gems)." },
+  transcendenceCrystal: { name: 'Transcendence Crystal', text: 'Used to advance a fighter beyond level 400 on the Transcendence track.' },
+  sigMaterial: { name: 'Signature Essence', text: "Strengthens a fighter's signature move up to three tiers." },
+  relicShard: { name: 'Relic Shard', text: 'Combine three to craft a random Artifact Relic.' },
+  dungeonKey: { name: 'Dungeon Key', text: 'Grants one attempt in the Daily Dungeon.' },
 };
 
 export function inventoryEntries(save: SaveData): InventoryEntry[] {

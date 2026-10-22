@@ -90,6 +90,12 @@ export interface Unit {
   awakened?: string[];
   /** Two rune slots: [offense rune id | null, defense rune id | null]. */
   runeSlots?: (string | null)[];
+  /** Transcendence tier for this fighter (0 = none, max 10). Unlocks at level 400. */
+  transcendenceTier?: number;
+  /** Active skin id; null/omitted uses default art. */
+  skinId?: string;
+  /** Signature upgrade tier (0 = base, max 3). */
+  sigTier?: number;
 }
 
 export type GearSlotKey = 'weapon' | 'armor' | 'acc1' | 'acc2';
@@ -180,6 +186,27 @@ export interface SaveData {
   weeklyWins?: number;
   weeklyTrains?: number;
   weeklyStages?: number;
+  // --- New feature fields ---
+  /** Daily Dungeon state. */
+  dungeon?: DungeonState;
+  /** Weekly Boss Raid state. */
+  raid?: RaidState;
+  /** Side quests cleared per family id. */
+  sideQuests?: Record<string, boolean>;
+  /** Artifact Relics in inventory. */
+  relics?: RelicItem[];
+  /** Currently equipped team relic id (one per team, not per fighter). */
+  equippedRelic?: string | null;
+  /** Owned skin ids. */
+  ownedSkins?: string[];
+  /** Active Wanted Posters (up to 3 at a time). */
+  wantedPosters?: WantedPoster[];
+  /** Best floor reached in Infinite Climb this week. */
+  climbBest?: number;
+  /** Week key for Infinite Climb leaderboard ("2026-W43"). */
+  climbWeek?: string;
+  /** Collector's Journal: completed family chains (familyId → true). */
+  journalComplete?: Record<string, boolean>;
 }
 
 export interface HomeData {
@@ -192,7 +219,53 @@ export interface HomeData {
 }
 
 /** Refresh Tickets refresh a shop for free; Respec Scrolls reset an awakening tree for free. */
-export type MaterialId = 'refreshTicket' | 'respecScroll';
+export type MaterialId = 'refreshTicket' | 'respecScroll' | 'transcendenceCrystal' | 'sigMaterial' | 'relicShard' | 'dungeonKey';
+
+// --- Transcendence ---
+/** Post-400 upgrade track: 10 tiers per fighter, stored by uid. */
+export type TranscendenceRecord = Record<string, number>;
+
+// --- Artifact Relics ---
+export interface RelicItem {
+  id: string;
+  templateId: string;
+  /** Brief description of the global passive it grants. */
+  effect: string;
+}
+
+// --- Wanted Posters ---
+export interface WantedPoster {
+  id: string;
+  /** Stage to clear. */
+  stage: number;
+  /** Class that must be used (all 5 fighters). Null means any composition. */
+  requiredClass: string | null;
+  /** Coin reward. */
+  coins: number;
+  gems: number;
+  /** Unix ms when this poster expires. */
+  expiresAt: number;
+  claimed: boolean;
+}
+
+// --- Daily Dungeon ---
+export interface DungeonState {
+  day: string;
+  rule: string;
+  cleared: boolean;
+  attempts: number;
+}
+
+// --- Boss Raid ---
+export interface RaidState {
+  /** ISO week key e.g. "2026-W43". */
+  week: string;
+  /** Current phase (0 = not started, 1-5 = active phase). */
+  phase: number;
+  totalDamage: number;
+  /** Phases already cleared this week. */
+  clearedPhases: number[];
+}
 
 export interface Counters {
   wins: number;

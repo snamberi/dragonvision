@@ -89,7 +89,7 @@ export function newSave(): SaveData {
     seenForms: ['kairo:0'],
     login: { day: '', claims: 0 },
     pieces: {},
-    materials: { refreshTicket: 0, respecScroll: 0 },
+    materials: { refreshTicket: 0, respecScroll: 0, transcendenceCrystal: 0, sigMaterial: 0, relicShard: 0, dungeonKey: 0 },
     market: { day: '', refreshes: 0, bought: [] },
     pityPulls: 0,
   };

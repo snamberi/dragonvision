@@ -673,7 +673,91 @@ const GEAR: Record<string, [string[], Palette]> = {
   'void-fang': [VOID_FANG, VOID],
 };
 
-export type ItemArtId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll' | 'coins' | 'gems';
+// Fractal crystal with a starlike inner glow — Transcendence Crystal.
+const TRANSCENDENCE_CRYSTAL = [
+  '................',
+  '.......LL.......',
+  '......LPPl......',
+  '.....LPPPPl.....',
+  '....LPLWLPPl....',
+  '...LPLLWLLPPl...',
+  '..LPLLLWLLLPPl..',
+  '...LPPLWLPPl....',
+  '....LPLWLPl.....',
+  '.....LPPPPl.....',
+  '......LPPl......',
+  '.......Ll.......',
+  '........l.......',
+  '................',
+  '................',
+  '................',
+];
+const TC_PALETTE: Palette = { L: '#e0c8ff', P: '#a855f7', l: '#7c3aed', W: '#ffffff' };
+
+// Swirling golden essence in a glass vial — Signature Essence.
+const SIG_MATERIAL = [
+  '................',
+  '.......SS.......',
+  '......SsWS......',
+  '......SWsS......',
+  '.....sYYYYs.....',
+  '.....YYyYYY.....',
+  '....sYyYYyYs....',
+  '....YYYyYYYY....',
+  '....YYYYYYYs....',
+  '.....sYYYYs.....',
+  '......SssS......',
+  '......SSSS......',
+  '.......SS.......',
+  '................',
+  '................',
+  '................',
+];
+const SIG_PALETTE: Palette = { Y: '#ffd23f', y: '#c98a1a', S: '#c8c0d8', s: '#7c7090', W: '#fff9d0' };
+
+// Jagged stone fragment with faint rune markings — Relic Shard.
+const RELIC_SHARD = [
+  '................',
+  '.........WB.....',
+  '........WBBT....',
+  '........WBTTt...',
+  '.......WBBTRt...',
+  '.......WBTTRt...',
+  '......WBBTTt....',
+  '......WBTTRt....',
+  '.....WBBTRt.....',
+  '.....WBTRtt.....',
+  '....WBBRtt......',
+  '....WBRtt.......',
+  '....BTtt........',
+  '.....Rd.........',
+  '................',
+  '................',
+];
+const RS_PALETTE: Palette = { W: '#f0ece4', B: '#9a8a70', T: '#6b5a40', t: '#3e3020', R: '#d8432e', d: '#4a2010' };
+
+// An ornate dungeon key with a ring head and bit — Dungeon Key.
+const DUNGEON_KEY = [
+  '................',
+  '.....KKKK.......',
+  '....KssssK......',
+  '....KsWWsK......',
+  '....KssssK......',
+  '.....KKKK.......',
+  '.......Kk.......',
+  '.......Kk.......',
+  '.......KkKK.....',
+  '.......Kk..K....',
+  '.......Kk..K....',
+  '.......KkKK.....',
+  '.......Kk.......',
+  '.......kk.......',
+  '................',
+  '................',
+];
+const DK_PALETTE: Palette = { K: '#c98a1a', k: '#8a5a10', s: '#7a5c28', W: '#fff6c0' };
+
+export type ItemArtId = 'goldenOrb' | 'spinOrb' | 'shard' | 'piece' | 'refreshTicket' | 'respecScroll' | 'coins' | 'gems' | 'transcendenceCrystal' | 'sigMaterial' | 'relicShard' | 'dungeonKey';
 
 const ITEMS: Record<ItemArtId, [string[], Palette]> = {
   spinOrb: [SPIN_ORB, SPIN_ORB_PALETTE],
@@ -684,6 +768,10 @@ const ITEMS: Record<ItemArtId, [string[], Palette]> = {
   respecScroll: [RESPEC_SCROLL, RESPEC_SCROLL_PALETTE],
   coins: [COINS, COINS_PALETTE],
   gems: [GEMS, GEMS_PALETTE],
+  transcendenceCrystal: [TRANSCENDENCE_CRYSTAL, TC_PALETTE],
+  sigMaterial: [SIG_MATERIAL, SIG_PALETTE],
+  relicShard: [RELIC_SHARD, RS_PALETTE],
+  dungeonKey: [DUNGEON_KEY, DK_PALETTE],
 };
 
 const cache = new Map<string, string>();
