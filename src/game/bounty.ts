@@ -1,3 +1,4 @@
+import { LEVEL_CAP_STAGE } from './balance';
 import { bump } from './progression';
 import { dayKey, weekKey } from './time';
 import { type MaterialReward, grantMaterials } from './materials';
@@ -9,11 +10,15 @@ export interface Bounty {
   label: string;
   counter: keyof Counters;
   goal: number;
-  reward: { coins?: number; spins?: number; gems?: number } & MaterialReward;
+  reward: BountyReward;
+  /** Extra crystals once the player has cleared the level-cap stage. */
+  postCapCrystals?: number;
 }
 
+export type BountyReward = { coins?: number; spins?: number; gems?: number } & MaterialReward;
+
 export const BOUNTIES: Bounty[] = [
-  { id: 'd-wins', period: 'daily', label: 'Win 10 battles', counter: 'wins', goal: 10, reward: { spins: 2, essence: 1 } },
+  { id: 'd-wins', period: 'daily', label: 'Win 10 battles', counter: 'wins', goal: 10, reward: { spins: 2, essence: 1 }, postCapCrystals: 1 },
   { id: 'd-summons', period: 'daily', label: 'Summon 10 fighters', counter: 'summons', goal: 10, reward: { gems: 1 } },
   { id: 'd-clear', period: 'daily', label: 'Clear a new stage', counter: 'firstClears', goal: 1, reward: { spins: 1 } },
   { id: 'w-wins', period: 'weekly', label: 'Win 75 battles', counter: 'wins', goal: 75, reward: { spins: 10, crystals: 2 } },
@@ -47,6 +52,12 @@ export function bountyProgress(save: SaveData, bounty: Bounty): { done: number; 
   return { done: Math.min(bounty.goal, save.counters[bounty.counter] - (p.start[bounty.counter] ?? 0)), claimed: p.claimed.includes(bounty.id) };
 }
 
+/** What claiming pays right now: endgame players earn extra crystals on some bounties. */
+export function bountyReward(save: SaveData, bounty: Bounty): BountyReward {
+  if (!bounty.postCapCrystals || save.clearedStage < LEVEL_CAP_STAGE) return bounty.reward;
+  return { ...bounty.reward, crystals: (bounty.reward.crystals ?? 0) + bounty.postCapCrystals };
+}
+
 export function claimBounty(save: SaveData, id: string): SaveData {
   const bounty = BOUNTIES.find((b) => b.id === id);
   if (!bounty) throw new Error('Unknown bounty');
@@ -54,11 +65,12 @@ export function claimBounty(save: SaveData, id: string): SaveData {
   if (claimed) throw new Error('Already claimed');
   if (done < bounty.goal) throw new Error('Not finished yet');
   const p = save.bounties[bounty.period]!;
+  const reward = bountyReward(save, bounty);
   return {
-    ...grantMaterials(save, bounty.reward),
-    coins: save.coins + (bounty.reward.coins ?? 0),
-    spins: save.spins + (bounty.reward.spins ?? 0),
-    gems: save.gems + (bounty.reward.gems ?? 0),
+    ...grantMaterials(save, reward),
+    coins: save.coins + (reward.coins ?? 0),
+    spins: save.spins + (reward.spins ?? 0),
+    gems: save.gems + (reward.gems ?? 0),
     bounties: { ...save.bounties, [bounty.period]: { ...p, claimed: [...p.claimed, id] } },
   };
 }

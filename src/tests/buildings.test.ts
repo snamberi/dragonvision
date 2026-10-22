@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GRAVITY_PER_LEVEL, STARTING_COINS, STARTING_SPINS, TOTAL_STAGES, enemyStarForStage, enemyStrengthForStage, gravityCost } from '../game/balance';
 import { createBattle } from '../game/battle';
-import { BOUNTIES, bountyProgress, claimBounty, recordWin, syncBounties } from '../game/bounty';
+import { BOUNTIES, bountyProgress, bountyReward, claimBounty, recordWin, syncBounties } from '../game/bounty';
 import { claimExpedition, expeditionDone, recallExpedition, startExpedition } from '../game/expedition';
 import { claimFortune, fortuneReady } from '../game/fortune';
 import { unitBonus } from '../game/fighterBonus';
@@ -98,6 +98,8 @@ describe('bounty board', () => {
     expect(bountyProgress(save, wins).done).toBe(10);
     save = claimBounty(save, 'd-wins');
     expect(save.spins).toBe(STARTING_SPINS + 2);
+    expect(save.materials.transcendenceCrystal).toBe(0);
+    expect(bountyReward({ ...save, clearedStage: 180 }, wins).crystals).toBe(1);
     expect(() => claimBounty(save, 'd-wins')).toThrow(/Already/);
     // The next day starts over.
     save = syncBounties(save, new Date(2026, 9, 18, 9));

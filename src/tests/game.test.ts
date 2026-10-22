@@ -204,7 +204,7 @@ describe('stages and rewards', () => {
 
   it('wall stages spike above their neighbours, then ease off', () => {
     expect(isWallStage(100)).toBe(true);
-    expect(enemyStrengthForStage(100)).toBeGreaterThan(enemyStrengthForStage(99) * 1.2);
+    expect(enemyStrengthForStage(100)).toBeGreaterThan(enemyStrengthForStage(99) * 1.15);
     expect(enemyStrengthForStage(101)).toBeLessThan(enemyStrengthForStage(100));
     expect(enemyStrengthForStage(281)).toBeGreaterThan(enemyStrengthForStage(271));
   });

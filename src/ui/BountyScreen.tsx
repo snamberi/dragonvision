@@ -1,5 +1,5 @@
 import { useActionFeedback } from './useActionFeedback';
-import { BOUNTIES, bountyProgress, claimBounty } from '../game/bounty';
+import { BOUNTIES, bountyProgress, bountyReward, claimBounty } from '../game/bounty';
 import { activePosters, claimWantedPoster, refreshWantedPosters } from '../game/wanted';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
@@ -42,7 +42,7 @@ export function BountyScreen({ save, update: commit, onBack }: Props) {
                       <i style={{ width: `${(done / b.goal) * 100}%` }} />
                     </span>
                     <span className="muted small-text">
-                      {done}/{b.goal} · {rewardText(b.reward)}
+                      {done}/{b.goal} · {rewardText(bountyReward(save, b))}
                     </span>
                   </div>
                   <button className="btn small primary" disabled={!complete || claimed} onClick={() => update((s) => claimBounty(s, b.id), 'Bounty reward collected')}>
