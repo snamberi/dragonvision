@@ -97,11 +97,14 @@ describe('levels and resets', () => {
 });
 
 describe('level wall', () => {
-  it('can level past any star boundary — no level wall', () => {
+  it('stops at star × 20 until the fighter evolves', () => {
     let save: SaveData = { ...newSave(), coins: 1_000_000 };
     save = upgradeUnit(save, 'u1', 50);
-    // No wall at star×20 anymore — fighter can level freely up to MAX_LEVEL
-    expect(save.units[0].level).toBeGreaterThan(20);
+    expect(save.units[0].level).toBe(20);
+    expect(() => upgradeUnit(save, 'u1', 1)).toThrow(/Level wall/);
+    save = withUnit(withUnit(save, 'kairo', 1, 1).save, 'kairo', 1, 1).save;
+    save = upgradeUnit(evolveUnit(save, 'u1'), 'u1', 50);
+    expect(save.units.find((u) => u.uid === 'u1')!.level).toBe(40);
   });
 });
 

@@ -9,6 +9,7 @@ import {
   STARTING_SPINS,
   STAT_PER_LEVEL,
   STAT_PER_STAR,
+  levelCap,
   levelUpCost,
 } from './balance';
 import { STARTER_FAMILY_ID, formForStar, getFamily } from './roster';
@@ -131,8 +132,10 @@ export function affordableLevels(level: number, coins: number, limit = MAX_LEVEL
 
 export function upgradeUnit(save: SaveData, uid: string, count: number): SaveData {
   const unit = findUnit(save, uid);
-  const levels = Math.min(count, MAX_LEVEL - unit.level);
-  if (levels <= 0) throw new Error('Already at max level');
+  const levels = Math.min(count, levelCap(unit.star) - unit.level);
+  if (levels <= 0) {
+    throw new Error(unit.level >= MAX_LEVEL ? 'Already at max level' : 'Level wall: evolve this fighter to raise its cap');
+  }
   const cost = upgradeCost(unit.level, levels);
   if (cost > save.coins) throw new Error('Not enough coins');
   const next = replaceUnit(save, { ...unit, level: unit.level + levels, coinsSpent: unit.coinsSpent + cost });
