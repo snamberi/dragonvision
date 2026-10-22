@@ -24,6 +24,7 @@ import {
   ASSASSIN_SINGLE_BONUS,
   SUPPORT_HEAL_BONUS,
   TANK_DAMAGE_TAKEN,
+  baseEnemyStrength,
   enemyStrengthForStage,
   starMilestoneBonus,
 } from './balance';
@@ -141,7 +142,8 @@ export interface BattleOptions {
 
 /** `team` is the five formation pads in order, with null for empty ones. */
 export function createBattle(team: (Unit | null)[], stage: Stage, options: BattleOptions = {}): BattleState {
-  const strength = enemyStrengthForStage(stage.number);
+  // Side modes (labelled stages) borrow a stage number for scaling but never get its wall spike.
+  const strength = stage.label ? baseEnemyStrength(stage.number) : enemyStrengthForStage(stage.number);
   const rule = stage.rule;
   const terrain = getTerrainEffect(stage.number);
   const teamFamilyIds = team.flatMap((u) => (u ? [u.familyId] : []));

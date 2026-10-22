@@ -94,7 +94,7 @@ describe('fusion lab', () => {
     const mixed = [spare[0].uid, spare[1].uid, save.units.find((u) => u.star === 2)!.uid];
     expect(() => fuseShard(save, mixed)).toThrow();
     const sold = sellSpares(save, [spare[0].uid]);
-    expect(sold.coins).toBe(sellValue(spare[0].star, spare[0].level));
+    expect(sold.coins).toBe(save.coins + sellValue(spare[0].star, spare[0].level));
     expect(sold.units).toHaveLength(save.units.length - 1);
   });
 });

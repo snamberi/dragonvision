@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import { REPLAY_COIN_SHARE, STAGES_PER_CHAPTER, TOTAL_STAGES, enemyStrengthForStage } from '../game/balance';
+import { REPLAY_COIN_SHARE, STAGES_PER_CHAPTER, TOTAL_STAGES, WALL_STAGES, enemyStrengthForStage, isWallStage } from '../game/balance';
 import { WEATHER_TEXT, arenaForChapter } from '../game/arenas';
 import { power, teamUnits, unitName } from '../game/progression';
 import { CHAPTER_NAMES, getStage, isUnlocked, stageKind } from '../game/stages';
@@ -130,10 +130,11 @@ export function StagesScreen({ save, update, onPlay }: Props) {
                 className={`map-node ${kind} ${cleared ? 'cleared' : ''} ${current ? 'current' : ''} ${unlocked ? '' : 'locked'}`}
                 disabled={!unlocked}
                 onClick={() => setSelected(n)}
-                aria-label={`Stage ${n}${kind === 'boss' ? ', boss' : kind === 'miniBoss' ? ', mini-boss' : ''}${cleared ? ', cleared' : ''}`}
+                aria-label={`Stage ${n}${kind === 'boss' ? ', boss' : kind === 'miniBoss' ? ', mini-boss' : ''}${isWallStage(n) ? ', wall' : ''}${cleared ? ', cleared' : ''}`}
               >
                 {n}
               </button>
+              {isWallStage(n) && !cleared && <span className="map-check">🛡</span>}
               {cleared && <span className="map-check">✓</span>}
             </div>
           );
@@ -219,7 +220,13 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
               Stage {stage.number}
               {stage.kind === 'boss' && <span className="tag boss">BOSS</span>}
               {stage.kind === 'miniBoss' && <span className="tag mini">MINI-BOSS</span>}
+              {isWallStage(stage.number) && <span className="tag boss">WALL</span>}
             </h2>
+            {isWallStage(stage.number) && (
+              <div className="muted small-text">
+                Gate battle: enemies are {Math.round(((WALL_STAGES[stage.number] ?? 1) - 1) * 100)}% stronger than usual. Evolve, gear up or train before you try.
+              </div>
+            )}
             {stage.weather && stage.weather !== 'clear' && <div className="muted small-text">{WEATHER_TEXT[stage.weather]}</div>}
             <div className="muted small-text">Dominant class: <strong>{stage.dominantRole}</strong> — bring a counter</div>
           </div>

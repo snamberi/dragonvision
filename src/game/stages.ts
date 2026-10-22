@@ -182,7 +182,9 @@ export interface Rewards {
 }
 
 /** Extra gems awarded on first clear of key milestone stages to celebrate progress. */
-const MILESTONE_GEMS: Record<number, number> = { 10: 5, 20: 10, 50: 15, 100: 20, 180: 30 };
+const MILESTONE_GEMS: Record<number, number> = {
+  10: 5, 20: 10, 50: 15, 100: 25, 180: 35, 230: 35, 280: 45, 330: 45, 380: 60,
+};
 
 /**
  * First clears pay full coins, spins (1 / 5 mini-boss / 10 boss) and gem chances.

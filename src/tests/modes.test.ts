@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ACHIEVEMENTS, achievementState, allForms, claimAchievement, recordForms, setTitle, unlockedTitles } from '../game/achievements';
 import { autoResolve, createBattle, performAction } from '../game/battle';
 import { LOGIN_TRACK, claimLogin, loginIndex, loginReady } from '../game/login';
+import { STARTING_SPINS } from '../game/balance';
 import { addUnit, newSave, teamSlots } from '../game/progression';
 import { seededRng } from '../game/rng';
 import { finishSurvival, nextWave, survivalWave } from '../game/survival';
@@ -21,7 +22,7 @@ describe('world boss', () => {
     expect(attemptsLeft(save)).toBe(2);
     expect(bossStage(save).enemies[0].hpPool!.left).toBe(Math.round(boss.pool * 0.7));
     save = claimMilestone(save, 0);
-    expect(save.spins).toBe(5);
+    expect(save.spins).toBe(STARTING_SPINS + 5);
     expect(() => claimMilestone(save, 1)).toThrow(/Not reached/);
     // A new day refills attempts; a new week resets the pool.
     expect(attemptsLeft(syncWorldBoss(save, new Date(2026, 9, 18)))).toBe(3);
@@ -47,7 +48,7 @@ describe('survival', () => {
     expect(survivalWave(team, 10).enemies[0].level).toBeGreaterThan(survivalWave(team, 1).enemies[0].level);
     const done = finishSurvival(save, 10);
     expect(done.survivalBest).toBe(10);
-    expect(done.spins).toBe(2);
+    expect(done.spins).toBe(STARTING_SPINS + 2);
     expect(done.coins).toBeGreaterThan(0);
   });
 });
@@ -77,7 +78,7 @@ describe('login calendar', () => {
     expect(loginReady(save, '2026-10-17')).toBe(false);
     expect(() => claimLogin(save, seededRng(1), '2026-10-17')).toThrow();
     save = claimLogin(save, seededRng(1), '2026-10-20');
-    expect(save.spins).toBe(2);
+    expect(save.spins).toBe(STARTING_SPINS + 2);
     expect(loginIndex(save)).toBe(2);
     expect(LOGIN_TRACK).toHaveLength(7);
   });

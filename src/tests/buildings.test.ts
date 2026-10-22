@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GRAVITY_PER_LEVEL, TOTAL_STAGES, enemyStarForStage, enemyStrengthForStage, gravityCost } from '../game/balance';
+import { GRAVITY_PER_LEVEL, STARTING_COINS, STARTING_SPINS, TOTAL_STAGES, enemyStarForStage, enemyStrengthForStage, gravityCost } from '../game/balance';
 import { createBattle } from '../game/battle';
 import { BOUNTIES, bountyProgress, claimBounty, recordWin, syncBounties } from '../game/bounty';
 import { claimExpedition, expeditionDone, recallExpedition, startExpedition } from '../game/expedition';
@@ -74,8 +74,8 @@ describe('expedition port', () => {
     expect(() => claimExpedition(save, save.expeditions[0].id, 3 * HOUR)).toThrow();
     const reward = save.expeditions[0].reward;
     save = claimExpedition(save, save.expeditions[0].id, 4 * HOUR);
-    expect(save.spins).toBe(reward.spins);
-    expect(save.coins).toBe(reward.coins);
+    expect(save.spins).toBe(STARTING_SPINS + reward.spins);
+    expect(save.coins).toBe(STARTING_COINS + reward.coins);
     expect(save.expeditions).toHaveLength(0);
   });
 
@@ -84,7 +84,7 @@ describe('expedition port', () => {
     const r = withUnit(newSave(), 'mei', 1, 10);
     const sent = startExpedition(r.save, [r.unit.uid], 8, 0);
     const back = recallExpedition(sent, sent.expeditions[0].id);
-    expect(back.coins).toBe(0);
+    expect(back.coins).toBe(STARTING_COINS);
   });
 });
 
@@ -97,7 +97,7 @@ describe('bounty board', () => {
     for (let i = 0; i < 10; i++) save = recordWin(save, { firstClear: false, boss: false, flawless: false });
     expect(bountyProgress(save, wins).done).toBe(10);
     save = claimBounty(save, 'd-wins');
-    expect(save.spins).toBe(2);
+    expect(save.spins).toBe(STARTING_SPINS + 2);
     expect(() => claimBounty(save, 'd-wins')).toThrow(/Already/);
     // The next day starts over.
     save = syncBounties(save, new Date(2026, 9, 18, 9));
@@ -115,7 +115,7 @@ describe('fortune teller', () => {
   it('gives one free summon per day', () => {
     const { save } = claimFortune(newSave(), seededRng(1), '2026-10-17');
     expect(save.units).toHaveLength(2);
-    expect(save.spins).toBe(0);
+    expect(save.spins).toBe(STARTING_SPINS);
     expect(fortuneReady(save, '2026-10-17')).toBe(false);
     expect(fortuneReady(save, '2026-10-18')).toBe(true);
   });

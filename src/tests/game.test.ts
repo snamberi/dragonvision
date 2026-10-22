@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { autoResolve, createBattle, performAction, nextActor } from '../game/battle';
-import { RESET_GEM_COST, TOTAL_STAGES } from '../game/balance';
+import { REPLAY_COIN_SHARE, RESET_GEM_COST, STARTING_SPINS, TOTAL_STAGES, enemyStrengthForStage, isWallStage } from '../game/balance';
 import {
   addUnit,
   checkEvolve,
@@ -162,7 +162,7 @@ describe('stages and rewards', () => {
     expect(rewardsFor({ ...save, clearedStage: 4 }, 5, () => 0.5).spins).toBe(5);
     expect(rewardsFor({ ...save, clearedStage: 9 }, 10, () => 0.5).spins).toBe(10);
     const replay = rewardsFor({ ...save, clearedStage: 10 }, 10, () => 0);
-    expect(replay).toMatchObject({ firstClear: false, spins: 0, gems: 0, coins: Math.round(getStage(10).coins * 0.075) });
+    expect(replay).toMatchObject({ firstClear: false, spins: 0, gems: 0, coins: Math.round(getStage(10).coins * REPLAY_COIN_SHARE) });
   });
 
   it('first clear advances progress, replay does not', () => {
@@ -171,15 +171,23 @@ describe('stages and rewards', () => {
     expect(save.clearedStage).toBe(1);
     save = applyRewards(save, 1, rewardsFor(save, 1, () => 0.5));
     expect(save.clearedStage).toBe(1);
-    expect(save.spins).toBe(1);
+    expect(save.spins).toBe(STARTING_SPINS + 1);
   });
 
   it('starts with one enemy and grows to five', () => {
     expect(getStage(1).enemies).toHaveLength(1);
-    expect(getStage(3).enemies).toHaveLength(3);
+    expect(getStage(3).enemies).toHaveLength(2);
+    expect(getStage(6).enemies).toHaveLength(3);
     expect(getStage(12).enemies).toHaveLength(5);
     expect(getStage(10).enemies[0].rank).toBe('boss');
     expect(getStage(TOTAL_STAGES).enemies[0].level).toBeLessThanOrEqual(400);
+  });
+
+  it('wall stages spike above their neighbours, then ease off', () => {
+    expect(isWallStage(100)).toBe(true);
+    expect(enemyStrengthForStage(100)).toBeGreaterThan(enemyStrengthForStage(99) * 1.2);
+    expect(enemyStrengthForStage(101)).toBeLessThan(enemyStrengthForStage(100));
+    expect(enemyStrengthForStage(281)).toBeGreaterThan(enemyStrengthForStage(271));
   });
 });
 
@@ -214,7 +222,7 @@ describe('buying spins', () => {
     const { spinPrice } = await import('../game/balance');
     const save: SaveData = { ...newSave(), coins: 10_000, clearedStage: 5 };
     const next = buySpins(save, 3);
-    expect(next.spins).toBe(3);
+    expect(next.spins).toBe(save.spins + 3);
     expect(next.coins).toBe(10_000 - 3 * spinPrice(5));
     expect(spinPrice(40)).toBeGreaterThan(spinPrice(5));
     expect(() => buySpins({ ...save, coins: 0 }, 1)).toThrow(/Not enough coins/);

@@ -111,9 +111,29 @@ export function enemyStarForStage(stage: number): number {
 }
 
 /** The first stages are gentler while the player only has one or two fighters. */
+/**
+ * Wall stages: act-gate bosses far stronger than the stages around them. Passing one takes a real
+ * upgrade (an evolution, better gear, Gravity levels), not just another level-up.
+ */
+export const WALL_STAGES: Record<number, number> = { 50: 1.2, 100: 1.3, 180: 1.4, 230: 1.3, 280: 1.45, 330: 1.35, 380: 1.6 };
+
+export function isWallStage(stage: number): boolean {
+  return stage in WALL_STAGES;
+}
+
+/** Past the level cap, enemies get stronger in a step at the start of every chapter. */
+const POST_CAP_STEP_PER_CHAPTER = 0.04;
+
 export function enemyStrengthForStage(stage: number): number {
+  return baseEnemyStrength(stage) * (WALL_STAGES[stage] ?? 1);
+}
+
+export function baseEnemyStrength(stage: number): number {
   if (stage <= 5) return 0.6 + stage * 0.06;
-  if (stage > LEVEL_CAP_STAGE) return 1.5 + (stage - LEVEL_CAP_STAGE) * 0.003;
+  if (stage > LEVEL_CAP_STAGE) {
+    const chaptersPastCap = Math.floor((stage - LEVEL_CAP_STAGE - 1) / STAGES_PER_CHAPTER) + 1;
+    return 1.5 + chaptersPastCap * POST_CAP_STEP_PER_CHAPTER;
+  }
   // Scales from 1.0 at stage 6 up to 1.5 at LEVEL_CAP_STAGE for mid-game difficulty.
   return 1 + (stage - 5) * (0.5 / (LEVEL_CAP_STAGE - 5));
 }
