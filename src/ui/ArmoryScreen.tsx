@@ -1,6 +1,7 @@
 import { useActionFeedback } from './useActionFeedback';
 import { SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
 import { RUNE_FRAG_COST, RUNE_TEMPLATES, craftRune } from '../game/rune';
+import { RELIC_CRAFT_COST, RELIC_TEMPLATES, craftRelic, equipRelic, equippedRelicTemplate, unequipRelic } from '../game/relic';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -97,6 +98,45 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
             </div>
           </div>
         )}
+      </section>
+
+      <section className="panel">
+        <div className="section-head">
+          <h3>Artifact Relics</h3>
+          <span className="muted small-text">◇ {save.materials.relicShard} shards · {RELIC_CRAFT_COST} to craft</span>
+        </div>
+        {(() => {
+          const active = equippedRelicTemplate(save);
+          return (
+            <>
+              {active && (
+                <div className="rune-card owned" style={{ marginBottom: 8 }}>
+                  <span className="rune-name">Equipped: {active.name}</span>
+                  <span className="rune-effect muted small-text">{active.effect}</span>
+                  <button className="btn small" onClick={() => update(unequipRelic, 'Relic unequipped')}>Unequip</button>
+                </div>
+              )}
+              <button className="btn small primary" disabled={save.materials.relicShard < RELIC_CRAFT_COST} onClick={() => update(craftRelic, 'Relic crafted!')}>
+                Craft Relic ◇ {RELIC_CRAFT_COST}
+              </button>
+              {(save.relics ?? []).length > 0 && (
+                <div className="rune-grid" style={{ marginTop: 8 }}>
+                  {(save.relics ?? []).map((r) => {
+                    const tmpl = RELIC_TEMPLATES.find((t) => t.id === r.templateId);
+                    const equipped = save.equippedRelic === r.id;
+                    return (
+                      <div key={r.id} className={`rune-card ${equipped ? 'owned' : ''}`}>
+                        <span className="rune-name">{tmpl?.name ?? r.templateId}</span>
+                        <span className="rune-effect muted small-text">{r.effect}</span>
+                        {!equipped && <button className="btn small" onClick={() => update((s) => equipRelic(s, r.id), 'Relic equipped')}>Equip</button>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       <section className="panel">

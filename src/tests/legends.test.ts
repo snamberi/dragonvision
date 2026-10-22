@@ -121,7 +121,7 @@ describe('items and materials', () => {
     delete old.market;
     const loaded = importCode(exportCode(old as SaveData));
     expect(loaded.pieces).toEqual({});
-    expect(loaded.materials).toEqual({ refreshTicket: 0, respecScroll: 0 });
+    expect(loaded.materials).toEqual({ refreshTicket: 0, respecScroll: 0, transcendenceCrystal: 0, sigMaterial: 0, relicShard: 0, dungeonKey: 0 });
     expect(loaded.market.bought).toEqual([]);
   });
 });

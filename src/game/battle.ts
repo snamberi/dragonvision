@@ -33,6 +33,11 @@ import type { Stage } from './stages';
 import type { Weather } from './arenas';
 import { type Bonus, emptyBonus } from './bonus';
 import type { Special, Unit } from './types';
+import { transcendenceBonuses } from './transcendence';
+import { bondBonus } from './bonds';
+import { signaturePower } from './signature';
+import { getTerrainEffect } from './terrain';
+import { detectFormation, formationAbility } from './formation';
 
 export type Side = 'player' | 'enemy';
 export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard' | 'combo';
@@ -137,6 +142,10 @@ export interface BattleOptions {
 export function createBattle(team: (Unit | null)[], stage: Stage, options: BattleOptions = {}): BattleState {
   const strength = enemyStrengthForStage(stage.number);
   const rule = stage.rule;
+  const terrain = getTerrainEffect(stage.number);
+  const teamFamilyIds = team.flatMap((u) => (u ? [u.familyId] : []));
+  const teamUnits = team.filter((u): u is Unit => u !== null);
+  const formation = formationAbility(detectFormation(teamUnits));
   // "max3" keeps only the first three fighters by pad.
   let allowed = rule === 'max3' ? 3 : Infinity;
   const players: Fighter[] = team.flatMap((u, slot) => {
@@ -144,11 +153,15 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     allowed--;
     const base = statsFor(u.familyId, u.star, u.level);
     const b = options.bonusFor?.(u) ?? emptyBonus();
+    const tc = transcendenceBonuses(u.transcendenceTier ?? 0);
+    const bond = bondBonus(u.familyId, teamFamilyIds);
+    const sigBonus = signaturePower(1, u.sigTier ?? 0) - 1;
+    const bWithSig = { ...b, specialPower: b.specialPower + sigBonus };
     const s = {
-      hp: Math.round(base.hp * (1 + b.hp)),
-      atk: Math.round(base.atk * (1 + b.atk)),
-      def: Math.round(base.def * (1 + b.def)),
-      spd: base.spd + b.spd,
+      hp: Math.round(base.hp * (1 + b.hp) * tc.hpMult),
+      atk: Math.round(base.atk * (1 + b.atk) * tc.atkMult * (1 + bond.atkBonus) * terrain.playerAtkMult * formation.atkMult),
+      def: Math.round(base.def * (1 + b.def) * tc.defMult * (1 + bond.defBonus) * terrain.playerDefMult * formation.defMult),
+      spd: base.spd + b.spd + formation.spdBonus,
     };
     const need = Math.max(1, getFamily(u.familyId).special.charge - b.chargeDiscount);
     const fighter: Fighter = {
@@ -169,7 +182,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       ki: Math.min(KI_MAX, KI_START + b.ki),
       charge: Math.min(need, b.charge),
       shield: Math.round(s.hp * b.shield),
-      bonus: b,
+      bonus: bWithSig,
     };
     return [fighter];
   });
@@ -192,8 +205,8 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       ...placement(e.familyId, i),
       maxHp: pool ? pool.max : hp,
       hp: pool ? pool.left : hp,
-      atk: Math.round(s.atk * atkMul * strength),
-      def: Math.round(s.def * strength),
+      atk: Math.round(s.atk * atkMul * strength * terrain.enemyAtkMult),
+      def: Math.round(s.def * strength * terrain.enemyDefMult),
       spd: s.spd,
       ...FRESH,
       bonus: emptyBonus(),
