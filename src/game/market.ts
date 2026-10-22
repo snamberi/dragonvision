@@ -1,5 +1,5 @@
 // The Shop: six random offers and one legendary offer a day, refreshed at midnight or for gems / a Refresh Ticket.
-import { spinPrice, stageCoinReward } from './balance';
+import { SHARD_PRICE_BASE, SHARD_PRICE_GROWTH, spinPrice, stageCoinReward } from './balance';
 import { RARITIES, type Rarity, SHOP_REFRESH_GEMS, TEMPLATES, addItem, rollRarity } from './gear';
 import { addPieces, randomLegendId } from './legendary';
 import { type Rng, seededRng } from './rng';
@@ -29,6 +29,11 @@ function bestStar(save: SaveData): number {
   return Math.max(1, ...save.units.map((u) => u.star));
 }
 
+/** A shard of star s stands in for 3^(s-1) one-star copies, so its price climbs with the star. */
+export function shardPrice(stageCoins: number, star: number): number {
+  return Math.round(stageCoins * SHARD_PRICE_BASE * Math.pow(SHARD_PRICE_GROWTH, star - 1));
+}
+
 function randomOffer(save: SaveData, rng: Rng): MarketOffer {
   const coin = stageCoinReward(Math.max(1, save.clearedStage));
   const spin = spinPrice(save.clearedStage);
@@ -39,7 +44,7 @@ function randomOffer(save: SaveData, rng: Rng): MarketOffer {
   }
   if (roll < 0.45) {
     const star = 1 + Math.floor(rng() * bestStar(save));
-    return { good: { kind: 'shard', star }, coins: Math.round(coin * (0.5 + star * 0.4)), gems: 0, legendary: false };
+    return { good: { kind: 'shard', star }, coins: shardPrice(coin, star), gems: 0, legendary: false };
   }
   if (roll < 0.75) {
     const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];

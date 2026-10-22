@@ -1,5 +1,6 @@
 import { bump } from './progression';
 import { dayKey, weekKey } from './time';
+import { type MaterialReward, grantMaterials } from './materials';
 import type { BountyPeriod, Counters, SaveData } from './types';
 
 export interface Bounty {
@@ -8,16 +9,16 @@ export interface Bounty {
   label: string;
   counter: keyof Counters;
   goal: number;
-  reward: { coins?: number; spins?: number; gems?: number };
+  reward: { coins?: number; spins?: number; gems?: number } & MaterialReward;
 }
 
 export const BOUNTIES: Bounty[] = [
-  { id: 'd-wins', period: 'daily', label: 'Win 10 battles', counter: 'wins', goal: 10, reward: { spins: 2 } },
+  { id: 'd-wins', period: 'daily', label: 'Win 10 battles', counter: 'wins', goal: 10, reward: { spins: 2, essence: 1 } },
   { id: 'd-summons', period: 'daily', label: 'Summon 10 fighters', counter: 'summons', goal: 10, reward: { gems: 1 } },
   { id: 'd-clear', period: 'daily', label: 'Clear a new stage', counter: 'firstClears', goal: 1, reward: { spins: 1 } },
-  { id: 'w-wins', period: 'weekly', label: 'Win 75 battles', counter: 'wins', goal: 75, reward: { spins: 10 } },
-  { id: 'w-evolve', period: 'weekly', label: 'Evolve 3 fighters', counter: 'evolves', goal: 3, reward: { gems: 5 } },
-  { id: 'w-bosses', period: 'weekly', label: 'Beat 3 bosses or mini-bosses', counter: 'bossWins', goal: 3, reward: { spins: 5 } },
+  { id: 'w-wins', period: 'weekly', label: 'Win 75 battles', counter: 'wins', goal: 75, reward: { spins: 10, crystals: 2 } },
+  { id: 'w-evolve', period: 'weekly', label: 'Evolve 3 fighters', counter: 'evolves', goal: 3, reward: { gems: 5, crystals: 2 } },
+  { id: 'w-bosses', period: 'weekly', label: 'Beat 3 bosses or mini-bosses', counter: 'bossWins', goal: 3, reward: { spins: 5, essence: 2 } },
   {
     id: 'w-flawless',
     period: 'weekly',
@@ -54,7 +55,7 @@ export function claimBounty(save: SaveData, id: string): SaveData {
   if (done < bounty.goal) throw new Error('Not finished yet');
   const p = save.bounties[bounty.period]!;
   return {
-    ...save,
+    ...grantMaterials(save, bounty.reward),
     coins: save.coins + (bounty.reward.coins ?? 0),
     spins: save.spins + (bounty.reward.spins ?? 0),
     gems: save.gems + (bounty.reward.gems ?? 0),

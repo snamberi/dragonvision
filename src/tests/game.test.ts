@@ -15,6 +15,7 @@ import {
 } from '../game/progression';
 import { seededRng } from '../game/rng';
 import { applyRewards, getStage, rewardsFor } from '../game/stages';
+import { shardPrice } from '../game/market';
 import { summon, summonOdds, summonStarCap } from '../game/summon';
 import type { SaveData } from '../game/types';
 
@@ -181,6 +182,21 @@ describe('stages and rewards', () => {
     expect(getStage(12).enemies).toHaveLength(5);
     expect(getStage(10).enemies[0].rank).toBe('boss');
     expect(getStage(TOTAL_STAGES).enemies[0].level).toBeLessThanOrEqual(400);
+  });
+
+  it('bosses drop Signature Essence; walls and post-cap bosses drop Transcendence Crystals', () => {
+    const save = newSave();
+    expect(rewardsFor({ ...save, clearedStage: 9 }, 10, () => 0.5)).toMatchObject({ essence: 1 });
+    expect(rewardsFor({ ...save, clearedStage: 99 }, 100, () => 0.5)).toMatchObject({ essence: 3, crystals: 5 });
+    expect(rewardsFor({ ...save, clearedStage: 199 }, 200, () => 0.5)).toMatchObject({ crystals: 2 });
+    expect(rewardsFor({ ...save, clearedStage: 10 }, 10, () => 0.5).essence).toBeUndefined();
+    const after = applyRewards(save, 100, rewardsFor({ ...save, clearedStage: 99 }, 100, () => 0.5));
+    expect(after.materials.transcendenceCrystal).toBe(5);
+    expect(after.materials.sigMaterial).toBe(3);
+  });
+
+  it('shop shards cost more the higher their star', () => {
+    expect(shardPrice(1000, 20)).toBeGreaterThan(shardPrice(1000, 10) * 8);
   });
 
   it('wall stages spike above their neighbours, then ease off', () => {

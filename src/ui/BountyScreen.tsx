@@ -6,6 +6,7 @@ import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { BuildingHeader } from './BuildingHeader';
 import { orbs } from './format';
+import { type MaterialReward, materialText } from '../game/materials';
 
 interface Props {
   save: SaveData;
@@ -13,8 +14,8 @@ interface Props {
   onBack: () => void;
 }
 
-function rewardText(r: { coins?: number; spins?: number; gems?: number }): string {
-  return [r.coins && `● ${r.coins.toLocaleString()}`, r.spins && orbs(r.spins), r.gems && `◆ ${r.gems}`].filter(Boolean).join(' · ');
+function rewardText(r: { coins?: number; spins?: number; gems?: number } & MaterialReward): string {
+  return [r.coins && `● ${r.coins.toLocaleString()}`, r.spins && orbs(r.spins), r.gems && `◆ ${r.gems}`, ...materialText(r)].filter(Boolean).join(' · ');
 }
 
 export function BountyScreen({ save, update: commit, onBack }: Props) {

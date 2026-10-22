@@ -1,4 +1,5 @@
 import { basicMotion } from '../art/combatMotion';
+import { materialText } from '../game/materials';
 import { WeatherLayer, WorldScene } from './WorldScene';
 import { WEATHER_TEXT, arenaForStage } from '../game/arenas';
 import { AttackEffect, fighterFootPoint } from './AttackEffect';
@@ -6,7 +7,7 @@ import type { SpritePose } from '../art/sprite';
 import { identityFor } from '../art/identity';
 import { PixelIcon } from './PixelIcon';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
-import { KI_BLAST_COST, KI_MAX } from '../game/balance';
+import { KI_BLAST_COST, KI_MAX, REPLAY_COIN_SHARE } from '../game/balance';
 import {
   type Action,
   type ActionEvent,
@@ -590,7 +591,8 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                     <GearCard item={rewards.gear} />
                   </li>
                 )}
-                {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward (7.5% coins)</li>}
+                {materialText(rewards).map((t) => <li key={t}>✦ {t}</li>)}
+                {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward ({Math.round(REPLAY_COIN_SHARE * 100)}% coins)</li>}
               </ul>
             ) : (
               <p className="muted">Level up your fighters or replay earlier stages for coins.</p>

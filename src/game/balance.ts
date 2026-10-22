@@ -190,6 +190,18 @@ export function spinPrice(clearedStage: number): number {
   return Math.max(MIN_SPIN_PRICE, Math.round(stageCoinReward(Math.max(1, clearedStage)) * SPIN_PRICE_SHARE));
 }
 
+// --- Upgrade materials from story first clears ---
+export const ESSENCE_PER_BOSS = 1;
+export const WALL_ESSENCE = 2;
+export const WALL_CRYSTALS = 5;
+/** Bosses past the level cap also drop Transcendence Crystals. */
+export const POST_CAP_BOSS_CRYSTALS = 2;
+
+// --- Shop shards ---
+/** Shard price = latest stage's first-clear coins × BASE × GROWTH^(star-1). */
+export const SHARD_PRICE_BASE = 0.4;
+export const SHARD_PRICE_GROWTH = 1.25;
+
 // --- Training Dojo ---
 export const DOJO_SLOTS = 3;
 /** Real minutes of training per level gained. */

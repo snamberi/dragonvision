@@ -1,4 +1,4 @@
-import { FATE_MAX, FATE_PER_PULL, FATE_RAGE_DRAIN, FATE_RAGE_THRESHOLD, LUCKY_PULL_BONUS_PER_5, LUCKY_PULL_CHANCE, LUCKY_PULL_ROLLS, RAGE_MIN_TIER, TEN_PULL_FATE_BOOST, TEN_PULL_FATE_BOOST_INDEX, TIER_RATES, spinPrice } from './balance';
+import { FOCUS_MULTIPLIER, LUCKY_MULTIPLIER, SUMMON_STAR_DECAY, FATE_MAX, FATE_PER_PULL, FATE_RAGE_DRAIN, FATE_RAGE_THRESHOLD, LUCKY_PULL_BONUS_PER_5, LUCKY_PULL_CHANCE, LUCKY_PULL_ROLLS, RAGE_MIN_TIER, TEN_PULL_FATE_BOOST, TEN_PULL_FATE_BOOST_INDEX, TIER_RATES, spinPrice } from './balance';
 import { addPieces, rollSummonPiece } from './legendary';
 import { addUnit, bump, summonLevelRange } from './progression';
 import { collectionCap } from './upgrades';
@@ -24,10 +24,6 @@ export function summonStarCap(save: SaveData, familyId: string): number {
 export function luckyFamilyId(day = dayKey()): string {
   return FAMILIES[hashString(day) % FAMILIES.length].id;
 }
-
-const FOCUS_MULTIPLIER = 5;
-const LUCKY_MULTIPLIER = 3;
-const SUMMON_STAR_DECAY = 0.55;
 
 export function familyWeight(save: SaveData, familyId: string, day = dayKey()): number {
   const focus = save.focusFamilyId === familyId ? FOCUS_MULTIPLIER : 1;

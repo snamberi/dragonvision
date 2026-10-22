@@ -1,4 +1,5 @@
 import { getFamily } from '../game/roster';
+import { materialText } from '../game/materials';
 import type { SaveData } from '../game/types';
 import { BOSS_ATTEMPTS_PER_DAY, BOSS_ROUNDS, MILESTONES, attemptsLeft, bossProgress, claimMilestone, weeklyBoss } from '../game/worldBoss';
 import type { Updater } from './App';
@@ -19,6 +20,7 @@ function rewardText(r: (typeof MILESTONES)[number]['reward']): string {
     r.gems && `◆ ${r.gems}`,
     r.gear && `${r.gear === 'legendary' ? 'Legendary' : 'Epic'} gear`,
     r.shards && `${r.shards} shards`,
+    ...materialText(r),
   ]
     .filter(Boolean)
     .join(' · ');

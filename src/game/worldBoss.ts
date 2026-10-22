@@ -1,4 +1,5 @@
 import { MAX_LEVEL, MAX_STARS, enemyLevelForStage, enemyStarForStage } from './balance';
+import { type MaterialReward, grantMaterials } from './materials';
 import { addItem, TEMPLATES } from './gear';
 import { statsFor } from './progression';
 import { type Rng, defaultRng } from './rng';
@@ -15,14 +16,14 @@ const ROSTER = ['vorg', 'grimm', 'sylas', 'kael', 'mogra', 'nyx', 'grylas'];
 export interface Milestone {
   share: number;
   label: string;
-  reward: { spins?: number; gems?: number; gear?: 'epic' | 'legendary'; shards?: number };
+  reward: { spins?: number; gems?: number; gear?: 'epic' | 'legendary'; shards?: number } & MaterialReward;
 }
 
 export const MILESTONES: Milestone[] = [
   { share: 0.25, label: '25%', reward: { spins: 5 } },
   { share: 0.5, label: '50%', reward: { gems: 10 } },
-  { share: 0.75, label: '75%', reward: { gear: 'epic', spins: 5 } },
-  { share: 1, label: 'Defeated', reward: { gear: 'legendary', gems: 15, shards: 2 } },
+  { share: 0.75, label: '75%', reward: { gear: 'epic', spins: 5, crystals: 2 } },
+  { share: 1, label: 'Defeated', reward: { gear: 'legendary', gems: 15, shards: 2, essence: 2, crystals: 3 } },
 ];
 
 /** This week's boss: the same for everyone, scaled to how far you are in the story. */
@@ -88,7 +89,7 @@ export function claimMilestone(save: SaveData, index: number, rng: Rng = default
   if (save.worldBoss.claimed.includes(index)) throw new Error('Already claimed');
   if (bossProgress(save) < m.share) throw new Error('Not reached yet');
   let next: SaveData = {
-    ...save,
+    ...grantMaterials(save, m.reward),
     spins: save.spins + (m.reward.spins ?? 0),
     gems: save.gems + (m.reward.gems ?? 0),
     worldBoss: { ...save.worldBoss, claimed: [...save.worldBoss.claimed, index] },

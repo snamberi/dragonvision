@@ -1,4 +1,5 @@
 import {
+  ESSENCE_PER_BOSS,
   GEMS_BOSS,
   GEMS_MINI_BOSS,
   NORMAL_GEM_AMOUNT,
@@ -7,13 +8,19 @@ import {
   SPINS_BOSS,
   SPINS_MINI_BOSS,
   SPINS_NORMAL,
+  LEVEL_CAP_STAGE,
+  POST_CAP_BOSS_CRYSTALS,
   STAGES_PER_CHAPTER,
   TOTAL_STAGES,
+  WALL_CRYSTALS,
+  WALL_ESSENCE,
   enemyCountForStage,
   enemyLevelForStage,
   enemyStarForStage,
+  isWallStage,
   stageCoinReward,
 } from './balance';
+import { type MaterialReward, grantMaterials } from './materials';
 import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
 import { type Weather, arenaForStage } from './arenas';
 import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
@@ -170,7 +177,7 @@ export function isUnlocked(save: SaveData, stage: number): boolean {
   return stage <= save.clearedStage + 1 && stage <= TOTAL_STAGES;
 }
 
-export interface Rewards {
+export interface Rewards extends MaterialReward {
   firstClear: boolean;
   coins: number;
   gems: number;
@@ -217,12 +224,16 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
     if (RARITIES.indexOf(rarity) < RARITIES.indexOf(floor)) rarity = floor;
     rewards.gear = { templateId: template.id, rarity };
   }
+  if (stage.kind === 'boss') rewards.essence = ESSENCE_PER_BOSS + (isWallStage(stageNumber) ? WALL_ESSENCE : 0);
+  const crystals = (isWallStage(stageNumber) ? WALL_CRYSTALS : 0) + (stage.kind === 'boss' && stageNumber > LEVEL_CAP_STAGE ? POST_CAP_BOSS_CRYSTALS : 0);
+  if (crystals > 0) rewards.crystals = crystals;
   return rewards;
 }
 
 export function applyRewards(save: SaveData, stageNumber: number, rewards: Rewards): SaveData {
   if (rewards.gear) save = addItem(save, rewards.gear.templateId, rewards.gear.rarity).save;
   if (rewards.piece) save = addPieces(save, rewards.piece);
+  save = grantMaterials(save, rewards);
   return {
     ...save,
     coins: save.coins + rewards.coins,
