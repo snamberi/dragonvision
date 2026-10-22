@@ -17,7 +17,7 @@ import {
 import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
 import { type Weather, arenaForStage } from './arenas';
 import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
-import { FAMILIES } from './roster';
+import { FAMILIES, type Role, roleFor } from './roster';
 import { type Rng, defaultRng, seededRng } from './rng';
 import type { SaveData } from './types';
 
@@ -112,10 +112,18 @@ export function stageKind(stage: number): StageKind {
 
 const villains = FAMILIES.filter((f) => f.villain);
 
+const ROLE_CYCLE: Role[] = ['Tank', 'Assassin', 'Blaster', 'Drainer', 'Support'];
+function chapterDominantRole(chapter: number): Role {
+  return ROLE_CYCLE[(chapter - 1) % ROLE_CYCLE.length];
+}
+
 /** Stages are generated from their number, so the same stage always has the same enemies. */
 export function getStage(number: number): Stage {
   const rng = seededRng(number * 7919);
   const chapter = Math.ceil(number / STAGES_PER_CHAPTER);
+  const dominantRole = chapterDominantRole(chapter);
+  const dominantFamilies = FAMILIES.filter((f) => !f.villain && roleFor(f) === dominantRole);
+  const otherFamilies = FAMILIES.filter((f) => !f.villain && roleFor(f) !== dominantRole);
   const kind = stageKind(number);
   const level = enemyLevelForStage(number);
   const star = enemyStarForStage(number);
@@ -133,7 +141,9 @@ export function getStage(number: number): Stage {
     });
   }
   while (enemies.length < count) {
-    const family = FAMILIES[Math.floor(rng() * FAMILIES.length)];
+    // 65% chance to pick from this chapter's dominant role for composition pressure.
+    const pool = dominantFamilies.length > 0 && rng() < 0.65 ? dominantFamilies : otherFamilies;
+    const family = pool[Math.floor(rng() * pool.length)];
     const jitter = Math.floor(rng() * 5) - 2;
     enemies.push({ familyId: family.id, star, level: Math.max(1, level + jitter), rank: 'minion' });
   }

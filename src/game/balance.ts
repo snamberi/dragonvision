@@ -12,9 +12,9 @@ export function levelCap(star: number): number {
 export const DUPLICATES_TO_EVOLVE = 2;
 export const MAX_TEAM_SIZE = 5;
 
-export const STARTING_COINS = 0;
-export const STARTING_GEMS = 0;
-export const STARTING_SPINS = 0;
+export const STARTING_COINS = 500;
+export const STARTING_GEMS = 20;
+export const STARTING_SPINS = 5;
 
 /** Coins to go from `level` to `level + 1`. */
 export function levelUpCost(level: number): number {
@@ -30,7 +30,7 @@ export const RESET_GEM_COST = 3;
 
 // --- Summoning ---
 /** Relative chance of each star tier: star s has weight STAR_DECAY^(s-1). */
-export const SUMMON_STAR_DECAY = 0.55;
+export const SUMMON_STAR_DECAY = 0.62;
 /** Focused character's family weight multiplier (others stay at 1). */
 export const FOCUS_MULTIPLIER = 5;
 /** The Fortune Teller's lucky fighter of the day is this much more likely. */
@@ -46,9 +46,9 @@ export const SPINS_MINI_BOSS = 5;
 export const SPINS_BOSS = 10;
 export const GEMS_MINI_BOSS = 5;
 export const GEMS_BOSS = 15;
-export const NORMAL_GEM_CHANCE = 0.01;
+export const NORMAL_GEM_CHANCE = 0.04;
 export const NORMAL_GEM_AMOUNT = 1;
-export const REPLAY_COIN_SHARE = 0.075;
+export const REPLAY_COIN_SHARE = 0.25;
 
 // --- Collection cap ---
 export const BASE_COLLECTION_CAP = 250;
@@ -113,13 +113,17 @@ export function enemyStarForStage(stage: number): number {
 /** The first stages are gentler while the player only has one or two fighters. */
 export function enemyStrengthForStage(stage: number): number {
   if (stage <= 5) return 0.6 + stage * 0.06;
-  // Post-game stages keep getting tougher after enemies max out.
-  if (stage > LEVEL_CAP_STAGE) return 1 + (stage - LEVEL_CAP_STAGE) * 0.003;
-  return 1;
+  if (stage > LEVEL_CAP_STAGE) return 1.5 + (stage - LEVEL_CAP_STAGE) * 0.003;
+  // Scales from 1.0 at stage 6 up to 1.5 at LEVEL_CAP_STAGE for mid-game difficulty.
+  return 1 + (stage - 5) * (0.5 / (LEVEL_CAP_STAGE - 5));
 }
 
 export function enemyCountForStage(stage: number): number {
-  return Math.min(MAX_TEAM_SIZE, stage);
+  if (stage <= 2) return 1;
+  if (stage <= 5) return 2;
+  if (stage <= 8) return 3;
+  if (stage <= 11) return 4;
+  return MAX_TEAM_SIZE;
 }
 
 export function stageCoinReward(stage: number): number {
@@ -198,3 +202,19 @@ export const TOWER_FLOORS = 30;
 /** Damage multiplier when attacking the class you beat, and when hit by the class that beats you. */
 export const CLASS_ADVANTAGE = 1.25;
 export const CLASS_DISADVANTAGE = 0.85;
+
+// --- Star milestone passives ---
+/** Cumulative passive bonuses unlocked by evolving a fighter to higher star tiers. */
+export function starMilestoneBonus(star: number): Partial<import('./bonus').Bonus> {
+  const b: Partial<import('./bonus').Bonus> = {};
+  if (star >= 2) b.crit = 0.05;
+  if (star >= 3) b.shield = 0.08;
+  if (star >= 4) b.specialPower = 0.12;
+  if (star >= 5) b.spd = 8;
+  if (star >= 6) b.secondWind = 0.15;
+  if (star >= 7) b.atk = 0.10;
+  if (star >= 8) b.charge = 1;
+  if (star >= 9) b.lastStand = 0.20;
+  if (star >= 10) b.ki = 15;
+  return b;
+}

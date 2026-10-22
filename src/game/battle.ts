@@ -25,13 +25,14 @@ import {
   SUPPORT_HEAL_BONUS,
   TANK_DAMAGE_TAKEN,
   enemyStrengthForStage,
+  starMilestoneBonus,
 } from './balance';
 import { isBackRow, statsFor, unitName } from './progression';
 import { type Combo, type Role, classEdge, combosWith, getFamily, roleFor } from './roster';
 import { type Rng, defaultRng } from './rng';
 import type { Stage } from './stages';
 import type { Weather } from './arenas';
-import { type Bonus, emptyBonus } from './bonus';
+import { type Bonus, addBonus, emptyBonus } from './bonus';
 import type { Special, Unit } from './types';
 import { transcendenceBonuses } from './transcendence';
 import { bondBonus } from './bonds';
@@ -157,13 +158,14 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     const bond = bondBonus(u.familyId, teamFamilyIds);
     const sigBonus = signaturePower(1, u.sigTier ?? 0) - 1;
     const bWithSig = { ...b, specialPower: b.specialPower + sigBonus };
+    const bFinal = addBonus(bWithSig, starMilestoneBonus(u.star));
     const s = {
-      hp: Math.round(base.hp * (1 + b.hp) * tc.hpMult),
-      atk: Math.round(base.atk * (1 + b.atk) * tc.atkMult * (1 + bond.atkBonus) * terrain.playerAtkMult * formation.atkMult),
-      def: Math.round(base.def * (1 + b.def) * tc.defMult * (1 + bond.defBonus) * terrain.playerDefMult * formation.defMult),
-      spd: base.spd + b.spd + formation.spdBonus,
+      hp: Math.round(base.hp * (1 + bFinal.hp) * tc.hpMult),
+      atk: Math.round(base.atk * (1 + bFinal.atk) * tc.atkMult * (1 + bond.atkBonus) * terrain.playerAtkMult * formation.atkMult),
+      def: Math.round(base.def * (1 + bFinal.def) * tc.defMult * (1 + bond.defBonus) * terrain.playerDefMult * formation.defMult),
+      spd: base.spd + bFinal.spd + formation.spdBonus,
     };
-    const need = Math.max(1, getFamily(u.familyId).special.charge - b.chargeDiscount);
+    const need = Math.max(1, getFamily(u.familyId).special.charge - bFinal.chargeDiscount);
     const fighter: Fighter = {
       id: `p-${u.uid}`,
       side: 'player',
@@ -179,10 +181,10 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       def: s.def,
       spd: s.spd,
       ...FRESH,
-      ki: Math.min(KI_MAX, KI_START + b.ki),
-      charge: Math.min(need, b.charge),
-      shield: Math.round(s.hp * b.shield),
-      bonus: bWithSig,
+      ki: Math.min(KI_MAX, KI_START + bFinal.ki),
+      charge: Math.min(need, bFinal.charge),
+      shield: Math.round(s.hp * bFinal.shield),
+      bonus: bFinal,
     };
     return [fighter];
   });
