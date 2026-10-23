@@ -1,5 +1,6 @@
 import { FOCUS_PITY_PULLS, FOCUS_MULTIPLIER, LUCKY_MULTIPLIER, SUMMON_STAR_DECAY, FATE_MAX, FATE_PER_PULL, FATE_RAGE_DRAIN, FATE_RAGE_THRESHOLD, LUCKY_PULL_BONUS_PER_5, LUCKY_PULL_CHANCE, LUCKY_PULL_ROLLS, RAGE_MIN_TIER, TEN_PULL_FATE_BOOST, TEN_PULL_FATE_BOOST_INDEX, TIER_RATES, spinPrice } from './balance';
 import { addPieces, rollSummonPiece } from './legendary';
+import { FEATURED_MULTIPLIER, dateFromDay, featuredFamilyId } from './events';
 import { addUnit, bump, summonLevelRange } from './progression';
 import { collectionCap } from './upgrades';
 import { FAMILIES, GOLDEN_FAMILIES, getFamily } from './roster';
@@ -27,7 +28,8 @@ export function luckyFamilyId(day = dayKey()): string {
 
 export function familyWeight(save: SaveData, familyId: string, day = dayKey()): number {
   const focus = save.focusFamilyId === familyId ? FOCUS_MULTIPLIER : 1;
-  return focus * (luckyFamilyId(day) === familyId ? LUCKY_MULTIPLIER : 1);
+  const featured = featuredFamilyId(dateFromDay(day)) === familyId ? FEATURED_MULTIPLIER : 1;
+  return focus * featured * (luckyFamilyId(day) === familyId ? LUCKY_MULTIPLIER : 1);
 }
 
 export function starWeight(star: number): number {
@@ -151,12 +153,12 @@ export function summon(save: SaveData, rng: Rng = defaultRng, day = dayKey(), ex
   return give({ ...save, fate: nextFate, pullsSinceLastLucky: nextPullsSince, focusPity: pityCount }, family.id, star, rng, lucky, rage);
 }
 
-function give(save: SaveData, familyId: string, star: number, rng: Rng, lucky: boolean, rage: boolean): Pull {
+function give(save: SaveData, familyId: string, star: number, rng: Rng, lucky: boolean, rage: boolean, cost = 1): Pull {
   const [min, max] = summonLevelRange(star);
   const level = randInt(rng, min, max);
   const cap = collectionCap(save);
   const atCap = save.units.length >= cap;
-  const spent = { ...save, spins: save.spins - 1 };
+  const spent = { ...save, spins: save.spins - cost };
   if (atCap) {
     const after = bump(spent, 'summons');
     const piece = rollSummonPiece(rng);
@@ -226,4 +228,10 @@ export function summonGolden(save: SaveData, count: typeof GOLDEN_ONE | typeof T
     { current: initial, units: [] },
   );
   return { save: result.current, units: result.units, pieces: [] };
+}
+
+/** A free pull of one chosen fighter (event shop): normal star odds up to its summon cap, no spin spent. */
+export function summonFamily(save: SaveData, familyId: string, rng: Rng = defaultRng): Pull {
+  const star = pickWeighted(rng, starOptions(summonStarCap(save, familyId)), starWeight);
+  return give(save, familyId, star, rng, false, false, 0);
 }

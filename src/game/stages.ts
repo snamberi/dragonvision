@@ -62,6 +62,8 @@ export interface Stage {
   weather?: Weather;
   /** Timed fights end after this many rounds. */
   roundLimit?: number;
+  /** Arena to fight in, when it isn't the chapter's (events). */
+  arenaId?: string;
 }
 
 /**

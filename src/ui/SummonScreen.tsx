@@ -9,6 +9,7 @@ import { ItemIcon } from './ItemIcon';
 import { orbs } from './format';
 import { spinPrice, FATE_MAX, FATE_RAGE_THRESHOLD } from '../game/balance';
 import { buyGoldenOrbs, focusPityLeft, GOLDEN_ORB_PRICE, goldenSummonOdds, summonGolden, buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
+import { FEATURED_MULTIPLIER, currentEvent, eventTimeLeft, formatTimeLeft } from '../game/events';
 import { collectionCap } from '../game/upgrades';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
@@ -97,6 +98,12 @@ export function SummonScreen({ save, update, onBack }: Props) {
         <div className="summon-banners" role="group" aria-label="Summoning pool">
           {(['normal','golden'] as const).map(b=><button key={b} className={`banner-tab ${banner===b?'selected':''} ${b}`} aria-pressed={banner===b} disabled={spinning} onClick={()=>{setBanner(b);setShowAll(false);setResults([]);setPieces([]);setRevealed(0);setPhase('idle')}}><ItemIcon icon={b==='golden'?'goldenOrb':'spinOrb'} size={42}/><span><b>{b==='golden'?'GOLDEN':'NORMAL'}</b><small>{b==='golden'?'10 exclusive fighters · 60 gems / orb':`${FAMILIES.length} fighters · Spin Orbs`}</small></span></button>)}
         </div>
+        {!golden && (
+          <div className="featured-banner">
+            <Sprite familyId={currentEvent().featured} star={Math.max(1, summonStarCap(save, currentEvent().featured) - 1)} size={44} />
+            <span><b>FEATURED · {currentEvent().name}</b><br />{getFamily(currentEvent().featured).name} is {FEATURED_MULTIPLIER}× more likely until the event ends ({formatTimeLeft(eventTimeLeft())}).</span>
+          </div>
+        )}
         <p className="muted">
           {golden?'Ten exclusive fighters, each with a 10% family chance. Golden Orbs are purchased separately.':'Focus a fighter in the normal pool to raise their chance.'} You can pull up to one star above your best copy. Higher stars are rarer.
         </p>

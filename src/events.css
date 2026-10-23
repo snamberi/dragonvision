@@ -1,0 +1,105 @@
+/* Day/night city and weekly events. */
+:root {
+  --event-gold: #ffd23f;
+  --event-ink: #251e38;
+  --event-panel: #2d2442;
+  --event-line: #8c7796;
+  --event-glow: #ffb02e;
+}
+
+/* --- Day/night tint over the city map (purely visual; buildings stay clickable) --- */
+.city-sky-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: background 1.2s ease, opacity 1.2s ease;
+  opacity: 0;
+}
+.city-map.time-dawn .city-sky-tint { opacity: 1; background: linear-gradient(180deg, #ff9fb066 0%, #ffd28a33 45%, transparent 100%); mix-blend-mode: soft-light; }
+.city-map.time-day .city-sky-tint { opacity: 0; }
+.city-map.time-dusk .city-sky-tint { opacity: 1; background: linear-gradient(180deg, #6b3fa866 0%, #ff8a4a40 55%, #ff8a4a1f 100%); mix-blend-mode: multiply; }
+.city-map.time-night .city-sky-tint { opacity: 1; background: radial-gradient(ellipse at 50% -20%, #3b4a9a55 0%, transparent 60%), linear-gradient(180deg, #0b0f2bcc 0%, #141a3ab3 60%, #1a1240a6 100%); mix-blend-mode: multiply; }
+
+/* Lit windows: at night buildings glow warm from inside. */
+.city-map.time-night .building-art { filter: brightness(.82) drop-shadow(0 0 6px #ffcf6a88) drop-shadow(0 0 16px #ffb02e44); }
+.city-map.time-dusk .building-art { filter: brightness(.95) drop-shadow(0 0 5px #ffcf6a55); }
+.city-map.time-night .building-name { color: #ffe6b3; text-shadow: 0 0 6px #ffb02e99, 2px 2px var(--event-ink); }
+.city-map.time-night .city-location span { text-shadow: 0 0 8px #ffd23f88, 2px 2px var(--event-ink); }
+
+/* Festival tent on the plaza. */
+.city-map .building.event-building .building-art { animation: event-sway 3.2s ease-in-out infinite; }
+.city-map .building.event-building .badge { background: var(--event-gold); color: var(--event-ink); }
+@keyframes event-sway { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .city-sky-tint { transition: none; }
+  .city-map .building.event-building .building-art { animation: none; }
+}
+
+/* --- Home banner --- */
+.home-event-banner {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(360px, calc(100% - 32px));
+  padding: 8px 14px;
+  border: 2px solid var(--event-gold);
+  background: linear-gradient(90deg, #2d2442ee, #4a2a6aee);
+  color: #fff6d8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 0 12px #ffd23f55;
+}
+.home-event-banner small { display: block; color: var(--event-gold); letter-spacing: 2px; font-size: 10px; }
+.home-event-banner strong { display: block; }
+.home-event-banner b { color: var(--event-gold); }
+
+/* --- Event screen --- */
+.event-screen { display: grid; gap: 14px; }
+.event-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  border: 2px solid var(--event-line);
+  background:
+    linear-gradient(90deg, #120c22f0 0%, #120c22c8 55%, #120c2233 100%),
+    linear-gradient(135deg, var(--event-sky-top, #2d2442), var(--event-sky-bottom, #4a2a6a));
+  color: #fff6d8;
+  text-shadow: 1px 1px #120c22;
+}
+.event-hero > *:not(.event-featured) { position: relative; z-index: 1; max-width: calc(100% - 110px); }
+@media (max-width: 700px) { .event-hero > *:not(.event-featured) { max-width: none; } }
+.event-hero h2 { margin: 2px 0 6px; }
+.event-hero p { margin: 0 0 10px; max-width: 60ch; }
+.event-hero .event-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; }
+.event-hero .event-meta b { color: var(--event-gold); }
+.event-hero .event-featured { position: absolute; right: 10px; bottom: 0; opacity: .95; }
+@media (max-width: 700px) { .event-hero .event-featured { position: static; display: block; margin-top: 8px; } }
+
+.event-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.event-stage { display: grid; gap: 4px; padding: 10px; border: 2px solid var(--event-line); background: var(--event-panel); color: #f0e6ff; }
+.event-stage.cleared { border-color: #4ade80; }
+.event-stage.boss { border-color: var(--event-gold); }
+.event-stage.locked { opacity: .55; }
+.event-stage small { color: #c9b8e8; }
+
+.event-shop { display: grid; gap: 8px; }
+.event-offer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 2px solid var(--event-line); background: var(--event-panel); color: #f0e6ff; }
+.event-offer.sold-out { opacity: .55; }
+.event-offer .event-price { color: var(--event-gold); white-space: nowrap; }
+
+/* --- Summon banner --- */
+.featured-banner { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 2px solid var(--event-gold); background: linear-gradient(90deg, #4a2a6a, #2d2442); color: #fff6d8; }
+.featured-banner b { color: var(--event-gold); }
+
+/* --- Skin picker --- */
+.skin-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.skin-picker .btn.active { outline: 2px solid var(--event-gold); }
+
+.home-event-banner.inline { position: static; width: 100%; max-width: none; margin-top: 10px; justify-content: space-between; }

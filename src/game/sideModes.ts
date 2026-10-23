@@ -6,14 +6,15 @@ import { recordWin } from './bounty';
 import { climbReward, climbStage, lastWeekBest, syncClimbWeek, winClimbFloor, BEAT_LAST_WEEK_REWARD } from './climb';
 import { applyDungeonRule, clearDungeon, dailyDungeonRule, dungeonRewards, dungeonSquad, dungeonStage } from './dungeon';
 import { RAID_GEMS_PER_PHASE, attemptRaid, raidStage } from './raid';
+import { EVENT_STAGES, currentEvent, eventStage, winEventStage } from './events';
 import { FAMILIES } from './roster';
 import type { Stage } from './stages';
 import { dayKey, hashString } from './time';
 import type { SaveData, Unit } from './types';
 
-export type SideMode = 'dungeon' | 'raid' | 'climb' | 'streak';
+export type SideMode = 'dungeon' | 'raid' | 'climb' | 'streak' | 'event';
 
-const SIDE_MODES: readonly string[] = ['dungeon', 'raid', 'climb', 'streak'];
+const SIDE_MODES: readonly string[] = ['dungeon', 'raid', 'climb', 'streak', 'event'];
 const STREAK_LEVEL_BONUS = 5;
 
 export function isSideMode(mode: string | undefined): mode is SideMode {
@@ -72,6 +73,8 @@ export function sideStage(mode: SideMode, save: SaveData, floor: number): Stage 
       return climbStage(floor);
     case 'streak':
       return streakBossStage(save);
+    case 'event':
+      return eventStage(save, floor);
   }
 }
 
@@ -116,13 +119,22 @@ export function settleSideBattle(mode: SideMode, save: SaveData, stage: Stage, b
     case 'streak':
       if (!won) return { save, lines: ['The Streak Boss is still waiting. Try again.'] };
       return { save: counted(winStreakBoss(save), true), lines: [`Guaranteed ${bestStar(save)}★ evolution shard`] };
+    case 'event': {
+      if (!won) return { save, lines: ['The event stage held. Regroup and try again.'] };
+      const ev = currentEvent();
+      const result = winEventStage(save, floor);
+      const lines = [`+${result.tokens} ${ev.currency}${result.firstClear ? ' (first clear)' : ''}`];
+      if (result.firstClear && floor === EVENT_STAGES) lines.push(`${ev.name} complete! Spend your ${ev.currency} in the event shop.`);
+      return { save: counted(result.save, stage.kind !== 'normal'), lines };
+    }
   }
 }
 
 /** The building to return to after the fight. */
-export const SIDE_MODE_HOME: Record<SideMode, 'dungeon' | 'raid' | 'climb' | 'colosseum'> = {
+export const SIDE_MODE_HOME: Record<SideMode, 'dungeon' | 'raid' | 'climb' | 'colosseum' | 'event'> = {
   dungeon: 'dungeon',
   raid: 'raid',
   climb: 'climb',
   streak: 'colosseum',
+  event: 'event',
 };

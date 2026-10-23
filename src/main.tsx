@@ -7,6 +7,7 @@ import './visuals.css';
 import './home.css';
 import './upgrade.css';
 import './areas.css';
+import './events.css';
 import { App } from './ui/App';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 

@@ -8,6 +8,7 @@ import { expeditionDone } from '../game/expedition';
 import { fortuneReady } from '../game/fortune';
 import { spareUnits } from '../game/fusion';
 import { dayKey } from '../game/time';
+import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 import type { SaveData } from '../game/types';
 
 /** The Shop has stock you haven't bought from today. */
@@ -15,15 +16,42 @@ function marketFresh(save: SaveData): boolean {
   return save.market.day !== dayKey() || save.market.bought.length === 0;
 }
 
-export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall' | 'upgrades' | 'dungeon' | 'raid' | 'climb' | 'journal';
+export type Building = 'shop' | 'summon' | 'dojo' | 'fusion' | 'gravity' | 'port' | 'bounty' | 'fortune' | 'tower' | 'armory' | 'colosseum' | 'gate' | 'hall' | 'upgrades' | 'dungeon' | 'raid' | 'climb' | 'journal' | 'event';
 
 interface Props {
   save: SaveData;
   onOpen: (building: Building) => void;
 }
 
+export type DayPhase = 'dawn' | 'day' | 'dusk' | 'night';
+
+const DAWN_HOUR = 5;
+const DAY_HOUR = 8;
+const DUSK_HOUR = 17;
+const NIGHT_HOUR = 20;
+const PHASE_REFRESH_MS = 300_000;
+
+/** The city's light follows the player's own clock. */
+export function dayPhase(hour: number): DayPhase {
+  if (hour >= NIGHT_HOUR || hour < DAWN_HOUR) return 'night';
+  if (hour < DAY_HOUR) return 'dawn';
+  return hour < DUSK_HOUR ? 'day' : 'dusk';
+}
+
+function useDayPhase(): DayPhase {
+  const [phase, setPhase] = useState(() => dayPhase(new Date().getHours()));
+  useEffect(() => {
+    const timer = setInterval(() => setPhase(dayPhase(new Date().getHours())), PHASE_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, []);
+  return phase;
+}
+
 export function CityScreen({ save, onOpen }: Props) {
   const now = Date.now();
+  const phase = useDayPhase();
+  const ev = currentEvent();
+  const evProgress = eventProgress(save);
   const dojoReady = save.dojo.reduce((sum, slot) => sum + dojoProgress(save, slot, now).ready, 0);
   const spares = spareUnits(save).length;
   const tripsBack = save.expeditions.filter((e) => expeditionDone(e, now)).length;
@@ -56,6 +84,7 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'raid', name: 'Boss Raid', art: colosseumUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage/1000).toFixed(0)}K` : undefined },
     { id: 'climb', name: 'Infinite Climb', art: towerUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
     { id: 'journal', name: "Collector's Journal", art: hallUrl() },
+    { id: 'event', name: ev.name, art: tentUrl(), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
   ];
 
   const layout = useCityLayout();
@@ -63,8 +92,9 @@ export function CityScreen({ save, onOpen }: Props) {
 
   return (
     <div className="city">
-      <div className={`city-map ${layout.id}`} style={{ aspectRatio: `${layout.w} / ${layout.h}` }}>
+      <div className={`city-map ${layout.id} time-${phase}`} data-phase={phase} style={{ aspectRatio: `${layout.w} / ${layout.h}` }}>
         <CityGround layout={layout} />
+        <div className="city-sky-tint" aria-hidden="true" />
         <div className="city-location">
           <span>VISION CITY</span>
           <small>THE HIGHLAND SANCTUARY</small>
@@ -76,7 +106,7 @@ export function CityScreen({ save, onOpen }: Props) {
             <button
               key={b.id}
               data-building={b.id}
-              className={`building ${b.badge ? 'ready' : ''} ${plot.id === 'summon' ? 'main' : ''}`}
+              className={`building ${b.badge ? 'ready' : ''} ${plot.id === 'summon' ? 'main' : ''} ${plot.id === 'event' ? 'event-building' : ''}`}
               style={{ left: `${(plot.x / layout.w) * 100}%`, top: `${((plot.y - SPUR) / layout.h) * 100}%`, width: `${(layout.plotW / layout.w) * 100}%` }}
               onClick={() => onOpen(b.id)}
             >
@@ -143,6 +173,7 @@ const WIDE: Layout = {
     { id: 'raid', x: 450, y: 940 },
     { id: 'climb', x: 700, y: 940 },
     { id: 'journal', x: 950, y: 940 },
+    { id: 'event', x: 625, y: 500 },
   ],
   roads: [
     [[110, 270], [1110, 270]],
@@ -166,7 +197,7 @@ const TALL_ROWS: [Building, Building | null][] = [
   ['hall', 'colosseum'],
   ['tower', 'gate'],
   ['bounty', 'port'],
-  ['upgrades', null],
+  ['upgrades', 'event'],
   ['dungeon', 'raid'],
   ['climb', 'journal'],
 ];

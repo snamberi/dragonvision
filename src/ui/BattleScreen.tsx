@@ -31,6 +31,7 @@ import { recordWin } from '../game/bounty';
 import { unitBonus } from '../game/fighterBonus';
 import { teamSlots } from '../game/progression';
 import { ARENAS } from '../game/arenas';
+import { equippedSkin } from '../game/skins';
 import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
 import { bossStage, recordBossAttempt } from '../game/worldBoss';
 import { type SideMode, isSideMode, prepareSideBattle, settleSideBattle, sideSquad, sideStage } from '../game/sideModes';
@@ -124,8 +125,8 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const [bossDamage, setBossDamage] = useState<number | null>(null);
   const [survivalDone, setSurvivalDone] = useState<number | null>(null);
   const arena = useMemo(
-    () => (mode === 'boss' || mode === 'raid' || mode === 'streak' ? ARENAS.demon : mode === 'survival' || mode === 'dungeon' ? ARENAS.void : arenaForStage(towerFloor ? 10 + towerFloor * 12 : stage.number)),
-    [mode, stage.number, towerFloor],
+    () => (stage.arenaId && ARENAS[stage.arenaId] ? ARENAS[stage.arenaId] : mode === 'boss' || mode === 'raid' || mode === 'streak' ? ARENAS.demon : mode === 'survival' || mode === 'dungeon' ? ARENAS.void : arenaForStage(towerFloor ? 10 + towerFloor * 12 : stage.number)),
+    [mode, stage.number, stage.arenaId, towerFloor],
   );
   const [battle, setBattle] = useState<BattleState>(() => {
     const state = createBattle(squad, stage, { bonusFor: (u) => unitBonus(save, u) });
@@ -402,7 +403,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
             {busy && (phase === 'impact' || phase === 'recover') && event?.data.hits.some(h => h.targetId === f.id && h.kind === 'damage') && <span key={`impact-${event.id}`} className={`impact-burst ${bigAction?'impact-major':'impact-minor'}`} aria-hidden="true" />}
             {busy && event?.data.actorId === f.id && (event.data.kind === 'charge' || phase === 'anticipation' && bigAction) && <span className="charge-aura" aria-hidden="true" />}
             <span className="unit-shadow" aria-hidden="true" />
-            <Sprite familyId={f.familyId} star={f.star} size={f.rank === 'boss' ? 132 : 104} flip={f.side === 'enemy'} pose={poseFor(f)} animated={f.hp > 0} />
+            <Sprite familyId={f.familyId} star={f.star} skinId={f.side === 'player' ? equippedSkin(save, f.familyId) : undefined} size={f.rank === 'boss' ? 132 : 104} flip={f.side === 'enemy'} pose={poseFor(f)} animated={f.hp > 0} />
             <span className="unit-tags">
               {f.role === 'Tank' && f.row === 'front' && f.hp > 0 && <span className="status taunt">TAUNT</span>}
               {actor && aimingAtEnemies && targetIds.has(f.id) && classEdge(actor.role, f.role) !== 'neutral' && (

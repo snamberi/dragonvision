@@ -220,6 +220,10 @@ export interface SaveData {
   equippedRelic?: string | null;
   /** Owned skin ids. */
   ownedSkins?: string[];
+  /** Skin worn by each fighter family (familyId → skin id). */
+  skinsEquipped?: Record<string, string>;
+  /** This week's event: progress, currency and shop purchases. */
+  event?: EventProgress;
   /** Active Wanted Posters (up to 3 at a time). */
   wantedPosters?: WantedPoster[];
   /** Best floor reached in Infinite Climb this week. */
@@ -325,4 +329,13 @@ export interface BountyPeriod {
 export interface BountyState {
   daily: BountyPeriod | null;
   weekly: BountyPeriod | null;
+}
+
+export interface EventProgress {
+  week: string;
+  /** Highest event stage cleared this week. */
+  cleared: number;
+  currency: number;
+  /** Shop purchases this week by offer id. */
+  bought: Record<string, number>;
 }
