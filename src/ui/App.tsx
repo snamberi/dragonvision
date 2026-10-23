@@ -9,6 +9,7 @@ import { loadSave, writeSave } from '../game/save';
 import { loginReady } from '../game/login';
 import type { SaveData } from '../game/types';
 import { BattleScreen } from './BattleScreen';
+import { type SideMode, SIDE_MODE_HOME, isSideMode } from '../game/sideModes';
 import { type Building, CityScreen } from './CityScreen';
 import { ArmoryScreen } from './ArmoryScreen';
 import { ColosseumScreen } from './ColosseumScreen';
@@ -54,7 +55,7 @@ const TAB_SHORT: Partial<Record<Tab, string>> = { inventory: 'Items' };
 
 type View =
   | { kind: 'tab'; tab: Tab }
-  | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number; mode?: 'boss' | 'survival' }
+  | { kind: 'battle'; stage: number; run: Run; seq: number; towerFloor?: number; mode?: 'boss' | 'survival' | SideMode }
   | { kind: 'fighter'; uid: string }
   | { kind: 'building'; building: Building };
 
@@ -195,7 +196,9 @@ export function App() {
             update={update}
             onExit={() =>
               setView(
-                view.towerFloor
+                isSideMode(view.mode)
+                  ? { kind: 'building', building: SIDE_MODE_HOME[view.mode] }
+                  : view.towerFloor
                   ? { kind: 'building', building: 'tower' }
                   : view.mode === 'boss'
                     ? { kind: 'building', building: 'colosseum' }
@@ -235,6 +238,7 @@ export function App() {
               update={update}
               onBack={toCity}
               onFight={() => setView({ kind: 'battle', stage: 0, mode: 'boss', run: newRun('single'), seq: Date.now() })}
+              onStreak={() => setView({ kind: 'battle', stage: 0, mode: 'streak', run: newRun('single'), seq: Date.now() })}
             />
           ) : view.building === 'gate' ? (
             <SurvivalScreen
@@ -251,15 +255,15 @@ export function App() {
           ) : view.building === 'upgrades' ? (
             <UpgradesHouseScreen save={save} update={update} onBack={toCity} />
           ) : view.building === 'dungeon' ? (
-            <DungeonScreen save={save} update={update} onBack={toCity} />
+            <DungeonScreen save={save} update={update} onBack={toCity} onFight={() => setView({ kind: 'battle', stage: 0, mode: 'dungeon', run: newRun('single'), seq: Date.now() })} />
           ) : view.building === 'raid' ? (
-            <RaidScreen save={save} update={update} onBack={toCity} />
+            <RaidScreen save={save} onBack={toCity} onFight={() => setView({ kind: 'battle', stage: 0, mode: 'raid', run: newRun('single'), seq: Date.now() })} />
           ) : view.building === 'climb' ? (
             <ClimbScreen
               save={save}
               update={update}
               onBack={toCity}
-              onChallenge={(floor) => setView({ kind: 'battle', stage: floor, run: newRun('single'), seq: Date.now() })}
+              onChallenge={(floor) => setView({ kind: 'battle', stage: floor, mode: 'climb', run: newRun('single'), seq: Date.now() })}
             />
           ) : view.building === 'journal' ? (
             <JournalScreen save={save} update={update} onBack={toCity} />
