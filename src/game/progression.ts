@@ -91,7 +91,8 @@ export function newSave(): SaveData {
     login: { day: '', claims: 0 },
     pieces: {},
     materials: { refreshTicket: 0, respecScroll: 0, transcendenceCrystal: 0, sigMaterial: 0, relicShard: 0, dungeonKey: 0 },
-    market: { day: '', refreshes: 0, bought: [] },
+    market: { day: '', refreshes: 0, bought: [], ticketsBought: 0 },
+    focusPity: 0,
     pityPulls: 0,
   };
 }

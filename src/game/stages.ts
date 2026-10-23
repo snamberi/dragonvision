@@ -1,4 +1,6 @@
 import {
+  DAILY_BOOST_MULT,
+  DAILY_BOOST_WINS,
   ESSENCE_PER_BOSS,
   GEMS_BOSS,
   GEMS_MINI_BOSS,
@@ -26,6 +28,7 @@ import { type Weather, arenaForStage } from './arenas';
 import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
 import { FAMILIES, type Role, roleFor } from './roster';
 import { type Rng, defaultRng, seededRng } from './rng';
+import { dayKey } from './time';
 import type { SaveData } from './types';
 
 export type StageKind = 'normal' | 'miniBoss' | 'boss';
@@ -186,6 +189,8 @@ export interface Rewards extends MaterialReward {
   gear?: { templateId: string; rarity: Rarity };
   /** Stage bosses sometimes drop a legendary piece, on any win. */
   piece?: string;
+  /** Set when the daily boost doubled the coins; the day it counts against. */
+  boostDay?: string;
 }
 
 /** Extra gems awarded on first clear of key milestone stages to celebrate progress. */
@@ -195,7 +200,7 @@ const MILESTONE_GEMS: Record<number, number> = {
 
 /**
  * First clears pay full coins, spins (1 / 5 mini-boss / 10 boss) and gem chances.
- * Replays pay 25% of the coins and nothing else.
+ * Replays pay REPLAY_COIN_SHARE of the coins and nothing else.
  */
 export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defaultRng): Rewards {
   const stage = getStage(stageNumber);
@@ -230,7 +235,23 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
   return rewards;
 }
 
+/** Story wins left today that still pay double coins. */
+export function dailyBoostLeft(save: SaveData, day = dayKey()): number {
+  const used = save.dailyBoost?.day === day ? save.dailyBoost.wins : 0;
+  return Math.max(0, DAILY_BOOST_WINS - used);
+}
+
+/** Doubles the coins of the first few story wins each day, first clears and replays alike. */
+export function withDailyBoost(save: SaveData, rewards: Rewards, day = dayKey()): Rewards {
+  if (dailyBoostLeft(save, day) === 0) return rewards;
+  return { ...rewards, coins: rewards.coins * DAILY_BOOST_MULT, boostDay: day };
+}
+
 export function applyRewards(save: SaveData, stageNumber: number, rewards: Rewards): SaveData {
+  if (rewards.boostDay) {
+    const wins = save.dailyBoost?.day === rewards.boostDay ? save.dailyBoost.wins : 0;
+    save = { ...save, dailyBoost: { day: rewards.boostDay, wins: wins + 1 } };
+  }
   if (rewards.gear) save = addItem(save, rewards.gear.templateId, rewards.gear.rarity).save;
   if (rewards.piece) save = addPieces(save, rewards.piece);
   save = grantMaterials(save, rewards);

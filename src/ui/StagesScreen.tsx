@@ -2,7 +2,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { REPLAY_COIN_SHARE, STAGES_PER_CHAPTER, TOTAL_STAGES, WALL_STAGES, enemyStrengthForStage, isWallStage } from '../game/balance';
 import { WEATHER_TEXT, arenaForChapter } from '../game/arenas';
 import { power, teamUnits, unitName } from '../game/progression';
-import { CHAPTER_NAMES, getStage, isUnlocked, stageKind } from '../game/stages';
+import { CHAPTER_NAMES, dailyBoostLeft, getStage, isUnlocked, stageKind } from '../game/stages';
 import { CHAPTER_SCENES, markScene, sceneSeen } from '../game/story';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -262,6 +262,9 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
             </>
           )}
         </div>
+        {dailyBoostLeft(save) > 0 && (
+          <div className="muted small-text">Daily boost: your next {dailyBoostLeft(save)} story win{dailyBoostLeft(save) === 1 ? '' : 's'} today pay ×2 coins.</div>
+        )}
         <div className="button-row">
           <button className="btn primary big" onClick={() => onPlay(stageNumber)}>
             {replay ? 'Replay' : 'Fight'} with {team.length} fighter{team.length === 1 ? '' : 's'}

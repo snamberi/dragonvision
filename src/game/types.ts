@@ -164,7 +164,11 @@ export interface SaveData {
   pieces: Record<string, number>;
   materials: Record<MaterialId, number>;
   /** The Shop's daily stock (the Armory keeps its own in `shop`). */
-  market: { day: string; refreshes: number; bought: number[] };
+  market: { day: string; refreshes: number; bought: number[]; ticketsBought?: number };
+  /** Pulls with a focus set since the last guaranteed best-star copy. */
+  focusPity?: number;
+  /** Story wins today that already paid double coins. */
+  dailyBoost?: { day: string; wins: number };
   /** Legacy pity counter; migrated to `fate` on first load. */
   pityPulls?: number;
   /** Dragon Fate bar (0–100). Rises each pull; Dragon Rage guaranteed Rare+ at ≥56. */

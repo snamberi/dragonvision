@@ -1,5 +1,5 @@
 // The Shop: six random offers and one legendary offer a day, refreshed at midnight or for gems / a Refresh Ticket.
-import { SHARD_PRICE_BASE, SHARD_PRICE_GROWTH, spinPrice, stageCoinReward } from './balance';
+import { MARKET_TICKETS_PER_DAY, SHARD_PRICE_BASE, SHARD_PRICE_GROWTH, spinPrice, stageCoinReward } from './balance';
 import { RARITIES, type Rarity, SHOP_REFRESH_GEMS, TEMPLATES, addItem, rollRarity } from './gear';
 import { addPieces, randomLegendId } from './legendary';
 import { type Rng, seededRng } from './rng';
@@ -66,14 +66,26 @@ function legendaryOffer(rng: Rng): MarketOffer {
   return { good: { kind: 'gear', templateId: template.id, rarity: 'legendary' }, coins: 0, gems: 100, legendary: true };
 }
 
+export function ticketsLeftToday(save: SaveData, day = dayKey()): number {
+  const bought = save.market.day === day ? (save.market.ticketsBought ?? 0) : 0;
+  return Math.max(0, MARKET_TICKETS_PER_DAY - bought);
+}
+
+/** Once today's ticket cap is reached, ticket offers become Respec Scrolls at the same price. */
+function capTickets(offer: MarketOffer, capped: boolean): MarketOffer {
+  if (!capped || offer.good.kind !== 'material' || offer.good.id !== 'refreshTicket') return offer;
+  return { ...offer, good: { ...offer.good, id: 'respecScroll' } };
+}
+
 export function marketStock(save: SaveData, day = dayKey()): MarketOffer[] {
   const rng = seededRng(hashString(`market:${day}:${save.market.refreshes}`));
-  const offers = Array.from({ length: MARKET_RANDOM }, () => randomOffer(save, rng));
+  const capped = ticketsLeftToday(save, day) === 0;
+  const offers = Array.from({ length: MARKET_RANDOM }, () => capTickets(randomOffer(save, rng), capped));
   return [...offers, legendaryOffer(rng)];
 }
 
 export function syncMarket(save: SaveData, day = dayKey()): SaveData {
-  return save.market.day === day ? save : { ...save, market: { day, refreshes: 0, bought: [] } };
+  return save.market.day === day ? save : { ...save, market: { day, refreshes: 0, bought: [], ticketsBought: 0 } };
 }
 
 export function grantGood(save: SaveData, good: MarketGood): SaveData {
@@ -100,13 +112,15 @@ export function buyMarketOffer(save: SaveData, index: number, day = dayKey()): S
   if (synced.gems < offer.gems) throw new Error('Not enough gems');
   const paid = { ...synced, coins: synced.coins - offer.coins, gems: synced.gems - offer.gems };
   const after = grantGood(paid, offer.good);
-  return { ...after, market: { ...after.market, bought: [...after.market.bought, index] } };
+  const ticket = offer.good.kind === 'material' && offer.good.id === 'refreshTicket' ? offer.good.count : 0;
+  const ticketsBought = (after.market.ticketsBought ?? 0) + ticket;
+  return { ...after, market: { ...after.market, bought: [...after.market.bought, index], ticketsBought } };
 }
 
 /** New stock: a Refresh Ticket if you have one, otherwise gems. */
 export function refreshMarket(save: SaveData, day = dayKey()): SaveData {
   const synced = syncMarket(save, day);
-  const market = { day, refreshes: synced.market.refreshes + 1, bought: [] };
+  const market = { ...synced.market, day, refreshes: synced.market.refreshes + 1, bought: [] };
   if (synced.materials.refreshTicket > 0) {
     return { ...synced, market, materials: { ...synced.materials, refreshTicket: synced.materials.refreshTicket - 1 } };
   }
