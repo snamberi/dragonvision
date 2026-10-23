@@ -1,4 +1,4 @@
-import { EXPEDITION_HOURS, EXPEDITION_MAX_PARTY, EXPEDITION_SLOTS, stageCoinReward } from './balance';
+import { EXPEDITION_HOURS, EXPEDITION_MAX_PARTY, EXPEDITION_SLOTS, LONG_EXPEDITION_COIN_MULT, stageCoinReward } from './balance';
 import { findUnit, isBusy } from './progression';
 import { type Rng, defaultRng } from './rng';
 import type { Expedition, SaveData } from './types';
@@ -11,7 +11,8 @@ const RISKY_REWARD_MULT = 1.5;
 /** What a party brings home; rolled once when it leaves. */
 export function rollExpedition(save: SaveData, partySize: number, hours: number, rng: Rng = defaultRng): Expedition['reward'] {
   const base = stageCoinReward(Math.max(1, save.clearedStage));
-  const coins = Math.round(base * hours * 0.5 * PARTY_FACTOR[partySize - 1]);
+  const longTrip = hours >= 8 ? LONG_EXPEDITION_COIN_MULT : 1;
+  const coins = Math.round(base * hours * 0.5 * PARTY_FACTOR[partySize - 1] * longTrip);
   const spins = (hours >= 8 ? 2 : hours >= 4 ? 1 : 0) + (partySize === EXPEDITION_MAX_PARTY && hours >= 4 ? 1 : 0);
   const gemRoll = rng();
   const gems = hours >= 8 ? (gemRoll < 0.3 ? 2 : 0) : hours >= 4 ? (gemRoll < 0.1 ? 1 : 0) : 0;

@@ -1,4 +1,4 @@
-import { FOCUS_MULTIPLIER, LUCKY_MULTIPLIER, SUMMON_STAR_DECAY, FATE_MAX, FATE_PER_PULL, FATE_RAGE_DRAIN, FATE_RAGE_THRESHOLD, LUCKY_PULL_BONUS_PER_5, LUCKY_PULL_CHANCE, LUCKY_PULL_ROLLS, RAGE_MIN_TIER, TEN_PULL_FATE_BOOST, TEN_PULL_FATE_BOOST_INDEX, TIER_RATES, spinPrice } from './balance';
+import { FOCUS_PITY_PULLS, FOCUS_MULTIPLIER, LUCKY_MULTIPLIER, SUMMON_STAR_DECAY, FATE_MAX, FATE_PER_PULL, FATE_RAGE_DRAIN, FATE_RAGE_THRESHOLD, LUCKY_PULL_BONUS_PER_5, LUCKY_PULL_CHANCE, LUCKY_PULL_ROLLS, RAGE_MIN_TIER, TEN_PULL_FATE_BOOST, TEN_PULL_FATE_BOOST_INDEX, TIER_RATES, spinPrice } from './balance';
 import { addPieces, rollSummonPiece } from './legendary';
 import { addUnit, bump, summonLevelRange } from './progression';
 import { collectionCap } from './upgrades';
@@ -97,11 +97,28 @@ export interface Pull {
   lucky: boolean;
   /** Whether Dragon Rage triggered on this pull. */
   rage: boolean;
+  /** Whether this pull was the focus pity's guaranteed best-star copy. */
+  pity?: boolean;
+}
+
+/** Pulls left until the focused family arrives at its best owned star (null with no focus). */
+export function focusPityLeft(save: SaveData): number | null {
+  if (!save.focusFamilyId) return null;
+  return Math.max(1, FOCUS_PITY_PULLS - (save.focusPity ?? 0));
 }
 
 /** Spends one spin with the Dragon Fate system. */
 export function summon(save: SaveData, rng: Rng = defaultRng, day = dayKey(), extraFate = 0): Pull {
   if (save.spins <= 0) throw new Error('No Spin Orbs left');
+
+  const focusId = save.focusFamilyId;
+  const pityCount = focusId ? (save.focusPity ?? 0) + 1 : (save.focusPity ?? 0);
+  if (focusId && pityCount >= FOCUS_PITY_PULLS) {
+    const star = Math.max(1, Math.min(summonStarCap(save, focusId), highestOwnedStar(save, focusId)));
+    const fatePity = Math.min(FATE_MAX, (save.fate ?? 0) + extraFate + FATE_PER_PULL);
+    const pull = give({ ...save, fate: fatePity, focusPity: 0, pullsSinceLastLucky: (save.pullsSinceLastLucky ?? 0) + 1 }, focusId, star, rng, false, false);
+    return { ...pull, pity: true };
+  }
 
   const fate = Math.min(FATE_MAX, (save.fate ?? 0) + extraFate);
   const rage = fate >= FATE_RAGE_THRESHOLD;
@@ -131,7 +148,7 @@ export function summon(save: SaveData, rng: Rng = defaultRng, day = dayKey(), ex
 
   const nextPullsSince = lucky ? 0 : (save.pullsSinceLastLucky ?? 0) + 1;
 
-  return give({ ...save, fate: nextFate, pullsSinceLastLucky: nextPullsSince }, family.id, star, rng, lucky, rage);
+  return give({ ...save, fate: nextFate, pullsSinceLastLucky: nextPullsSince, focusPity: pityCount }, family.id, star, rng, lucky, rage);
 }
 
 function give(save: SaveData, familyId: string, star: number, rng: Rng, lucky: boolean, rage: boolean): Pull {

@@ -8,7 +8,7 @@ import { FAMILIES, GOLDEN_FAMILIES, getFamily } from '../game/roster';
 import { ItemIcon } from './ItemIcon';
 import { orbs } from './format';
 import { spinPrice, FATE_MAX, FATE_RAGE_THRESHOLD } from '../game/balance';
-import { buyGoldenOrbs, GOLDEN_ORB_PRICE, goldenSummonOdds, summonGolden, buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
+import { buyGoldenOrbs, focusPityLeft, GOLDEN_ORB_PRICE, goldenSummonOdds, summonGolden, buySpins, luckyFamilyId, summon, summonOdds, summonStarCap, summonTen } from '../game/summon';
 import { collectionCap } from '../game/upgrades';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
@@ -118,6 +118,13 @@ export function SummonScreen({ save, update, onBack }: Props) {
               <div className="fate-bar-fill" style={{ width: `${save.fate ?? 0}%` }} />
               <div className="fate-bar-rage-mark" style={{ left: `${FATE_RAGE_THRESHOLD}%` }} />
             </div>
+            {save.focusFamilyId ? (
+              <div className="muted small-text">
+                Guaranteed best-star {getFamily(save.focusFamilyId).name} in {focusPityLeft(save)} pull{focusPityLeft(save) === 1 ? '' : 's'}
+              </div>
+            ) : (
+              <div className="muted small-text">Focus a fighter: every 100 pulls brings them at their best star.</div>
+            )}
           </div>
         )}
         {collFull && !golden ? (

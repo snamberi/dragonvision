@@ -51,6 +51,7 @@ function migrate(save: SaveData): SaveData {
     // Dragon Fate: migrate old pity counter (each PITY_THRESHOLD cycle ≈ half a Fate bar)
     fate: save.fate ?? Math.min(FATE_RAGE_THRESHOLD, Math.round(((save.pityPulls ?? 0) / PITY_THRESHOLD) * FATE_RAGE_THRESHOLD)),
     pullsSinceLastLucky: save.pullsSinceLastLucky ?? 0,
+    focusPity: save.focusPity ?? 0,
     upgrades: save.upgrades ?? undefined,
     runes: save.runes ?? [],
     runeFragments: save.runeFragments ?? 0,

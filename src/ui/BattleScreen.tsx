@@ -35,7 +35,7 @@ import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/s
 import { bossStage, recordBossAttempt } from '../game/worldBoss';
 import { classEdge, getFamily } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
-import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor } from '../game/stages';
+import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor, withDailyBoost } from '../game/stages';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { type Run, nextInRun } from './run';
@@ -227,7 +227,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
       setRewards(firstClear ? { firstClear, coins: r.coins, gems: r.gems, spins: r.spins } : { firstClear, coins: 0, gems: 0, spins: 0 });
       return;
     }
-    const earned = rewardsFor(save, stageNumber);
+    const earned = withDailyBoost(save, rewardsFor(save, stageNumber));
     update((s) => recordWin(applyRewards(s, stageNumber, earned), { firstClear: earned.firstClear, boss, flawless }));
     setRewards(earned);
     if (run.mode === 'single') return;
@@ -578,7 +578,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
             )}
             {battle.result === 'won' && rewards ? (
               <ul className="reward-list">
-                <li><PixelIcon kind="coin" /> {rewards.coins.toLocaleString()} coins</li>
+                <li><PixelIcon kind="coin" /> {rewards.coins.toLocaleString()} coins{rewards.boostDay && ' (daily ×2)'}</li>
                 {rewards.spins > 0 && <li><PixelIcon kind="orb" /> {orbs(rewards.spins)}</li>}
                 {rewards.gems > 0 && <li><PixelIcon kind="gem" /> {rewards.gems} gem{rewards.gems === 1 ? '' : 's'}</li>}
                 {rewards.piece && (

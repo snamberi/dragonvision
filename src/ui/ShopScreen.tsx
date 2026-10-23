@@ -1,7 +1,7 @@
 import { useActionFeedback } from './useActionFeedback';
 import { SHOP_REFRESH_GEMS } from '../game/gear';
 import { goodName } from '../game/items';
-import { LEGENDARY_SLOT, type MarketGood, buyMarketOffer, marketStock, refreshMarket, syncMarket } from '../game/market';
+import { LEGENDARY_SLOT, type MarketGood, buyMarketOffer, marketStock, refreshMarket, syncMarket, ticketsLeftToday } from '../game/market';
 import { getFamily } from '../game/roster';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
@@ -87,6 +87,7 @@ export function ShopScreen({ save, update: commit, onBack }: Props) {
             {tickets > 0 ? `New stock (ticket, ${tickets} left)` : <>New stock <PixelIcon kind="gem" size={16} /> {SHOP_REFRESH_GEMS}</>}
           </button>
         </div>
+        <p className="muted small-text">Refresh Tickets left to buy today: {ticketsLeftToday(save)}</p>
         <div className="shop-grid">{stock.slice(0, LEGENDARY_SLOT).map((_, i) => card(i))}</div>
       </section>
     </div>
