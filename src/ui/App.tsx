@@ -34,6 +34,7 @@ import { DungeonScreen } from './DungeonScreen';
 import { RaidScreen } from './RaidScreen';
 import { ClimbScreen } from './ClimbScreen';
 import { JournalScreen } from './JournalScreen';
+import { EventScreen } from './EventScreen';
 import { Modal } from './Modal';
 import { SettingsPanel } from './SettingsPanel';
 import { WhatsNew } from './WhatsNew';
@@ -265,6 +266,8 @@ export function App() {
               onBack={toCity}
               onChallenge={(floor) => setView({ kind: 'battle', stage: floor, mode: 'climb', run: newRun('single'), seq: Date.now() })}
             />
+          ) : view.building === 'event' ? (
+            <EventScreen save={save} update={update} onBack={toCity} onFight={(n) => setView({ kind: 'battle', stage: n, mode: 'event', run: newRun('single'), seq: Date.now() })} />
           ) : view.building === 'journal' ? (
             <JournalScreen save={save} update={update} onBack={toCity} />
           ) : (
@@ -275,7 +278,7 @@ export function App() {
             />
           )
         ) : view.tab === 'home' ? (
-          <HomeScreen save={save} update={update} onTravel={tab=>setView({kind:'tab',tab})} onUpdates={()=>setPopup('updates')}/>
+          <HomeScreen save={save} update={update} onTravel={tab=>setView({kind:'tab',tab})} onUpdates={()=>setPopup('updates')} onEvent={()=>setView({kind:'building',building:'event'})}/>
         ) : view.tab === 'city' ? (
           <CityScreen save={save} onOpen={(building) => setView({ kind: 'building', building })} />
         ) : view.tab === 'inventory' ? (

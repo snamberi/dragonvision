@@ -64,6 +64,7 @@ function migrate(save: SaveData): SaveData {
     relics: save.relics ?? [],
     equippedRelic: save.equippedRelic ?? null,
     ownedSkins: save.ownedSkins ?? [],
+    skinsEquipped: save.skinsEquipped ?? {},
     wantedPosters: save.wantedPosters ?? [],
     climbBest: save.climbBest ?? 0,
     climbWeek: save.climbWeek ?? '',

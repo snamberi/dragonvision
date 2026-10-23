@@ -1,4 +1,5 @@
 import { PixelIcon } from './PixelIcon';
+import { equipSkin, equippedSkin, skinsFor } from '../game/skins';
 import { useState } from 'react';
 import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap, starMilestoneBonus } from '../game/balance';
 import { type Bonus, describeBonus } from '../game/bonus';
@@ -96,7 +97,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
       </button>
 
       <section className="panel detail-hero">
-        <Sprite familyId={unit.familyId} star={unit.star} size={128} className={`idle ${masteryAuraClass(unit)}`} />
+        <Sprite familyId={unit.familyId} star={unit.star} skinId={equippedSkin(save, unit.familyId)} size={128} className={`idle ${masteryAuraClass(unit)}`} />
         <div className="detail-info">
           <div className="eyebrow">{family.title}</div>
           <h2>{unitName(unit)}</h2>
@@ -141,6 +142,22 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
           </p>
         )}
       </section>
+
+      {skinsFor(save, unit.familyId).length > 0 && (
+        <section className="panel">
+          <h3>Skins</h3>
+          <div className="skin-picker">
+            <button className={`btn small ${equippedSkin(save, unit.familyId) ? '' : 'active'}`} onClick={() => update((s) => equipSkin(s, unit.familyId, null))}>
+              Default
+            </button>
+            {skinsFor(save, unit.familyId).map((skin) => (
+              <button key={skin.id} className={`btn small ${equippedSkin(save, unit.familyId) === skin.id ? 'active' : ''}`} onClick={() => update((s) => equipSkin(s, unit.familyId, skin.id))}>
+                {skin.name}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="panel">
         <h3>

@@ -10,11 +10,12 @@ import { HOME_PLACES, HomeLandscape, HomeProp, HouseArt } from './HomeArt';
 import { DailyChestPanel, HousePanel, MailboxPanel, TrainingPanel, TrophyPanel } from './HomePanels';
 import { PixelIcon } from './PixelIcon';
 import { Sprite } from './Sprite';
+import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 
 type Panel='house'|'resident'|'mail'|'daily'|'training'|'trophies'|null;
-interface Props { save:SaveData;update:Updater;onTravel:(tab:Tab)=>void;onUpdates:()=>void }
+interface Props { save:SaveData;update:Updater;onTravel:(tab:Tab)=>void;onUpdates:()=>void;onEvent?:()=>void }
 
-export function HomeScreen({save,update,onTravel,onUpdates}:Props) {
+export function HomeScreen({save,update,onTravel,onUpdates,onEvent}:Props) {
   const [panel,setPanel]=useState<Panel>(null);
   const [compact,setCompact]=useState(()=>window.matchMedia('(max-width:700px)').matches);
   const [,tick]=useState(0);
@@ -50,12 +51,21 @@ export function HomeScreen({save,update,onTravel,onUpdates}:Props) {
       {spot('dummy','Training yard',<HomeProp kind="dummy"/>,()=>setPanel('training'))}
       {spot('trophy','Trophy shelf',<HomeProp kind="trophy" count={Math.min(trophies,3)}/>,()=>setPanel('trophies'),trophyReady?`${trophyReady} EARNED`:undefined)}
       {spot('sign','Vision City',<HomeProp kind="sign"/>,()=>onTravel('city'))}
+      {onEvent&&!compact&&<EventBanner save={save} onOpen={onEvent}/>}
       <div className="home-map-note"><span aria-hidden="true">✦</span> A place to rest. A world to explore.</div>
     </section>
+    {onEvent&&compact&&<EventBanner save={save} onOpen={onEvent} inline/>}
     {(panel==='house'||panel==='resident')&&<HousePanel save={save} update={update} onClose={close} selectResident={panel==='resident'}/>}
     {panel==='mail'&&<MailboxPanel save={save} update={update} onClose={close} onUpdates={()=>{close();onUpdates();}}/>}
     {panel==='daily'&&<DailyChestPanel save={save} update={update} onClose={close}/>}
     {panel==='trophies'&&<TrophyPanel save={save} update={update} onClose={close}/>}
     {panel==='training'&&<TrainingPanel resident={resident} onClose={close} onChoose={()=>setPanel('resident')}/>}
   </div>;
+}
+
+function EventBanner({save,onOpen,inline=false}:{save:SaveData;onOpen:()=>void;inline?:boolean}) {
+  const ev=currentEvent(),progress=eventProgress(save);
+  return <button className={`home-event-banner ${inline?'inline':''}`} onClick={onOpen}>
+    <span><small>WEEKLY EVENT · {formatTimeLeft(eventTimeLeft())} LEFT</small><strong>{ev.name}</strong>{progress.cleared}/{EVENT_STAGES} stages · {progress.currency} {ev.currency}</span><b>→</b>
+  </button>;
 }
