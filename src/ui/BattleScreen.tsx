@@ -33,6 +33,7 @@ import { teamSlots } from '../game/progression';
 import { ARENAS } from '../game/arenas';
 import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
 import { bossStage, recordBossAttempt } from '../game/worldBoss';
+import { type SideMode, isSideMode, prepareSideBattle, settleSideBattle, sideSquad, sideStage } from '../game/sideModes';
 import { classEdge, getFamily } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
 import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor, withDailyBoost } from '../game/stages';
@@ -52,8 +53,8 @@ interface Props {
   stageNumber: number;
   /** Set for a Rival Tower floor instead of a story stage. */
   towerFloor?: number;
-  /** World boss attempt or an Endless Survival run instead of a story stage. */
-  mode?: 'boss' | 'survival';
+  /** World boss attempt, an Endless Survival run, or a side mode instead of a story stage. */
+  mode?: 'boss' | 'survival' | SideMode;
   run: Run;
   update: Updater;
   onExit: () => void;
@@ -106,10 +107,12 @@ function fieldPosition(f: Fighter): CSSProperties {
 
 export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update, onExit, onContinue }: Props) {
   // The team and stage are fixed when the battle starts.
-  const [squad] = useState(() => teamSlots(save));
+  const [squad] = useState(() => (isSideMode(mode) ? sideSquad(mode, save, teamSlots(save)) : teamSlots(save)));
   const [wave, setWave] = useState(1);
   const [stage] = useState(() =>
-    mode === 'boss'
+    isSideMode(mode)
+      ? sideStage(mode, save, stageNumber)
+      : mode === 'boss'
       ? bossStage(save)
       : mode === 'survival'
         ? survivalWave(squad, 1)
@@ -121,12 +124,13 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const [bossDamage, setBossDamage] = useState<number | null>(null);
   const [survivalDone, setSurvivalDone] = useState<number | null>(null);
   const arena = useMemo(
-    () => (mode === 'boss' ? ARENAS.demon : mode === 'survival' ? ARENAS.void : arenaForStage(towerFloor ? 10 + towerFloor * 12 : stageNumber)),
-    [mode, stageNumber, towerFloor],
+    () => (mode === 'boss' || mode === 'raid' || mode === 'streak' ? ARENAS.demon : mode === 'survival' || mode === 'dungeon' ? ARENAS.void : arenaForStage(towerFloor ? 10 + towerFloor * 12 : stage.number)),
+    [mode, stage.number, towerFloor],
   );
-  const [battle, setBattle] = useState<BattleState>(() =>
-    createBattle(squad, stage, { bonusFor: (u) => unitBonus(save, u) }),
-  );
+  const [battle, setBattle] = useState<BattleState>(() => {
+    const state = createBattle(squad, stage, { bonusFor: (u) => unitBonus(save, u) });
+    return isSideMode(mode) ? prepareSideBattle(mode, save, state) : state;
+  });
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<'idle'|'anticipation'|'release'|'impact'|'recover'>('idle');
@@ -137,6 +141,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const [speed, setSpeed] = useState(() => (run.mode === 'single' ? loadSpeed() : Math.max(2, loadSpeed())));
   const [log, setLog] = useState<string[]>([]);
   const [rewards, setRewards] = useState<Rewards | null>(null);
+  const [sideLines, setSideLines] = useState<string[] | null>(null);
   const [runAfter, setRunAfter] = useState<{ run: Run; next?: number; stop?: string } | null>(null);
   const eventId = useRef(0);
   // Blocks a second action from a fast double tap before React re-renders.
@@ -214,6 +219,11 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
       setSurvivalDone(wave - 1);
       return;
     }
+    if (isSideMode(mode)) {
+      update((s) => settleSideBattle(mode, s, stage, battle, stageNumber).save);
+      setSideLines(settleSideBattle(mode, save, stage, battle, stageNumber).lines);
+      return;
+    }
     if (battle.result === 'lost') {
       if (run.mode !== 'single') setRunAfter({ run, stop: 'Your team was defeated.' });
       return;
@@ -240,7 +250,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     };
     const decision = nextInRun(total, stageNumber);
     setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
-  }, [busy, battle.result, battle.fighters, save, stage.kind, stageNumber, towerFloor, update, run, mode, bossStart, wave]);
+  }, [busy, battle.result, battle.fighters, save, stage, stageNumber, towerFloor, update, run, mode, bossStart, wave, battle]);
 
   // Survival: after a cleared wave, the next one starts with the same fighters and no healing.
   useEffect(() => {
@@ -539,7 +549,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
         <div className="modal-backdrop">
           <div className="modal panel result">
             <h2>
-              {mode === 'boss'
+              {mode === 'boss' || mode === 'raid'
                 ? battle.result === 'won'
                   ? 'BOSS DOWN!'
                   : 'ATTEMPT OVER'
@@ -556,6 +566,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                 {battle.result === 'timeout' ? ` before time ran out (${stage.roundLimit} rounds)` : ''}.
               </p>
             )}
+            {sideLines && sideLines.map((line) => <p key={line} className="boss-damage">{line}</p>)}
             {survivalDone !== null && (
               <p className="boss-damage">
                 Waves cleared: <b>{survivalDone}</b> · ● {survivalCoins(survivalDone).toLocaleString()}
@@ -595,7 +606,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                 {!rewards.firstClear && !towerFloor && <li className="muted">Replay reward ({Math.round(REPLAY_COIN_SHARE * 100)}% coins)</li>}
               </ul>
             ) : (
-              <p className="muted">Level up your fighters or replay earlier stages for coins.</p>
+              !sideLines && <p className="muted">Level up your fighters or replay earlier stages for coins.</p>
             )}
             {runAfter && (
               <div className="run-summary">

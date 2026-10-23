@@ -2,6 +2,14 @@ import { stageCoinReward } from './balance';
 import { TEMPLATES, addItem } from './gear';
 import { type Rng, defaultRng } from './rng';
 import { dayKey } from './time';
+
+export const STREAK_BOSS_EVERY = 7;
+export const DUNGEON_KEYS_PER_LOGIN = 1;
+
+function previousDay(day: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  return dayKey(new Date(y, m - 1, d - 1));
+}
 import type { SaveData } from './types';
 
 export interface LoginReward {
@@ -41,5 +49,12 @@ export function claimLogin(save: SaveData, rng: Rng = defaultRng, day = dayKey()
   if (!loginReady(save, day)) throw new Error('Already claimed today');
   const reward = LOGIN_TRACK[loginIndex(save)];
   const next = reward.apply(save, rng);
-  return { ...next, login: { day, claims: save.login.claims + 1 } };
+  const streak = save.login.day === previousDay(day) ? (save.login.streak ?? 0) + 1 : 1;
+  const bossReady = Boolean(save.login.bossReady) || streak % STREAK_BOSS_EVERY === 0;
+  return {
+    ...next,
+    login: { day, claims: save.login.claims + 1, streak, bossReady },
+    // Every claim also hands out a Daily Dungeon key.
+    materials: { ...next.materials, dungeonKey: next.materials.dungeonKey + DUNGEON_KEYS_PER_LOGIN },
+  };
 }

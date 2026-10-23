@@ -1,5 +1,7 @@
 import { getFamily } from '../game/roster';
 import { materialText } from '../game/materials';
+import { STREAK_BOSS_EVERY } from '../game/login';
+import { bestStar } from '../game/sideModes';
 import type { SaveData } from '../game/types';
 import { BOSS_ATTEMPTS_PER_DAY, BOSS_ROUNDS, MILESTONES, attemptsLeft, bossProgress, claimMilestone, weeklyBoss } from '../game/worldBoss';
 import type { Updater } from './App';
@@ -12,6 +14,7 @@ interface Props {
   update: Updater;
   onBack: () => void;
   onFight: () => void;
+  onStreak: () => void;
 }
 
 function rewardText(r: (typeof MILESTONES)[number]['reward']): string {
@@ -26,7 +29,7 @@ function rewardText(r: (typeof MILESTONES)[number]['reward']): string {
     .join(' · ');
 }
 
-export function ColosseumScreen({ save, update, onBack, onFight }: Props) {
+export function ColosseumScreen({ save, update, onBack, onFight, onStreak }: Props) {
   const boss = weeklyBoss(save, save.worldBoss.week);
   const family = getFamily(boss.familyId);
   const progress = bossProgress(save);
@@ -58,6 +61,17 @@ export function ColosseumScreen({ save, update, onBack, onFight }: Props) {
             {defeated ? 'Defeated this week' : left === 0 ? 'Come back tomorrow' : `Fight (${left} left today)`}
           </button>
         </div>
+      </section>
+
+      <section className="panel">
+        <h3>Streak Boss</h3>
+        <p className="muted">
+          Log in {STREAK_BOSS_EVERY} days in a row to unlock a bonus boss. Beat it for a guaranteed {bestStar(save)}★ evolution shard.
+          Current streak: <b>{save.login.streak ?? 0}</b> day{(save.login.streak ?? 0) === 1 ? '' : 's'}.
+        </p>
+        <button className="btn primary" disabled={!save.login.bossReady} onClick={onStreak}>
+          {save.login.bossReady ? 'Fight the Streak Boss' : `Unlocks at a ${STREAK_BOSS_EVERY}-day streak`}
+        </button>
       </section>
       <section className="panel">
         <h3>Rewards</h3>

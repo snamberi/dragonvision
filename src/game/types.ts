@@ -169,7 +169,14 @@ export interface SaveData {
   /** Every form ever owned, as "familyId:formIndex". */
   seenForms: string[];
   /** Daily login track: last day claimed and how many days claimed in total. */
-  login: { day: string; claims: number };
+  login: {
+    day: string;
+    claims: number;
+    /** Consecutive days claimed, ending on `day`. */
+    streak?: number;
+    /** A Streak Boss fight is waiting (unlocked every 7th consecutive day). */
+    bossReady?: boolean;
+  };
   /** Legendary fighter pieces by family id; 10 make the fighter. */
   pieces: Record<string, number>;
   materials: Record<MaterialId, number>;
@@ -219,6 +226,8 @@ export interface SaveData {
   climbBest?: number;
   /** Week key for Infinite Climb leaderboard ("2026-W43"). */
   climbWeek?: string;
+  /** Best floor of each past week, oldest first (last 8 weeks). */
+  climbHistory?: { week: string; best: number }[];
   /** Collector's Journal: completed family chains (familyId → true). */
   journalComplete?: Record<string, boolean>;
 }
@@ -279,6 +288,10 @@ export interface RaidState {
   totalDamage: number;
   /** Phases already cleared this week. */
   clearedPhases: number[];
+  /** This week's boss HP pool, fixed at the first attempt. */
+  pool?: number;
+  attemptsDay?: string;
+  attemptsCount?: number;
 }
 
 export interface Counters {
