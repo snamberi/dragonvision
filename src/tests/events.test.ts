@@ -139,3 +139,21 @@ describe('featured summon rate-up', () => {
     expect(chance(dayKey(WEEK_A))).toBeGreaterThan(chance(dayKey(other.week)) * 2);
   });
 });
+
+describe('event replay cap', () => {
+  it('stops paying replay currency after the daily cap, but first clears still pay', async () => {
+    const { EVENT_REPLAY_DAILY_CAP, winEventStage, replayTokensLeft } = await import('../game/events');
+    const { newSave } = await import('../game/progression');
+    const now = new Date(2026, 9, 21, 12);
+    let save = winEventStage({ ...newSave(), clearedStage: 50 }, 1, now).save;
+    const earned = () => save.event!.currency;
+    const afterFirst = earned();
+    for (let i = 0; i < 40; i++) save = winEventStage(save, 1, now).save;
+    expect(earned() - afterFirst).toBe(EVENT_REPLAY_DAILY_CAP);
+    expect(replayTokensLeft(save, now)).toBe(0);
+    const before = earned();
+    save = winEventStage(save, 2, now).save;
+    expect(earned()).toBeGreaterThan(before);
+    expect(replayTokensLeft(save, new Date(2026, 9, 22, 12))).toBe(EVENT_REPLAY_DAILY_CAP);
+  });
+});

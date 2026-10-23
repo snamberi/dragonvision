@@ -349,4 +349,7 @@ export interface EventProgress {
   currency: number;
   /** Shop purchases this week by offer id. */
   bought: Record<string, number>;
+  /** Replay currency earned on `replayDay`, capped by EVENT_REPLAY_DAILY_CAP. */
+  replayDay?: string;
+  replayEarned?: number;
 }

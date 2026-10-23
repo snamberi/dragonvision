@@ -1,6 +1,6 @@
 import { type CSSProperties, useState } from 'react';
 import { ARENAS, WEATHER_TEXT } from '../game/arenas';
-import { EVENT_STAGES, currentEvent, eventProgress, eventStageUnlocked, eventTimeLeft, eventTokens, formatTimeLeft, introSceneKey } from '../game/events';
+import { EVENT_STAGES, currentEvent, eventProgress, eventStageUnlocked, eventTimeLeft, eventTokens, formatTimeLeft, introSceneKey, replayTokensLeft, EVENT_REPLAY_DAILY_CAP } from '../game/events';
 import { buyEventOffer, eventOffers, offerLeft } from '../game/eventShop';
 import { getFamily } from '../game/roster';
 import { markScene, sceneSeen } from '../game/story';
@@ -75,6 +75,7 @@ export function EventScreen({ save, update: commit, onBack, onFight }: Props) {
 
       <section className="panel">
         <h3>Event chapter · {progress.cleared}/{EVENT_STAGES} cleared</h3>
+        <p className="muted small-text">Replay {ev.currency} left today: {replayTokensLeft(save)}/{EVENT_REPLAY_DAILY_CAP}</p>
         <div className="event-stages">
           {Array.from({ length: EVENT_STAGES }, (_, i) => i + 1).map((n) => {
             const cleared = n <= progress.cleared;

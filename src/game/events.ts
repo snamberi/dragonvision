@@ -6,7 +6,7 @@ import { FAMILIES } from './roster';
 import { seededRng } from './rng';
 import type { EnemySpec, Stage, StageKind } from './stages';
 import type { Line } from './story';
-import { hashString, weekKey } from './time';
+import { dayKey, hashString, weekKey } from './time';
 import type { EventProgress, SaveData } from './types';
 
 export type { EventProgress };
@@ -250,14 +250,26 @@ export function eventTokens(n: number, firstClear: boolean): number {
   return firstClear ? FIRST_CLEAR_BASE + FIRST_CLEAR_PER_STAGE * n : REPLAY_TOKENS;
 }
 
+/** Replays stop paying currency after this much in a day; first clears always pay. */
+export const EVENT_REPLAY_DAILY_CAP = 100;
+
+export function replayTokensLeft(save: SaveData, now = new Date()): number {
+  const progress = eventProgress(save, now);
+  const earned = progress.replayDay === dayKey(now) ? (progress.replayEarned ?? 0) : 0;
+  return Math.max(0, EVENT_REPLAY_DAILY_CAP - earned);
+}
+
 export function winEventStage(save: SaveData, n: number, now = new Date()): { save: SaveData; tokens: number; firstClear: boolean } {
   if (!eventStageUnlocked(save, n, now)) throw new Error('That event stage is locked');
   const synced = syncEvent(save, now);
   const progress = synced.event!;
   const firstClear = n > progress.cleared;
-  const tokens = eventTokens(n, firstClear);
+  const tokens = firstClear ? eventTokens(n, true) : Math.min(eventTokens(n, false), replayTokensLeft(synced, now));
+  const day = dayKey(now);
+  const replayEarned = firstClear ? progress.replayEarned : (progress.replayDay === day ? (progress.replayEarned ?? 0) : 0) + tokens;
+  const replayDay = firstClear ? progress.replayDay : day;
   return {
-    save: { ...synced, event: { ...progress, cleared: Math.max(progress.cleared, n), currency: progress.currency + tokens } },
+    save: { ...synced, event: { ...progress, cleared: Math.max(progress.cleared, n), currency: progress.currency + tokens, replayDay, replayEarned } },
     tokens,
     firstClear,
   };
