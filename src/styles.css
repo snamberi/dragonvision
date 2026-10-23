@@ -3039,3 +3039,33 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 .rune-inventory { margin-top:12px; }
 .rune-inventory h4 { margin:0 0 6px; font-size:16px; }
 .rune-card.owned { opacity:.85; }
+
+/* Evolve call-to-action when a fighter sits at its level wall. */
+.btn.glow {
+  box-shadow: 0 0 0 2px var(--orange), 0 0 14px 2px var(--orange);
+  animation: glow-pulse 1.6s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  50% { box-shadow: 0 0 0 2px var(--orange), 0 0 22px 6px var(--orange); }
+}
+.level-wall .btn { margin-top: 6px; }
+
+/* Fighter mastery: progress bar and cosmetic aura tiers. */
+.mastery-bar {
+  height: 8px;
+  background: var(--bg-2);
+  border: 1px solid #ffffff22;
+}
+.mastery-bar i { display: block; height: 100%; background: var(--orange); }
+.sprite.mastery-aura, .mastery-aura .sprite { filter: drop-shadow(0 0 3px #7fd4ff88); }
+.sprite.mastery-aura-2, .mastery-aura-2 .sprite { filter: drop-shadow(0 0 5px #7fd4ffaa); }
+.sprite.mastery-aura-3, .mastery-aura-3 .sprite { filter: drop-shadow(0 0 6px #b98cffbb); }
+.sprite.mastery-aura-4, .mastery-aura-4 .sprite { filter: drop-shadow(0 0 8px #ffcc55cc); }
+.sprite.mastery-aura-5, .mastery-aura-5 .sprite { filter: drop-shadow(0 0 10px #ff7a3d) drop-shadow(0 0 4px #ffe08a); }
+
+/* Team presets */
+.preset-list { display: grid; gap: 8px; }
+.preset-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.preset-row .preset-members { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; }
+.preset-name { display: flex; gap: 6px; align-items: center; }
+.preset-name input { width: 9em; }

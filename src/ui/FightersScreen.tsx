@@ -4,6 +4,8 @@ import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
 import { TeamArena } from './TeamArena';
+import { TeamPresets } from './TeamPresets';
+import { masteryAuraClass } from '../game/mastery';
 import { collectionCap } from '../game/upgrades';
 
 interface Props {
@@ -96,6 +98,7 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
   return (
     <div className="fighters">
       <TeamArena save={save} onOpen={onOpen} onMove={(from, to) => update((s) => moveTeamMember(s, from, to))} />
+      <TeamPresets save={save} update={update} toast={toast} />
 
       <div className="section-head">
         <h2>Collection ({save.units.length}/{cap})</h2>
@@ -126,6 +129,7 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
               star={u.star}
               level={u.level}
               highlight={inTeam}
+              className={masteryAuraClass(u)}
               badge={checkEvolve(save, u.uid).ok ? 'EVOLVE' : undefined}
               notifierDot={dot}
               onClick={() => onOpen(u.uid)}

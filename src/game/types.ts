@@ -96,6 +96,14 @@ export interface Unit {
   skinId?: string;
   /** Signature upgrade tier (0 = base, max 3). */
   sigTier?: number;
+  /** Team wins this fighter took part in; sets its mastery level. */
+  mastery?: number;
+}
+
+/** A saved formation: five pads of unit ids. */
+export interface TeamPreset {
+  name: string;
+  team: (string | null)[];
 }
 
 export type GearSlotKey = 'weapon' | 'armor' | 'acc1' | 'acc2';
@@ -127,6 +135,8 @@ export interface SaveData {
    * Slots 1, 3 and 5 are the front row; slots 2 and 4 are the back row.
    */
   team: (string | null)[];
+  /** Saved formations to swap in from the team screen. */
+  teamPresets?: TeamPreset[];
   /** Highest stage cleared; the next stage is the only new one available. */
   clearedStage: number;
   focusFamilyId: string | null;

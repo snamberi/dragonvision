@@ -1,6 +1,8 @@
 import { PixelIcon } from './PixelIcon';
 import { useState } from 'react';
-import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap } from '../game/balance';
+import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap, starMilestoneBonus } from '../game/balance';
+import { type Bonus, describeBonus } from '../game/bonus';
+import { MAX_MASTERY, masteryAuraClass, masteryBonus, masteryProgress } from '../game/mastery';
 import {
   affordableLevels,
   canReset,
@@ -23,6 +25,19 @@ import { AwakeningTree } from './AwakeningTree';
 import { GearSlots } from './GearSlots';
 import { Sprite, Stars } from './Sprite';
 import { describeSpecial } from './specialText';
+
+/** Highest star that unlocks a new passive. */
+const LAST_PASSIVE_STAR = 10;
+
+function nextStarPassive(star: number): { star: number; gain: Partial<Bonus> } | null {
+  const current = starMilestoneBonus(star);
+  const next = Array.from({ length: LAST_PASSIVE_STAR }, (_, i) => i + 1).find(
+    (s) => s > star && Object.keys(starMilestoneBonus(s)).length > Object.keys(current).length,
+  );
+  if (!next) return null;
+  const gain = Object.fromEntries(Object.entries(starMilestoneBonus(next)).filter(([k]) => !(k in current)));
+  return { star: next, gain };
+}
 
 interface Props {
   save: SaveData;
@@ -69,6 +84,10 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
   };
 
   const levelButtons = [1, 10, 50].filter((n) => unit.level + n <= cap);
+  const atWall = unit.level >= cap && unit.level < MAX_LEVEL;
+  const passives = describeBonus(starMilestoneBonus(unit.star));
+  const nextPassive = nextStarPassive(unit.star);
+  const mastery = masteryProgress(unit.mastery ?? 0);
 
   return (
     <div className="detail">
@@ -77,7 +96,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
       </button>
 
       <section className="panel detail-hero">
-        <Sprite familyId={unit.familyId} star={unit.star} size={128} className="idle" />
+        <Sprite familyId={unit.familyId} star={unit.star} size={128} className={`idle ${masteryAuraClass(unit)}`} />
         <div className="detail-info">
           <div className="eyebrow">{family.title}</div>
           <h2>{unitName(unit)}</h2>
@@ -113,6 +132,34 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
         </div>
       </section>
 
+      <section className="panel">
+        <h3>Star passives</h3>
+        <p className={passives ? '' : 'muted'}>{passives || 'No star passive yet: evolve to 2★ to unlock the first one.'}</p>
+        {nextPassive && (
+          <p className="muted small-text">
+            Next at {nextPassive.star}★: {describeBonus(nextPassive.gain)}
+          </p>
+        )}
+      </section>
+
+      <section className="panel">
+        <h3>
+          Mastery <span className="muted">· level {mastery.level}/{MAX_MASTERY}</span>
+        </h3>
+        {mastery.need === null ? (
+          <p>Fully mastered. {describeBonus(masteryBonus(mastery.level))}</p>
+        ) : (
+          <>
+            <div className="mastery-bar" role="progressbar" aria-label="Mastery progress" aria-valuemin={0} aria-valuemax={mastery.need} aria-valuenow={mastery.into}>
+              <i style={{ width: `${(mastery.into / mastery.need) * 100}%` }} />
+            </div>
+            <p className="muted small-text">
+              {mastery.into}/{mastery.need} team wins to level {mastery.level + 1}: {describeBonus(masteryBonus(mastery.level + 1))}
+            </p>
+          </>
+        )}
+      </section>
+
       <GearSlots save={save} unit={unit} update={update} />
       <AwakeningTree save={save} unit={unit} update={update} />
 
@@ -122,10 +169,16 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
         </h3>
         {unit.level >= MAX_LEVEL ? (
           <p className="muted">Max level reached.</p>
-        ) : unit.level >= cap ? (
-          <p className="level-wall">
-            Level wall: {unit.star}★ fighters stop at Lv {cap}. Evolve to {unit.star + 1}★ to raise the cap to Lv {levelCap(unit.star + 1)}.
-          </p>
+        ) : atWall ? (
+          <div className="level-wall">
+            <p>
+              Level wall: {unit.star}★ fighters stop at Lv {cap}.
+            </p>
+            <button className={`btn primary ${evolve.ok ? 'glow' : ''}`} disabled={!evolve.ok} onClick={startEvolve}>
+              Evolve to raise cap (Lv {cap} → {levelCap(unit.star + 1)})
+            </button>
+            {!evolve.ok && <p className="muted small-text">Needs 2 more {unit.star}★ copies or shards (see Evolve below).</p>}
+          </div>
         ) : (
           <div className="button-row">
             {levelButtons.map((n) => {
@@ -165,7 +218,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
                 ))}
               </div>
             )}
-            <button className="btn primary" disabled={!evolve.ok} onClick={startEvolve}>
+            <button className={`btn primary ${evolve.ok && atWall ? 'glow' : ''}`} disabled={!evolve.ok} onClick={startEvolve}>
               Evolve
             </button>
           </>

@@ -1,4 +1,5 @@
 import { LEVEL_CAP_STAGE } from './balance';
+import { recordMastery } from './mastery';
 import { bump } from './progression';
 import { dayKey, weekKey } from './time';
 import { type MaterialReward, grantMaterials } from './materials';
@@ -75,9 +76,9 @@ export function claimBounty(save: SaveData, id: string): SaveData {
   };
 }
 
-/** Counts a won battle for the Bounty Board. */
+/** Counts a won battle for the Bounty Board and fighter mastery. */
 export function recordWin(save: SaveData, outcome: { firstClear: boolean; boss: boolean; flawless: boolean }): SaveData {
-  let next = bump(save, 'wins');
+  let next = bump(recordMastery(save), 'wins');
   if (outcome.firstClear) next = bump(next, 'firstClears');
   if (outcome.boss) next = bump(next, 'bossWins');
   if (outcome.boss && outcome.flawless) next = bump(next, 'flawlessBossWins');

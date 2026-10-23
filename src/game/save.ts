@@ -66,6 +66,7 @@ function migrate(save: SaveData): SaveData {
     climbBest: save.climbBest ?? 0,
     climbWeek: save.climbWeek ?? '',
     journalComplete: save.journalComplete ?? {},
+    teamPresets: save.teamPresets ?? [],
   };
 }
 
