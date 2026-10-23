@@ -4,6 +4,7 @@ import { WEATHER_TEXT, arenaForChapter } from '../game/arenas';
 import { power, teamUnits, unitName } from '../game/progression';
 import { CHAPTER_NAMES, getStage, isUnlocked, stageKind } from '../game/stages';
 import { CHAPTER_SCENES, markScene, sceneSeen } from '../game/story';
+import { TRAITS, WALL_SCENES, wallRule, wallSceneKey } from '../game/encounters';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { type Run, newRun } from './run';
@@ -41,7 +42,7 @@ export function StagesScreen({ save, update, onPlay }: Props) {
   const unlockedChapters = Math.ceil(next / STAGES_PER_CHAPTER);
   const [chapter, setChapter] = useState(unlockedChapters);
   const [selected, setSelected] = useState<number | null>(null);
-  const [story, setStory] = useState<{ stage: number; run?: Run } | null>(null);
+  const [story, setStory] = useState<{ stage: number; run?: Run; wall?: boolean } | null>(null);
   const [farmLimit, setFarmLimit] = useState<string>('10');
   const mapRef = useRef<HTMLDivElement>(null);
   const arena = arenaForChapter(chapter);
@@ -58,7 +59,9 @@ export function StagesScreen({ save, update, onPlay }: Props) {
   const play = (stageNumber: number, run?: Run) => {
     const c = Math.ceil(stageNumber / STAGES_PER_CHAPTER);
     const isOpening = stageNumber === (c - 1) * STAGES_PER_CHAPTER + 1 && stageNumber > save.clearedStage;
-    if (isOpening && !sceneSeen(save, String(c)) && CHAPTER_SCENES[c - 1]) setStory({ stage: stageNumber, run });
+    const wallIntro = WALL_SCENES[stageNumber] && stageNumber > save.clearedStage && !sceneSeen(save, wallSceneKey(stageNumber));
+    if (wallIntro) setStory({ stage: stageNumber, run, wall: true });
+    else if (isOpening && !sceneSeen(save, String(c)) && CHAPTER_SCENES[c - 1]) setStory({ stage: stageNumber, run });
     else onPlay(stageNumber, run);
   };
 
@@ -162,10 +165,15 @@ export function StagesScreen({ save, update, onPlay }: Props) {
 
       {story && (
         <StoryScene
-          title={`Chapter ${Math.ceil(story.stage / STAGES_PER_CHAPTER)} · ${CHAPTER_NAMES[Math.ceil(story.stage / STAGES_PER_CHAPTER) - 1]}`}
-          lines={CHAPTER_SCENES[Math.ceil(story.stage / STAGES_PER_CHAPTER) - 1]}
+          title={
+            story.wall
+              ? `Gate Battle · Stage ${story.stage} · ${wallRule(story.stage)?.name ?? ''}`
+              : `Chapter ${Math.ceil(story.stage / STAGES_PER_CHAPTER)} · ${CHAPTER_NAMES[Math.ceil(story.stage / STAGES_PER_CHAPTER) - 1]}`
+          }
+          lines={story.wall ? WALL_SCENES[story.stage] : CHAPTER_SCENES[Math.ceil(story.stage / STAGES_PER_CHAPTER) - 1]}
           onDone={() => {
-            update((s) => markScene(s, String(Math.ceil(story.stage / STAGES_PER_CHAPTER))));
+            const key = story.wall ? wallSceneKey(story.stage) : String(Math.ceil(story.stage / STAGES_PER_CHAPTER));
+            update((s) => markScene(s, key));
             const { stage, run } = story;
             setStory(null);
             onPlay(stage, run);
@@ -229,6 +237,16 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
             )}
             {stage.weather && stage.weather !== 'clear' && <div className="muted small-text">{WEATHER_TEXT[stage.weather]}</div>}
             <div className="muted small-text">Dominant class: <strong>{stage.dominantRole}</strong> — bring a counter</div>
+            {stage.trait && (
+              <div className="muted small-text">
+                Enemy trait: <strong>{TRAITS[stage.trait].name}</strong> — {TRAITS[stage.trait].text}
+              </div>
+            )}
+            {wallRule(stage.number) && (
+              <div className="small-text">
+                Arena rule: <strong>{wallRule(stage.number)!.name}</strong> — {wallRule(stage.number)!.text}
+              </div>
+            )}
           </div>
           <div className="power-compare">
             <span>Your team {teamPower.toLocaleString()}</span>

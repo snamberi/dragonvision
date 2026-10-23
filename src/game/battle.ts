@@ -40,6 +40,7 @@ import { bondBonus } from './bonds';
 import { signaturePower } from './signature';
 import { getTerrainEffect } from './terrain';
 import { detectFormation, formationAbility } from './formation';
+import { type EncounterMods, TRAITS, mergeMods, wallRule } from './encounters';
 
 export type Side = 'player' | 'enemy';
 export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard' | 'combo';
@@ -92,6 +93,8 @@ export interface BattleState {
   roundLimit?: number;
   result: 'ongoing' | 'won' | 'lost' | 'timeout';
   weather: Weather;
+  /** Chapter trait + wall rule for story stages. */
+  mods?: EncounterMods;
 }
 
 export type HitKind = 'damage' | 'heal' | 'revive' | 'shield' | 'stun' | 'rally' | 'resist';
@@ -145,6 +148,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
   // Side modes (labelled stages) borrow a stage number for scaling but never get its wall spike.
   const strength = stage.label ? baseEnemyStrength(stage.number) : enemyStrengthForStage(stage.number);
   const rule = stage.rule;
+  const mods = encounterMods(stage);
   const terrain = getTerrainEffect(stage.number);
   const teamFamilyIds = team.flatMap((u) => (u ? [u.familyId] : []));
   const teamUnits = team.filter((u): u is Unit => u !== null);
@@ -183,7 +187,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       def: s.def,
       spd: s.spd,
       ...FRESH,
-      ki: Math.min(KI_MAX, KI_START + bFinal.ki),
+      ki: Math.max(0, Math.min(KI_MAX, KI_START + bFinal.ki + (mods.playerKi ?? 0))),
       charge: Math.min(need, bFinal.charge),
       shield: Math.round(s.hp * bFinal.shield),
       bonus: bFinal,
@@ -198,6 +202,11 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     const hp = Math.round(s.hp * hpMul * strength * (rule === 'tough' ? 1.5 : 1));
     const pool = e.hpPool;
     const special = getFamily(e.familyId).special;
+    const place = placement(e.familyId, i);
+    const boss = e.rank !== 'minion';
+    const bonus = addBonus(addBonus(emptyBonus(), mods.enemyBonus ?? {}), boss ? (mods.bossBonus ?? {}) : {});
+    const shieldShare = (rule === 'enemyShields' ? 0.3 : 0) + (place.row === 'front' ? (mods.frontShield ?? 0) : 0);
+    const charge = rule === 'fullSpecials' ? special.charge : Math.min(special.charge, mods.enemyCharge ?? 0);
     return {
       id: `e-${i}`,
       side: 'enemy',
@@ -206,16 +215,16 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       level: e.level,
       name: unitName(e),
       rank: e.rank,
-      ...placement(e.familyId, i),
+      ...place,
       maxHp: pool ? pool.max : hp,
       hp: pool ? pool.left : hp,
-      atk: Math.round(s.atk * atkMul * strength * terrain.enemyAtkMult),
-      def: Math.round(s.def * strength * terrain.enemyDefMult),
-      spd: s.spd,
+      atk: Math.round(s.atk * atkMul * strength * terrain.enemyAtkMult * (1 + (mods.enemyAtk ?? 0))),
+      def: Math.round(s.def * strength * terrain.enemyDefMult * (1 + (mods.enemyDef ?? 0))),
+      spd: s.spd + (mods.enemySpd ?? 0),
       ...FRESH,
-      bonus: emptyBonus(),
-      charge: rule === 'fullSpecials' ? special.charge : 0,
-      shield: rule === 'enemyShields' ? Math.round(hp * 0.3) : 0,
+      bonus,
+      charge,
+      shield: Math.round(hp * shieldShare),
     };
   });
   const weather = stage.weather ?? 'clear';
@@ -225,7 +234,14 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
     ki: weather === 'snow' ? Math.max(0, f.ki - 10) : f.ki,
     charge: weather === 'stars' ? Math.min(specialNeed(f), f.charge + 1) : f.charge,
   }));
-  return { fighters, turn: 'player', round: 1, acted: [], result: 'ongoing', weather, roundLimit: stage.roundLimit };
+  const hasMods = Object.keys(mods).length > 0;
+  return { fighters, turn: 'player', round: 1, acted: [], result: 'ongoing', weather, roundLimit: stage.roundLimit, ...(hasMods && { mods }) };
+}
+
+/** Story stages carry their chapter trait and wall rule; labelled side modes get neither. */
+export function encounterMods(stage: Stage): EncounterMods {
+  if (stage.label) return {};
+  return mergeMods(stage.trait && TRAITS[stage.trait], wallRule(stage.number));
 }
 
 export function living(state: BattleState, side: Side): Fighter[] {
@@ -317,10 +333,12 @@ function damage(
   special: boolean,
   weather: Weather,
   rng: Rng,
+  mods: EncounterMods = {},
 ): { amount: number; crit: boolean } {
   const b = attacker.bonus;
   let atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1);
   if (b.lastStand && attacker.hp / attacker.maxHp < 0.3) atk *= 1 + b.lastStand;
+  if (mods.enrageBelow && attacker.side === 'enemy' && attacker.hp / attacker.maxHp < mods.enrageBelow) atk *= 1 + (mods.enrageAtk ?? 0);
   // atk / (atk + def) keeps fights the same length at every level when both sides are even.
   let base = atk * (atk / (atk + defender.def)) * 0.9 * mult;
   if (attacker.role === 'Assassin' && !wave) base *= ASSASSIN_SINGLE_BONUS;
@@ -353,8 +371,15 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
   const hits: Hit[] = [];
   const pick = (candidates: Fighter[]) => fighters.get((candidates.find((f) => f.id === action.targetId) ?? candidates[0]).id)!;
 
+  const mods = state.mods ?? {};
+  const hurt = (target: Fighter, amount: number) => {
+    const absorbed = Math.min(target.shield, amount);
+    target.shield -= absorbed;
+    target.hp -= Math.min(target.hp, amount - absorbed);
+    hits.push({ targetId: target.id, kind: 'damage', amount, crit: false, absorbed, ko: target.hp <= 0 });
+  };
   const strike = (target: Fighter, mult: number, wave = false) => {
-    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', state.weather, rng);
+    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', state.weather, rng, mods);
     self.struck = true;
     const absorbed = Math.min(target.shield, amount);
     target.shield -= absorbed;
@@ -368,13 +393,23 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       hits[hits.length - 1].ko = false;
       hits.push({ targetId: target.id, kind: 'revive', amount: target.hp, crit: false, absorbed: 0, ko: false });
     }
+    if (self.side === 'enemy' && mods.lifesteal && !mods.noHealing && dealt > 0 && self.hp > 0) restore(self, Math.round(dealt * mods.lifesteal), 'heal');
+    // Volatile: a fallen enemy bursts and hits every standing player fighter.
+    if (target.side === 'enemy' && target.hp <= 0 && mods.koBurst) {
+      const burst = Math.max(1, Math.round(target.maxHp * mods.koBurst));
+      for (const f of fighters.values()) if (f.side === 'player' && f.hp > 0) hurt(f, burst);
+    }
     return dealt;
   };
-  const restore = (target: Fighter, amount: number, kind: HitKind) => {
+  function restore(target: Fighter, amount: number, kind: HitKind) {
+    if (kind === 'heal' && mods.noHealing) {
+      hits.push({ targetId: target.id, kind: 'resist', amount: 0, crit: false, absorbed: 0, ko: false });
+      return;
+    }
     if (state.weather === 'rain' && kind === 'heal') amount = Math.round(amount * 1.2);
     target.hp = Math.min(target.maxHp, target.hp + amount);
     hits.push({ targetId: target.id, kind, amount, crit: false, absorbed: 0, ko: false });
-  };
+  }
   const allies = () => [...fighters.values()].filter((f) => f.side === actor.side && f.hp > 0);
 
   let label = '';
