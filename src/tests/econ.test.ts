@@ -81,7 +81,7 @@ describe('active play boost', () => {
     expect(eight / four).toBeCloseTo(1.6, 2);
   });
 
-  it('softens the final wall to 1.4', () => {
-    expect(WALL_STAGES[380]).toBe(1.4);
+  it('softens the final wall to 1.3', () => {
+    expect(WALL_STAGES[380]).toBe(1.3);
   });
 });

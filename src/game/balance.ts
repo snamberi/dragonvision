@@ -115,7 +115,7 @@ export function enemyStarForStage(stage: number): number {
  * Wall stages: act-gate bosses far stronger than the stages around them. Passing one takes a real
  * upgrade (an evolution, better gear, Gravity levels), not just another level-up.
  */
-export const WALL_STAGES: Record<number, number> = { 50: 1.2, 100: 1.2, 180: 1.4, 230: 1.3, 280: 1.45, 330: 1.35, 380: 1.4 };
+export const WALL_STAGES: Record<number, number> = { 50: 1.2, 100: 1.2, 180: 1.4, 230: 1.3, 280: 1.45, 330: 1.25, 380: 1.3 };
 
 export function isWallStage(stage: number): boolean {
   return stage in WALL_STAGES;
@@ -210,7 +210,7 @@ export const FOCUS_PITY_PULLS = 100;
 
 // --- Shop shards ---
 /** Most Refresh Tickets the shop sells per day, so restocks can't feed themselves. */
-export const MARKET_TICKETS_PER_DAY = 3;
+export const MARKET_TICKETS_PER_DAY = 6;
 /** Shard price = latest stage's first-clear coins × BASE × GROWTH^(star-1). */
 export const SHARD_PRICE_BASE = 0.4;
 export const SHARD_PRICE_GROWTH = 1.25;
