@@ -12,11 +12,13 @@ interface Props {
   onOpen?: (uid: string) => void;
   /** When set, fighters can be dragged (or tapped, then tapped again) onto another pad. */
   onMove?: (from: number, to: number) => void;
+  /** Shows a Remove button next to Info. */
+  onRemove?: (uid: string) => void;
   title?: string;
 }
 
 /** The team standing on its five formation pads; pads 2 and 4 are the back row. */
-export function TeamArena({ save, onOpen, onMove, title = 'Your Team' }: Props) {
+export function TeamArena({ save, onOpen, onMove, onRemove, title = 'Your Team' }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const slots = teamSlots(save);
@@ -128,6 +130,11 @@ export function TeamArena({ save, onOpen, onMove, title = 'Your Team' }: Props) 
               {onMove && onOpen && (
                 <button className="btn small hud-info" onClick={() => onOpen(u.uid)}>
                   Info
+                </button>
+              )}
+              {onRemove && (
+                <button className="btn small hud-remove" onClick={() => onRemove(u.uid)} aria-label={`Remove ${unitName(u)} from the team`}>
+                  Remove
                 </button>
               )}
             </div>

@@ -4,7 +4,9 @@ import { REPLAY_COIN_SHARE, RESET_GEM_COST, STARTING_SPINS, TOTAL_STAGES, enemyS
 import {
   addUnit,
   checkEvolve,
+  evolveAll,
   evolveUnit,
+  teamUnits,
   newSave,
   resetUnit,
   summonLevelRange,
@@ -245,5 +247,22 @@ describe('buying spins', () => {
     expect(next.coins).toBe(10_000 - 3 * spinPrice(5));
     expect(spinPrice(40)).toBeGreaterThan(spinPrice(5));
     expect(() => buySpins({ ...save, coins: 0 }, 1)).toThrow(/Not enough coins/);
+  });
+});
+
+describe('evolve all and empty teams', () => {
+  it('keeps evolving until nothing is left, team fighters first', () => {
+    let save: SaveData = newSave();
+    for (let i = 0; i < 8; i++) save = withUnit(save, 'kairo', 1, 1).save;
+    const { save: after, count } = evolveAll(save);
+    expect(count).toBe(4);
+    expect(after.units.find((u) => u.uid === 'u1')!.star).toBe(3);
+    expect(evolveAll(after).count).toBe(0);
+  });
+
+  it('lets the team go empty', () => {
+    const r = toggleTeamMember(newSave(), 'u1');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(teamUnits(r.save)).toHaveLength(0);
   });
 });

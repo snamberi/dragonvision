@@ -205,14 +205,19 @@ export function isBusy(save: SaveData, uid: string): boolean {
   return isTraining(save, uid) || isOnExpedition(save, uid);
 }
 
+function hasGear(u: Unit): boolean {
+  return Object.values(u.gear ?? {}).some(Boolean);
+}
+
 export function duplicatesFor(save: SaveData, unit: Unit): Unit[] {
   return save.units
     // Fighters training in the Dojo are never used up.
     .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !isBusy(save, u.uid))
-    // Spend the cheapest copies first: not on the team, then fewest coins invested.
+    // Spend the cheapest copies first: not on the team, no gear, then fewest coins invested.
     .sort(
       (a, b) =>
         Number(save.team.includes(a.uid)) - Number(save.team.includes(b.uid)) ||
+        Number(hasGear(a)) - Number(hasGear(b)) ||
         a.coinsSpent - b.coinsSpent ||
         a.level - b.level,
     );
@@ -265,6 +270,33 @@ export function evolveUnit(save: SaveData, uid: string): SaveData {
   );
 }
 
+/**
+ * Evolves everything it can, again and again, until nothing is left to evolve.
+ * Team fighters go first; fighters on the team or wearing gear are never used up as copies.
+ */
+export function evolveAll(save: SaveData): { save: SaveData; count: number } {
+  let current = save;
+  let count = 0;
+  for (;;) {
+    const kept = new Set(current.units.filter((u) => current.team.includes(u.uid) || hasGear(u)).map((u) => u.uid));
+    const order = [...current.units].sort(
+      (a, b) =>
+        Number(current.team.includes(b.uid)) - Number(current.team.includes(a.uid)) ||
+        Number(hasGear(b)) - Number(hasGear(a)) ||
+        b.star - a.star ||
+        b.level - a.level ||
+        b.coinsSpent - a.coinsSpent,
+    );
+    const next = order.find((u) => {
+      const check = checkEvolve(current, u.uid);
+      return check.ok && check.duplicates.every((d) => !kept.has(d.uid));
+    });
+    if (!next) return { save: current, count };
+    current = evolveUnit(current, next.uid);
+    count++;
+  }
+}
+
 // --- Team ---
 
 /** Fighters on the team in slot order, skipping empty pads. */
@@ -297,7 +329,6 @@ export type TeamToggleResult = { ok: true; save: SaveData } | { ok: false; reaso
 export function toggleTeamMember(save: SaveData, uid: string): TeamToggleResult {
   const team = Array.from({ length: MAX_TEAM_SIZE }, (_, i) => save.team[i] ?? null);
   if (team.includes(uid)) {
-    if (team.filter(Boolean).length === 1) return { ok: false, reason: 'Your team needs at least one fighter.' };
     return { ok: true, save: { ...save, team: team.map((t) => (t === uid ? null : t)) } };
   }
   const pad = team.indexOf(null);

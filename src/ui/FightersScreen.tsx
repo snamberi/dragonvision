@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { checkEvolve, evolveUnit, moveTeamMember, power, toggleTeamMember, unitName } from '../game/progression';
+import { checkEvolve, evolveAll as evolveEverything, moveTeamMember, power, toggleTeamMember, unitName } from '../game/progression';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
@@ -18,11 +18,6 @@ interface Props {
 type Sort = 'power' | 'level' | 'star' | 'name';
 
 const INITIAL_SHOWN = 10;
-
-/** Gear equipped to a unit: any slot is non-null. */
-function hasGearEquipped(unit: { gear?: Partial<Record<string, string>> }): boolean {
-  return unit.gear ? Object.values(unit.gear).some(Boolean) : false;
-}
 
 /** Any unequipped gear in inventory that could go to this unit. */
 function canEquipGear(save: SaveData, unitUid: string): boolean {
@@ -58,7 +53,11 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
 
   const cap = collectionCap(save);
 
+  // Team fighters stay pinned on top in pad order, whatever the sort.
+  const teamOrder = (uid: string) => { const i = save.team.indexOf(uid); return i < 0 ? Infinity : i; };
   const units = [...save.units].sort((a, b) => {
+    const pinned = teamOrder(a.uid) - teamOrder(b.uid);
+    if (pinned) return pinned;
     if (sort === 'name') return unitName(a).localeCompare(unitName(b)) || b.level - a.level;
     if (sort === 'level') return b.level - a.level;
     if (sort === 'star') return b.star - a.star || b.level - a.level;
@@ -72,32 +71,20 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
   };
 
   const evolveAll = () => {
-    let count = 0;
-    update((s) => {
-      let current = s;
-      for (const u of current.units) {
-        const inTeam = current.team.includes(u.uid);
-        const geared = hasGearEquipped(u);
-        if (!inTeam && !geared && checkEvolve(current, u.uid).ok) {
-          try {
-            current = evolveUnit(current, u.uid);
-            count++;
-          } catch {
-            // skip if requirements changed mid-loop
-          }
-        }
-      }
-      if (count === 0) throw new Error('No fighters can be evolved right now');
-      return current;
-    });
-    if (count > 0) toast(`Evolved ${count} fighter${count === 1 ? '' : 's'}`);
+    const result = evolveEverything(save);
+    if (result.count === 0) {
+      toast('No fighters can be evolved right now');
+      return;
+    }
+    update(() => result.save);
+    toast(`Evolved ${result.count} time${result.count === 1 ? '' : 's'}`);
   };
 
   const shown = showAll ? units : units.slice(0, INITIAL_SHOWN);
 
   return (
     <div className="fighters">
-      <TeamArena save={save} onOpen={onOpen} onMove={(from, to) => update((s) => moveTeamMember(s, from, to))} />
+      <TeamArena save={save} onOpen={onOpen} onMove={(from, to) => update((s) => moveTeamMember(s, from, to))} onRemove={toggle} />
       <TeamPresets save={save} update={update} toast={toast} />
 
       <div className="section-head">

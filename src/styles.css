@@ -864,10 +864,16 @@ div.card-open {
   letter-spacing: 1px;
 }
 
-.hud-info {
+.hud-info,
+.hud-remove {
   margin-top: 4px;
   padding: 2px 8px;
   font-size: 15px;
+}
+
+.hud-remove {
+  margin-left: 4px;
+  opacity: 0.85;
 }
 
 .arena-ghost {

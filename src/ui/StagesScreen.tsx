@@ -291,8 +291,8 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
           <div className="muted small-text">Daily boost: your next {dailyBoostLeft(save)} story win{dailyBoostLeft(save) === 1 ? '' : 's'} today pay ×2 coins.</div>
         )}
         <div className="button-row">
-          <button className="btn primary big" onClick={() => onPlay(stageNumber)}>
-            {replay ? 'Replay' : 'Fight'} with {team.length} fighter{team.length === 1 ? '' : 's'}
+          <button className="btn primary big" disabled={team.length === 0} onClick={() => onPlay(stageNumber)}>
+            {team.length === 0 ? 'Add a fighter to your team first' : `${replay ? 'Replay' : 'Fight'} with ${team.length} fighter${team.length === 1 ? '' : 's'}`}
           </button>
           <button className="btn ghost" onClick={onClose}>
             Close
