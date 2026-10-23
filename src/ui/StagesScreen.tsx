@@ -2,7 +2,8 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { REPLAY_COIN_SHARE, STAGES_PER_CHAPTER, TOTAL_STAGES, WALL_STAGES, enemyStrengthForStage, isWallStage } from '../game/balance';
 import { WEATHER_TEXT, arenaForChapter } from '../game/arenas';
 import { power, teamUnits, unitName } from '../game/progression';
-import { CHAPTER_NAMES, dailyBoostLeft, getStage, isUnlocked, stageKind } from '../game/stages';
+import { CHAPTER_NAMES, WALL_SET_REPLAY_CHANCE, dailyBoostLeft, getStage, isUnlocked, stageKind } from '../game/stages';
+import { GEAR_EFFECTS, wallSetFor } from '../game/bossSets';
 import { CHAPTER_SCENES, markScene, sceneSeen } from '../game/story';
 import { TRAITS, WALL_SCENES, wallRule, wallSceneKey } from '../game/encounters';
 import type { SaveData } from '../game/types';
@@ -245,6 +246,12 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
             {wallRule(stage.number) && (
               <div className="small-text">
                 Arena rule: <strong>{wallRule(stage.number)!.name}</strong> — {wallRule(stage.number)!.text}
+              </div>
+            )}
+            {wallSetFor(stage.number) && (
+              <div className="small-text">
+                Drops: <strong style={{ color: wallSetFor(stage.number)!.color }}>{wallSetFor(stage.number)!.name}</strong> set piece — guaranteed on the
+                first clear, {Math.round(WALL_SET_REPLAY_CHANCE * 100)}% on replays. 4 pieces: {GEAR_EFFECTS[wallSetFor(stage.number)!.effect].text}.
               </div>
             )}
           </div>

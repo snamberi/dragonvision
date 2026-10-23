@@ -108,10 +108,19 @@ export interface TeamPreset {
 
 export type GearSlotKey = 'weapon' | 'armor' | 'acc1' | 'acc2';
 
+export type GearSubStat = 'atk' | 'hp' | 'def' | 'crit' | 'spd' | 'ki' | 'specialPower' | 'heal';
+
+/** A rolled bonus stat on a gear piece; Forge Dust rerolls one. */
+export interface GearSub {
+  stat: GearSubStat;
+  value: number;
+}
+
 export interface GearItem {
   id: string;
   templateId: string;
   rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  subs?: GearSub[];
 }
 
 /** A fighter training in the Dojo since `since` (ms timestamp). */
@@ -157,6 +166,8 @@ export interface SaveData {
   towerFloor: number;
   /** Gear in the inventory (equipped or not). */
   items: GearItem[];
+  /** Salvaged gear, spent to reroll a stat. */
+  forgeDust?: number;
   nextItemId: number;
   shop: { day: string; refreshes: number; bought: number[] };
   /** Story scenes already shown (chapter numbers and "ending"). */

@@ -5,7 +5,7 @@ import type { BattleState } from './battle';
 import { recordWin } from './bounty';
 import { climbReward, climbStage, lastWeekBest, syncClimbWeek, winClimbFloor, BEAT_LAST_WEEK_REWARD } from './climb';
 import { applyDungeonRule, clearDungeon, dailyDungeonRule, dungeonRewards, dungeonSquad, dungeonStage } from './dungeon';
-import { RAID_GEMS_PER_PHASE, attemptRaid, raidStage } from './raid';
+import { RAID_GEMS_PER_PHASE, attemptRaid, raidSet, raidStage } from './raid';
 import { FAMILIES } from './roster';
 import type { Stage } from './stages';
 import { dayKey, hashString } from './time';
@@ -99,7 +99,7 @@ export function settleSideBattle(mode: SideMode, save: SaveData, stage: Stage, b
       const next = attemptRaid(save, dealt);
       const phases = (next.raid?.clearedPhases.length ?? 0) - (save.raid?.clearedPhases.length ?? 0);
       const lines = [`You dealt ${dealt.toLocaleString()} damage.`];
-      if (phases > 0) lines.push(`${phases} phase${phases === 1 ? '' : 's'} cleared · ◆ ${phases * RAID_GEMS_PER_PHASE}`);
+      if (phases > 0) lines.push(`${phases} phase${phases === 1 ? '' : 's'} cleared · ◆ ${phases * RAID_GEMS_PER_PHASE} · ${phases} ${raidSet()?.name ?? 'set'} piece${phases === 1 ? '' : 's'}`);
       return { save: counted(next, true), lines };
     }
     case 'climb': {

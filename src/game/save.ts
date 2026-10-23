@@ -35,6 +35,7 @@ function migrate(save: SaveData): SaveData {
     fortuneDay: save.fortuneDay ?? null,
     towerFloor: save.towerFloor ?? 0,
     items: save.items ?? [],
+    forgeDust: save.forgeDust ?? 0,
     nextItemId: save.nextItemId ?? 1,
     shop: save.shop ?? fresh.shop,
     seenScenes: save.seenScenes ?? [],

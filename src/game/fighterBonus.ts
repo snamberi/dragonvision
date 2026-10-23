@@ -1,6 +1,7 @@
 import { awakeningBonus } from './awakening';
 import { type Bonus, addBonus, emptyBonus } from './bonus';
-import { gearBonus } from './gear';
+import type { BattleOptions } from './battle';
+import { gearBonus, gearEffects } from './gear';
 import { gravityMultiplier } from './gravity';
 import { masteryBonus, unitMastery } from './mastery';
 import { getFamily, roleFor } from './roster';
@@ -14,4 +15,9 @@ export function unitBonus(save: SaveData, unit: Unit): Bonus {
   total = addBonus(total, awakeningBonus(unit));
   total = addBonus(total, masteryBonus(unitMastery(unit)));
   return total;
+}
+
+/** Everything createBattle needs to know about the player's fighters. */
+export function battleOptions(save: SaveData): BattleOptions {
+  return { bonusFor: (u) => unitBonus(save, u), effectsFor: (u) => gearEffects(save, u) };
 }

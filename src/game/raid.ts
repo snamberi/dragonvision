@@ -1,6 +1,10 @@
 import { MAX_LEVEL, MAX_STARS, enemyLevelForStage, enemyStarForStage } from './balance';
 import { statsFor } from './progression';
 import type { Stage } from './stages';
+import { raidSetFor } from './bossSets';
+import { addItem, rollSetPiece } from './gear';
+import { seededRng } from './rng';
+import { hashString } from './time';
 import type { RaidState, SaveData } from './types';
 
 export const RAID_PHASES = 5;
@@ -83,6 +87,21 @@ export function canRaid(save: SaveData): boolean {
   return raidAttemptsLeft(save) > 0;
 }
 
+/** The week's raid boss set. */
+export function raidSet(week = weekKey(new Date())) {
+  return raidSetFor(raidBossName(week));
+}
+
+/** Each newly cleared phase drops one piece of the week's raid set (seeded per week and phase). */
+function raidSetPieces(save: SaveData, week: string, phases: number[]): SaveData {
+  const set = raidSet(week);
+  if (!set) return save;
+  return phases.reduce((acc, phase) => {
+    const drop = rollSetPiece(set, acc.clearedStage, seededRng(hashString(`raid:${week}:${phase}`)));
+    return addItem(acc, drop.templateId, drop.rarity).save;
+  }, save);
+}
+
 /** Adds one attempt's damage; every fifth of the pool is a phase worth gems. */
 export function attemptRaid(save: SaveData, damageDealt: number, week = weekKey(new Date()), day = today()): SaveData {
   const prev = raidState(save, week);
@@ -92,8 +111,9 @@ export function attemptRaid(save: SaveData, damageDealt: number, week = weekKey(
   const prevCleared = prev?.clearedPhases ?? [];
   const newlyCleared = Array.from({ length: RAID_PHASES }, (_, i) => i + 1).filter((p) => p <= newPhase && !prevCleared.includes(p));
   const attemptsCount = prev?.attemptsDay === day ? (prev.attemptsCount ?? 0) : 0;
+  const withGear = raidSetPieces(save, week, newlyCleared);
   return {
-    ...save,
+    ...withGear,
     gems: save.gems + newlyCleared.length * RAID_GEMS_PER_PHASE,
     raid: {
       week,

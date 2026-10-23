@@ -41,6 +41,7 @@ import { signaturePower } from './signature';
 import { getTerrainEffect } from './terrain';
 import { detectFormation, formationAbility } from './formation';
 import { type EncounterMods, TRAITS, mergeMods, wallRule } from './encounters';
+import { EFFECT_NUMBERS as FX, type GearEffect } from './bossSets';
 
 export type Side = 'player' | 'enemy';
 export type ActionKind = 'attack' | 'kiBlast' | 'special' | 'charge' | 'guard' | 'combo';
@@ -81,6 +82,18 @@ export interface Fighter {
   secondWindUsed: boolean;
   /** Has landed a hit this battle (for first-strike bonuses). */
   struck: boolean;
+  /** Boss set 4-piece effects (player fighters only). */
+  effects?: GearEffect[];
+  /** Damage over time ticking at the start of this fighter's side's turn; never lethal. */
+  burn?: { turns: number; dmg: number };
+  /** Ascendant stacks. */
+  stacks?: number;
+  /** Recharge already used this battle. */
+  refundUsed?: boolean;
+}
+
+function has(f: Fighter, effect: GearEffect): boolean {
+  return f.effects?.includes(effect) ?? false;
 }
 
 export interface BattleState {
@@ -141,6 +154,8 @@ const FRESH = {
 export interface BattleOptions {
   /** Gear, Gravity and awakening bonuses for each of the player's fighters. */
   bonusFor?: (unit: Unit) => Bonus;
+  /** Boss set 4-piece effects for each of the player's fighters. */
+  effectsFor?: (unit: Unit) => GearEffect[];
 }
 
 /** `team` is the five formation pads in order, with null for empty ones. */
@@ -172,6 +187,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       spd: base.spd + bFinal.spd + formation.spdBonus,
     };
     const need = Math.max(1, getFamily(u.familyId).special.charge - bFinal.chargeDiscount);
+    const effects = options.effectsFor?.(u) ?? [];
     const fighter: Fighter = {
       id: `p-${u.uid}`,
       side: 'player',
@@ -191,6 +207,7 @@ export function createBattle(team: (Unit | null)[], stage: Stage, options: Battl
       charge: Math.min(need, bFinal.charge),
       shield: Math.round(s.hp * bFinal.shield),
       bonus: bFinal,
+      ...(effects.length > 0 && { effects }),
     };
     return [fighter];
   });
@@ -336,7 +353,7 @@ function damage(
   mods: EncounterMods = {},
 ): { amount: number; crit: boolean } {
   const b = attacker.bonus;
-  let atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1);
+  let atk = attacker.atk * (attacker.rallyTurns > 0 ? 1 + attacker.rallyBonus : 1) * (1 + (attacker.stacks ?? 0) * FX.ascendPerAction);
   if (b.lastStand && attacker.hp / attacker.maxHp < 0.3) atk *= 1 + b.lastStand;
   if (mods.enrageBelow && attacker.side === 'enemy' && attacker.hp / attacker.maxHp < mods.enrageBelow) atk *= 1 + (mods.enrageAtk ?? 0);
   // atk / (atk + def) keeps fights the same length at every level when both sides are even.
@@ -349,6 +366,7 @@ function damage(
   else if (edge === 'weak') base *= CLASS_DISADVANTAGE;
   if (special) base *= 1 + b.specialPower;
   if (!attacker.struck) base *= 1 + b.firstStrike;
+  if (has(attacker, 'execute') && defender.hp / defender.maxHp < FX.executeBelow) base *= 1 + FX.executeBonus;
   if (wave && defender.row === 'back') base *= BACK_ROW_WAVE_REDUCTION;
   if (weather === 'embers') base *= 1.1;
   if (weather === 'storm' && wave) base *= 1.2;
@@ -378,8 +396,15 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
     target.hp -= Math.min(target.hp, amount - absorbed);
     hits.push({ targetId: target.id, kind: 'damage', amount, crit: false, absorbed, ko: target.hp <= 0 });
   };
+  const basic = action.kind === 'attack' || action.kind === 'kiBlast';
+  const big = action.kind === 'special' || action.kind === 'combo';
+  let refund = false;
+  // Colossus Aura: a standing ally (or the target itself) with Aegis softens every hit on its side.
+  const aegis = (target: Fighter) => [...fighters.values()].some((f) => f.side === target.side && f.hp > 0 && has(f, 'aegis'));
   const strike = (target: Fighter, mult: number, wave = false) => {
-    const { amount, crit } = damage(self, target, mult, wave, action.kind === 'special' || action.kind === 'combo', state.weather, rng, mods);
+    const rolled = damage(self, target, mult, wave, big, state.weather, rng, mods);
+    const crit = rolled.crit;
+    const amount = aegis(target) ? Math.max(1, Math.round(rolled.amount * (1 - FX.aegisReduction))) : rolled.amount;
     self.struck = true;
     const absorbed = Math.min(target.shield, amount);
     target.shield -= absorbed;
@@ -394,6 +419,18 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       hits.push({ targetId: target.id, kind: 'revive', amount: target.hp, crit: false, absorbed: 0, ko: false });
     }
     if (self.side === 'enemy' && mods.lifesteal && !mods.noHealing && dealt > 0 && self.hp > 0) restore(self, Math.round(dealt * mods.lifesteal), 'heal');
+    if (target.hp <= 0 && target.side !== self.side && has(self, 'recharge') && !self.refundUsed) {
+      self.refundUsed = true;
+      refund = true;
+    }
+    if (target.hp > 0 && ((basic && has(self, 'hellfire')) || (big && has(self, 'scorch')))) {
+      target.burn = { turns: FX.burnTurns, dmg: Math.max(1, Math.round(self.atk * FX.burnShareOfAtk)) };
+    }
+    if (target.hp > 0 && basic && has(self, 'frost') && target.rank === 'minion' && rng() < FX.frostChance) {
+      target.stunned = true;
+      hits.push({ targetId: target.id, kind: 'stun', amount: 0, crit: false, absorbed: 0, ko: false });
+    }
+    if (target.guarding && has(target, 'reflect') && target.hp > 0 && self.hp > 0) hurt(self, Math.max(1, Math.round(amount * FX.reflectShare)));
     // Volatile: a fallen enemy bursts and hits every standing player fighter.
     if (target.side === 'enemy' && target.hp <= 0 && mods.koBurst) {
       const burst = Math.max(1, Math.round(target.maxHp * mods.koBurst));
@@ -407,10 +444,20 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       return;
     }
     if (state.weather === 'rain' && kind === 'heal') amount = Math.round(amount * 1.2);
+    const overflow = target.hp + amount - target.maxHp;
+    if (kind === 'heal' && overflow > 0 && has(self, 'overflow')) {
+      target.shield = Math.min(Math.round(target.maxHp * MAX_SHIELD_SHARE), target.shield + overflow);
+    }
     target.hp = Math.min(target.maxHp, target.hp + amount);
     hits.push({ targetId: target.id, kind, amount, crit: false, absorbed: 0, ko: false });
   }
   const allies = () => [...fighters.values()].filter((f) => f.side === actor.side && f.hp > 0);
+  // Riptide: a single-target special jumps to the weakest other standing foe.
+  const chain = (from: Fighter, power: number) => {
+    if (!has(self, 'chain')) return;
+    const next = [...fighters.values()].filter((f) => f.side !== actor.side && f.hp > 0 && f.id !== from.id).sort((a, b) => a.hp - b.hp)[0];
+    if (next) strike(next, power * FX.chainPower);
+  };
 
   let label = '';
   self.guarding = false;
@@ -456,14 +503,19 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       label = special.name;
       const healBonus = (actor.role === 'Support' ? SUPPORT_HEAL_BONUS : 1) * (1 + self.bonus.heal);
       switch (special.kind) {
-        case 'beam':
-          strike(pick(legalTargets(state, actor.side)), special.power);
+        case 'beam': {
+          const target = pick(legalTargets(state, actor.side));
+          strike(target, special.power);
+          chain(target, special.power);
           break;
+        }
         case 'wave':
           for (const foe of living(state, opposite(actor.side))) strike(fighters.get(foe.id)!, special.power, true);
           break;
         case 'drain': {
-          const dealt = strike(pick(legalTargets(state, actor.side)), special.power);
+          const drained = pick(legalTargets(state, actor.side));
+          const dealt = strike(drained, special.power);
+          chain(drained, special.power);
           const share = (actor.role === 'Drainer' ? DRAINER_DRAIN_SHARE : DRAIN_SHARE) + self.bonus.drain;
           restore(self, Math.round(dealt * share), 'heal');
           break;
@@ -489,6 +541,7 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
         case 'stun': {
           const target = pick(legalTargets(state, actor.side));
           strike(target, special.power);
+          chain(target, special.power);
           if (target.hp > 0) {
             // Bosses shrug off stuns.
             const resists = target.rank !== 'minion';
@@ -509,7 +562,9 @@ export function performAction(state: BattleState, action: Action, rng: Rng = def
       break;
     }
   }
-  if (action.kind !== 'special' && action.kind !== 'combo') self.charge = Math.min(specialNeed(self), self.charge + 1);
+  if (!big) self.charge = Math.min(specialNeed(self), self.charge + 1 + (basic && has(self, 'surge') ? FX.surgeSteps : 0));
+  if (refund) self.charge = specialNeed(self);
+  if (has(self, 'ascend')) self.stacks = Math.min(FX.ascendMaxStacks, (self.stacks ?? 0) + 1);
   self.ki = Math.max(0, Math.min(KI_MAX, self.ki));
 
   let next: BattleState = {
@@ -538,6 +593,10 @@ function startTurn(state: BattleState, side: Side): BattleState {
     if (f.side !== side) return f;
     // Guard lasts until that fighter's side moves again; rally counts down on its own turns.
     const changed = { ...f, guarding: false, rallyTurns: Math.max(0, f.rallyTurns - 1) };
+    if (f.burn && f.hp > 0) {
+      changed.hp = Math.max(1, f.hp - f.burn.dmg);
+      changed.burn = f.burn.turns > 1 ? { ...f.burn, turns: f.burn.turns - 1 } : undefined;
+    }
     if (f.stunned && f.hp > 0) {
       skipped.push(f.id);
       changed.stunned = false;

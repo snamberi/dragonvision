@@ -1,5 +1,7 @@
 import { useActionFeedback } from './useActionFeedback';
-import { SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
+import { BOSS_GEAR_SETS, SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
+import { REROLL_COST, duplicateItems, dustFor, forgeDust, rerollSub, salvageDuplicates, salvageItem } from '../game/forge';
+import { describeBonus } from '../game/bonus';
 import { RUNE_FRAG_COST, RUNE_TEMPLATES, craftRune } from '../game/rune';
 import { RELIC_CRAFT_COST, RELIC_TEMPLATES, craftRelic, equipRelic, equippedRelicTemplate, unequipRelic } from '../game/relic';
 import { dayKey } from '../game/time';
@@ -19,6 +21,10 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
   const today = syncShop(save, dayKey());
   const stock = shopStock(today);
   const loose = save.items.filter((i) => !wearer(save, i.id));
+  const spares = duplicateItems(save);
+  const spareDust = spares.reduce((sum, i) => sum + dustFor(i), 0);
+  const dust = forgeDust(save);
+  const rollable = save.items.filter((i) => (i.subs ?? []).length > 0);
 
   return (
     <div className="armory area-polished">{feedback}
@@ -56,12 +62,57 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
       </section>
 
       <section className="panel">
-        <h3>Sets</h3>
+        <h3>Boss sets</h3>
+        <p className="muted small-text">
+          Wall bosses and raid bosses drop their own sets. Wall pieces drop on every first clear and on 25% of replays, so farm the wall
+          that drops what you need. 4 pieces change how a fighter fights.
+        </p>
+        <div className="set-list">
+          {BOSS_GEAR_SETS.map((set) => (
+            <SetBonusText key={set.id} setId={set.id} />
+          ))}
+        </div>
+        <h3>Armory sets</h3>
         <div className="set-list">
           {SETS.map((set) => (
             <SetBonusText key={set.id} setId={set.id} />
           ))}
         </div>
+      </section>
+
+      <section className="panel forge">
+        <div className="section-head">
+          <h3>Forge</h3>
+          <span className="muted small-text">✧ {dust.toLocaleString()} Forge Dust</span>
+        </div>
+        <p className="muted small-text">
+          Salvage spare gear into Forge Dust, then spend it to reroll one rolled stat on a piece. Boss set pieces salvage for double.
+        </p>
+        <button
+          className="btn small primary"
+          disabled={spares.length === 0}
+          onClick={() => update((s) => salvageDuplicates(s).save, `Salvaged ${spares.length} spare piece${spares.length === 1 ? '' : 's'} for ${spareDust} Forge Dust`)}
+        >
+          {spares.length === 0 ? 'No spare copies' : `Salvage ${spares.length} spare cop${spares.length === 1 ? 'y' : 'ies'} (+${spareDust} ✧)`}
+        </button>
+        {rollable.length > 0 && (
+          <div className="gear-grid mt-sm">
+            {rollable.map((item) => (
+              <GearCard key={item.id} save={save} item={item}>
+                {(item.subs ?? []).map((sub, idx) => (
+                  <button
+                    key={idx}
+                    className="btn small"
+                    disabled={dust < REROLL_COST[item.rarity]}
+                    onClick={() => update((s) => rerollSub(s, item.id, idx), 'Stat rerolled')}
+                  >
+                    Reroll {describeBonus({ [sub.stat]: sub.value })} · ✧ {REROLL_COST[item.rarity]}
+                  </button>
+                ))}
+              </GearCard>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="panel rune-forge">
@@ -140,7 +191,7 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
       </section>
 
       <section className="panel">
-        <h3>Sell unworn gear ({loose.length})</h3>
+        <h3>Sell or salvage unworn gear ({loose.length})</h3>
         {loose.length === 0 ? (
           <p className="muted">Nothing to sell. Gear someone is wearing stays safe.</p>
         ) : (
@@ -149,6 +200,9 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
               <GearCard key={item.id} save={save} item={item}>
                 <button className="btn small" onClick={() => update((s) => sellItem(s, item.id))}>
                   Sell ● {sellValueOf(item).toLocaleString()}
+                </button>
+                <button className="btn small" onClick={() => update((s) => salvageItem(s, item.id))}>
+                  Salvage ✧ {dustFor(item)}
                 </button>
               </GearCard>
             ))}

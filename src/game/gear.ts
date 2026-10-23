@@ -3,7 +3,8 @@ import { stageCoinReward } from './balance';
 import { findUnit } from './progression';
 import { type Rng, defaultRng, pickWeighted, seededRng } from './rng';
 import { dayKey, hashString } from './time';
-import type { GearItem, GearSlotKey, SaveData, Unit } from './types';
+import { BOSS_SETS, BOSS_TEMPLATES, type BossSetDef, type GearEffect, type SetSource } from './bossSets';
+import type { GearItem, GearSlotKey, GearSub, GearSubStat, SaveData, Unit } from './types';
 
 export type GearKind = 'weapon' | 'armor' | 'accessory';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
@@ -37,6 +38,9 @@ export interface GearSet {
   color: string;
   two: Partial<Bonus>;
   four: Partial<Bonus>;
+  /** Boss sets: the play-changing 4-piece effect and where the pieces drop. */
+  effect?: GearEffect;
+  source?: SetSource;
 }
 
 // Every set has a weapon, armor and two different accessories, so one fighter can wear all four.
@@ -71,8 +75,19 @@ export const TEMPLATES: GearTemplate[] = [
   { id: 'void-fang', name: 'Void Fang', kind: 'accessory', setId: 'void', base: { atk: 0.03 } },
 ];
 
-const templateById = new Map(TEMPLATES.map((t) => [t.id, t]));
-const setById = new Map(SETS.map((s) => [s.id, s]));
+/** Boss sets drop only from their wall stage or raid boss; they never show up in random drops or the Armory. */
+export const BOSS_GEAR_SETS: GearSet[] = BOSS_SETS.map((b) => ({
+  id: b.id, name: b.name, color: b.color, two: b.two, four: {}, effect: b.effect, source: b.source,
+}));
+export const ALL_SETS: GearSet[] = [...SETS, ...BOSS_GEAR_SETS];
+
+const templateById = new Map<string, GearTemplate & { art?: string }>([...TEMPLATES, ...BOSS_TEMPLATES].map((t) => [t.id, t]));
+const setById = new Map(ALL_SETS.map((s) => [s.id, s]));
+
+/** Template whose pixel art a piece uses (boss pieces borrow Armory art). */
+export function gearArtId(templateId: string): string {
+  return templateById.get(templateId)?.art ?? templateId;
+}
 
 export function getTemplate(id: string): GearTemplate {
   const t = templateById.get(id);
@@ -84,14 +99,44 @@ export function getSet(id: string): GearSet {
   return setById.get(id)!;
 }
 
-/** An item's own stats after rarity. Flat stats round to whole numbers. */
-export function itemBonus(item: Pick<GearItem, 'templateId' | 'rarity'>): Partial<Bonus> {
+const isFlat = (key: keyof Bonus) => key === 'spd' || key === 'ki';
+const roundStat = (key: keyof Bonus, value: number) => (isFlat(key) ? Math.round(value) : Math.round(value * 1000) / 1000);
+
+/** An item's own stats after rarity, plus its rolled sub-stats. Flat stats round to whole numbers. */
+export function itemBonus(item: Pick<GearItem, 'templateId' | 'rarity' | 'subs'>): Partial<Bonus> {
   const power = RARITY_POWER[item.rarity];
   const out: Partial<Bonus> = {};
   for (const [key, value] of Object.entries(getTemplate(item.templateId).base) as [keyof Bonus, number][]) {
-    out[key] = key === 'spd' || key === 'ki' ? Math.round(value * power) : Math.round(value * power * 1000) / 1000;
+    out[key] = roundStat(key, value * power);
   }
+  for (const sub of item.subs ?? []) out[sub.stat] = roundStat(sub.stat, (out[sub.stat] ?? 0) + sub.value);
   return out;
+}
+
+// --- Sub-stats ---
+
+export const SUB_STATS: GearSubStat[] = ['atk', 'hp', 'def', 'crit', 'spd', 'ki', 'specialPower', 'heal'];
+/** Sub-stat size at Common; scaled by rarity and a 70–130% roll. */
+const SUB_BASE: Record<GearSubStat, number> = { atk: 0.02, hp: 0.025, def: 0.025, crit: 0.012, spd: 1, ki: 3, specialPower: 0.03, heal: 0.03 };
+const SUB_COUNT: Record<Rarity, number> = { common: 0, uncommon: 0, rare: 1, epic: 1, legendary: 2 };
+const BOSS_SUB_COUNT = 2;
+const SUB_ROLL_MIN = 0.7;
+const SUB_ROLL_SPAN = 0.6;
+
+export function rollSub(rarity: Rarity, rng: Rng, exclude: GearSubStat[] = []): GearSub {
+  const pool = SUB_STATS.filter((st) => !exclude.includes(st));
+  const stat = pool[Math.floor(rng() * pool.length)];
+  const raw = SUB_BASE[stat] * RARITY_POWER[rarity] * (SUB_ROLL_MIN + rng() * SUB_ROLL_SPAN);
+  return { stat, value: Math.max(isFlat(stat) ? 1 : 0.001, roundStat(stat, raw)) };
+}
+
+function rollSubs(templateId: string, rarity: Rarity, rng: Rng): GearSub[] {
+  const count = isBossSetTemplate(templateId) ? BOSS_SUB_COUNT : SUB_COUNT[rarity];
+  return Array.from({ length: count }).reduce<GearSub[]>((subs) => [...subs, rollSub(rarity, rng, subs.map((x) => x.stat))], []);
+}
+
+export function isBossSetTemplate(templateId: string): boolean {
+  return Boolean(getSet(getTemplate(templateId).setId).effect);
 }
 
 export function findItem(save: SaveData, id: string): GearItem {
@@ -120,6 +165,11 @@ export function setCounts(save: SaveData, unit: Unit): { set: GearSet; pieces: n
     counts.set(setId, (counts.get(setId) ?? 0) + 1);
   }
   return [...counts.entries()].map(([id, pieces]) => ({ set: getSet(id), pieces }));
+}
+
+/** Play-changing 4-piece effects a fighter has on. */
+export function gearEffects(save: SaveData, unit: Unit): GearEffect[] {
+  return setCounts(save, unit).flatMap(({ set, pieces }) => (pieces >= 4 && set.effect ? [set.effect] : []));
 }
 
 /** Item stats plus 2- and 4-piece set bonuses. */
@@ -167,8 +217,10 @@ export function sellValueOf(item: GearItem): number {
   return SELL_BASE[item.rarity];
 }
 
+/** Sub-stats are seeded by item id, so the same drop always rolls the same way. */
 export function addItem(save: SaveData, templateId: string, rarity: Rarity): { save: SaveData; item: GearItem } {
-  const item: GearItem = { id: `g${save.nextItemId}`, templateId, rarity };
+  const subs = rollSubs(templateId, rarity, seededRng(hashString(`sub:${templateId}:${save.nextItemId}`)));
+  const item: GearItem = { id: `g${save.nextItemId}`, templateId, rarity, ...(subs.length > 0 && { subs }) };
   return { save: { ...save, items: [...save.items, item], nextItemId: save.nextItemId + 1 }, item };
 }
 
@@ -194,6 +246,16 @@ export function rollItem(save: SaveData, rng: Rng = defaultRng, minRarity: Rarit
   let rarity = rollRarity(save.clearedStage, rng);
   if (RARITIES.indexOf(rarity) < RARITIES.indexOf(minRarity)) rarity = minRarity;
   return addItem(save, template.id, rarity);
+}
+
+// --- Boss set drops ---
+
+/** A random piece of a boss set, at least the set's floor rarity. */
+export function rollSetPiece(set: BossSetDef, clearedStage: number, rng: Rng = defaultRng): { templateId: string; rarity: Rarity } {
+  const slot = Math.floor(rng() * set.pieces.length);
+  let rarity = rollRarity(clearedStage, rng);
+  if (RARITIES.indexOf(rarity) < RARITIES.indexOf(set.floor)) rarity = set.floor;
+  return { templateId: `${set.id}-${slot}`, rarity };
 }
 
 // --- Armory shop ---

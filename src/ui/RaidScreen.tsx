@@ -1,4 +1,5 @@
-import { RAID_GEMS_PER_PHASE, RAID_PHASES, RAID_ROUNDS, raidAttemptsLeft, raidBoss, weekKey } from '../game/raid';
+import { RAID_GEMS_PER_PHASE, RAID_PHASES, RAID_ROUNDS, raidAttemptsLeft, raidBoss, raidSet, weekKey } from '../game/raid';
+import { SetBonusText } from './GearCard';
 import type { SaveData } from '../game/types';
 import { BuildingHeader } from './BuildingHeader';
 import { Sprite } from './Sprite';
@@ -19,6 +20,7 @@ export function RaidScreen({ save, onBack, onFight }: Props) {
   const clearedPhases = state?.clearedPhases ?? [];
   const hpPct = Math.min(PCT_MAX, Math.round((totalDamage / boss.pool) * PCT_MAX));
   const attempts = raidAttemptsLeft(save, week);
+  const set = raidSet(week);
   const defeated = totalDamage >= boss.pool;
 
   return (
@@ -60,13 +62,18 @@ export function RaidScreen({ save, onBack, onFight }: Props) {
 
       <section className="panel">
         <h3>Phase Rewards</h3>
+        {set && (
+          <p className="small-text">
+            This week's set: <SetBonusText setId={set.id} />
+          </p>
+        )}
         {Array.from({ length: RAID_PHASES }, (_, idx) => {
           const phase = idx + 1;
           const done = clearedPhases.includes(phase);
           return (
             <div key={phase} className={`raid-phase-row ${done ? 'claimed' : ''}`}>
               <span>Phase {phase}</span>
-              <span className="muted">◆ {RAID_GEMS_PER_PHASE} gems</span>
+              <span className="muted">◆ {RAID_GEMS_PER_PHASE} gems{set ? ` + ${set.name} piece` : ''}</span>
               <span>{done ? '✓' : '—'}</span>
             </div>
           );

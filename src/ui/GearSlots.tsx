@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { describeBonus } from '../game/bonus';
-import { RARITIES, SLOT_KINDS, SLOT_LABEL, equip, gearBonus, getTemplate, setCounts, unequip } from '../game/gear';
+import { RARITIES, SLOT_KINDS, SLOT_LABEL, equip, gearBonus, gearEffects, getTemplate, setCounts, unequip } from '../game/gear';
+import { GEAR_EFFECTS } from '../game/bossSets';
 import type { GearSlotKey, SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
 import { GearCard, GearIcon, SetBonusText } from './GearCard';
@@ -12,6 +13,7 @@ export function GearSlots({ save, unit, update }: { save: SaveData; unit: Unit; 
   const [picking, setPicking] = useState<GearSlotKey | null>(null);
   const sets = setCounts(save, unit);
   const total = describeBonus(gearBonus(save, unit));
+  const effects = gearEffects(save, unit);
 
   const options = picking
     ? save.items
@@ -36,10 +38,15 @@ export function GearSlots({ save, unit, update }: { save: SaveData; unit: Unit; 
       </div>
       <p className="muted small-text">{total ? `Gear gives: ${total}` : 'No gear on. Tap a slot to equip.'}</p>
       {sets.map(({ set, pieces }) => (
-        <p key={set.id} className="small-text">
-          {pieces}/4 · <SetBonusText setId={set.id} />
+        <p key={set.id} className={`small-text ${pieces >= 4 ? 'set-active-4' : pieces >= 2 ? 'set-active-2' : ''}`}>
+          {pieces}/4 {pieces >= 4 ? '✦' : pieces >= 2 ? '◆' : ''} · <SetBonusText setId={set.id} />
         </p>
       ))}
+      {effects.length > 0 && (
+        <p className="small-text set-effects">
+          Active set effects: {effects.map((e) => `${GEAR_EFFECTS[e].name} (${GEAR_EFFECTS[e].text})`).join(' · ')}
+        </p>
+      )}
 
       {picking && (
         <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={() => setPicking(null)}>

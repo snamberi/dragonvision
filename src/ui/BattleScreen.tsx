@@ -28,7 +28,7 @@ import {
   targetsFor,
 } from '../game/battle';
 import { recordWin } from '../game/bounty';
-import { unitBonus } from '../game/fighterBonus';
+import { battleOptions } from '../game/fighterBonus';
 import { teamSlots } from '../game/progression';
 import { ARENAS } from '../game/arenas';
 import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
@@ -128,7 +128,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     [mode, stage.number, towerFloor],
   );
   const [battle, setBattle] = useState<BattleState>(() => {
-    const state = createBattle(squad, stage, { bonusFor: (u) => unitBonus(save, u) });
+    const state = createBattle(squad, stage, battleOptions(save));
     return isSideMode(mode) ? prepareSideBattle(mode, save, state) : state;
   });
   const [event, setEvent] = useState<{ id: number; data: ActionEvent } | null>(null);
@@ -257,7 +257,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
     if (busy || mode !== 'survival' || battle.result !== 'won') return;
     const id = setTimeout(() => {
       setWave(wave + 1);
-      setBattle((b) => nextWave(b, squad, wave + 1, { bonusFor: (u) => unitBonus(save, u) }));
+      setBattle((b) => nextWave(b, squad, wave + 1, battleOptions(save)));
     }, 900);
     return () => clearTimeout(id);
     // Only the result and wave should restart this timer.

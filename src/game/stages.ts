@@ -24,7 +24,8 @@ import {
 } from './balance';
 import { type MaterialReward, grantMaterials } from './materials';
 import { type TraitId, chapterTrait } from './encounters';
-import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
+import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity, rollSetPiece } from './gear';
+import { wallSetFor } from './bossSets';
 import { type Weather, arenaForStage } from './arenas';
 import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
 import { FAMILIES, type Role, roleFor } from './roster';
@@ -206,12 +207,18 @@ const MILESTONE_GEMS: Record<number, number> = {
  * First clears pay full coins, spins (1 / 5 mini-boss / 10 boss) and gem chances.
  * Replays pay REPLAY_COIN_SHARE of the coins and nothing else.
  */
+/** Chance a wall boss drops a piece of its set on a replay. */
+export const WALL_SET_REPLAY_CHANCE = 0.25;
+
 export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defaultRng): Rewards {
   const stage = getStage(stageNumber);
   const firstClear = stageNumber > save.clearedStage;
   const piece = stage.kind === 'boss' && rng() < PIECE_BOSS_CHANCE ? randomLegendId(rng) : undefined;
+  // Wall bosses drop their own set: always on the first clear, sometimes on replays.
+  const wallSet = wallSetFor(stageNumber);
+  const setPiece = wallSet && (firstClear || rng() < WALL_SET_REPLAY_CHANCE) ? rollSetPiece(wallSet, save.clearedStage, rng) : undefined;
   if (!firstClear) {
-    return { firstClear, coins: Math.round(stage.coins * REPLAY_COIN_SHARE), gems: 0, spins: 0, ...(piece && { piece }) };
+    return { firstClear, coins: Math.round(stage.coins * REPLAY_COIN_SHARE), gems: 0, spins: 0, ...(piece && { piece }), ...(setPiece && { gear: setPiece }) };
   }
   let gems = 0;
   let spins = SPINS_NORMAL;
@@ -226,7 +233,8 @@ export function rewardsFor(save: SaveData, stageNumber: number, rng: Rng = defau
   }
   gems += MILESTONE_GEMS[stageNumber] ?? 0;
   const rewards: Rewards = { firstClear, coins: stage.coins, gems, spins, ...(piece && { piece }) };
-  if (stage.kind !== 'normal') {
+  if (setPiece) rewards.gear = setPiece;
+  else if (stage.kind !== 'normal') {
     const template = TEMPLATES[Math.floor(rng() * TEMPLATES.length)];
     let rarity = rollRarity(save.clearedStage, rng);
     const floor: Rarity = stage.kind === 'boss' ? 'rare' : 'uncommon';
