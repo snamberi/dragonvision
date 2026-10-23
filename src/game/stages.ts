@@ -21,6 +21,7 @@ import {
   stageCoinReward,
 } from './balance';
 import { type MaterialReward, grantMaterials } from './materials';
+import { type TraitId, chapterTrait } from './encounters';
 import { RARITIES, type Rarity, TEMPLATES, addItem, rollRarity } from './gear';
 import { type Weather, arenaForStage } from './arenas';
 import { PIECE_BOSS_CHANCE, addPieces, randomLegendId } from './legendary';
@@ -46,6 +47,8 @@ export interface Stage {
   kind: StageKind;
   /** The enemy class that dominates this chapter — tells players what counter to bring. */
   dominantRole: Role;
+  /** Chapter-wide enemy trait (story stages only, from chapter 3). */
+  trait?: TraitId;
   enemies: EnemySpec[];
   coins: number;
   /** Shown instead of "Stage N" (Rival Tower floors). */
@@ -163,6 +166,7 @@ export function getStage(number: number): Stage {
     chapterName: CHAPTER_NAMES[(chapter - 1) % CHAPTER_NAMES.length],
     kind,
     dominantRole,
+    ...(chapterTrait(chapter) && { trait: chapterTrait(chapter) }),
     enemies,
     coins: stageCoinReward(number),
     weather: arenaForStage(number).weather,
