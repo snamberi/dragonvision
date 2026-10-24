@@ -45,7 +45,9 @@ export const CHAPTER_SCENES: Line[][] = [
   ],
   [
     { who: 'zeno', text: 'The rift remembers every battle ever fought. Listen.' },
-    { who: 'kael', text: '...Kairo. You don’t know me yet. You will.' },
+    { who: 'arden', text: 'I’m Kael, from an Earth a long way from yours. The rift pulled me through.' },
+    { who: 'arden', text: 'Looks like you could use a hand, Kairo.' },
+    { who: 'kairo', text: 'Ha! The more the merrier.' },
   ],
   [
     { who: 'grimm', text: 'The Demon Gate opens. Your world will feed my hunger.' },
@@ -80,7 +82,7 @@ export const CHAPTER_SCENES: Line[][] = [
     { who: 'kairo', text: 'Then I just won’t lose.' },
   ],
   [
-    { who: 'grimm', text: 'The Crimson Throne waits for its king. Sylas, Kael, come.' },
+    { who: 'grimm', text: 'The Crimson Throne waits for its king. Sylas, Echo, come.' },
     { who: 'orrin', text: 'Three of them at once... we need everyone.' },
   ],
   [
@@ -161,13 +163,15 @@ export const CHAPTER_SCENES: Line[][] = [
   ],
   [
     { who: 'kael', text: 'The Vision Gate. Everything you are ends here, Kairo.' },
-    { who: 'kairo', text: 'No, Kael. Everything starts here.' },
+    { who: 'kairo', text: 'No, Echo. Everything starts here.' },
+    { who: 'arden', text: 'And he isn’t facing you alone.' },
   ],
 ];
 
 export const ENDING: Line[] = [
   { who: 'kael', text: 'So... the echo fades. You never once gave up.' },
-  { who: 'kairo', text: 'Come with us, Kael. There’s always another fight to train for.' },
+  { who: 'kairo', text: 'Come with us, Echo. There’s always another fight to train for.' },
+  { who: 'arden', text: 'The Gate opens onto the other Earths. Mine is one of them. Come and see it.' },
   { who: 'kenji', text: 'The Vision Gate is open. Whatever lies beyond, you are ready.' },
 ];
 

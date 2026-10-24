@@ -240,6 +240,14 @@ const TREES: Record<string, Tree> = {
     ['Perfect Demon', { atk: 0.12, lastStand: 0.3 }],
     ['Infinite Feast', { drain: 0.3, secondWind: 0.25 }],
   ],
+  arden: [
+    ['Blue Aura', { def: 0.1 }],
+    ['Lantern House', { hp: 0.08 }],
+    ['Hold the Sky', { specialPower: 0.16 }],
+    ['Who Else Is in the Room?', { lastStand: 0.25 }],
+    ['Three Minutes', { chargeDiscount: 1 }],
+    ['Magnetic Eye', { secondWind: 0.2 }],
+  ],
   kael: [
     ['Void Touch', { atk: 0.08 }],
     ['Dark Echo', { crit: 0.07 }],

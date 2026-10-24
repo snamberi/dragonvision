@@ -365,17 +365,32 @@ export const FAMILIES: Family[] = [
     ],
   },
   {
+    // Shown as Echo. The id stays 'kael' (from before the rename) because saves store it.
     id: 'kael',
     tier: 'epic',
-    name: 'Kael',
+    name: 'Echo',
     title: 'The Corrupted Echo',
     villain: true,
     base: { hp: 98, atk: 29, def: 20, spd: 26 },
     special: { name: 'Void Cannon', kind: 'beam', power: 3.0, charge: 4 },
     forms: [
-      form('Kael', { skin: '#c9b8b0', hair: '#3a1f5c', hairStyle: 'spiky', outfit: '#3a1f5c', accent: '#ff4a3d', boots: '#1b1530' }),
-      form('Dark Kael', { skin: '#b0a0a8', hair: '#6b2fd0', hairStyle: 'spikyTall', outfit: '#1b1530', accent: '#ff4a3d', boots: '#1b1530', aura: '#8b5cf6' }),
-      form('Void Kael', { skin: '#9a8a94', hair: '#ff2f4a', hairStyle: 'spikyTall', outfit: '#0a0618', accent: '#ff2f4a', boots: '#0a0618', aura: '#ff2f4a' }),
+      form('Echo', { skin: '#c9b8b0', hair: '#3a1f5c', hairStyle: 'spiky', outfit: '#3a1f5c', accent: '#ff4a3d', boots: '#1b1530' }),
+      form('Dark Echo', { skin: '#b0a0a8', hair: '#6b2fd0', hairStyle: 'spikyTall', outfit: '#1b1530', accent: '#ff4a3d', boots: '#1b1530', aura: '#8b5cf6' }),
+      form('Void Echo', { skin: '#9a8a94', hair: '#ff2f4a', hairStyle: 'spikyTall', outfit: '#0a0618', accent: '#ff2f4a', boots: '#0a0618', aura: '#ff2f4a' }),
+    ],
+  },
+  {
+    // Kael Arden from The Seal of Earth Zero, the Vision universe story. (The id 'kael' belongs to Echo.)
+    id: 'arden',
+    tier: 'epic',
+    name: 'Kael',
+    title: 'Guardian of Bellhaven',
+    base: { hp: 124, atk: 24, def: 27, spd: 22 },
+    special: { name: 'Blue Aura', kind: 'shield', power: 0.32, charge: 3 },
+    forms: [
+      form('Kael', { skin: '#d9a77f', hair: '#2b2118', hairStyle: 'spiky', outfit: '#2f5d8a', accent: '#9fc6e2', boots: '#1d2a3a' }),
+      form('Lantern Kael', { skin: '#d9a77f', hair: '#2b2118', hairStyle: 'spiky', outfit: '#2f5d8a', accent: '#9fc6e2', boots: '#1d2a3a', aura: '#5fb7ff' }),
+      form('Magnetic Eye Kael', { skin: '#d9a77f', hair: '#2b2118', hairStyle: 'spikyTall', outfit: '#1d3e66', accent: '#e6edf5', boots: '#1d2a3a', aura: '#c9e6ff' }),
     ],
   },
   ...NEW_NORMAL_FAMILIES,

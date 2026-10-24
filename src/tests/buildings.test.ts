@@ -20,7 +20,7 @@ function withUnit(save: SaveData, familyId: string, star: number, level: number)
 }
 
 describe('380 stages', () => {
-  it('has a chapter name for every 10 stages and ends with a Kael boss at the Vision Gate', () => {
+  it('has a chapter name for every 10 stages and ends with an Echo boss at the Vision Gate', () => {
     expect(TOTAL_STAGES).toBe(380);
     expect(CHAPTER_NAMES).toHaveLength(38);
     const last = getStage(380);

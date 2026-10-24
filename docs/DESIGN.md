@@ -52,7 +52,7 @@ Numbers live in `src/game/balance.ts`. Everything marked *placeholder* is a firs
 
 ## Stages
 - **380 stages** in 38 named chapters of 10, in four acts. Stage 5 of each chapter is a mini-boss, stage 10 a boss.
-- **The end:** stage 380, *The Vision Gate*, a 21★ Kael boss. Clearing it shows the ending.
+- **The end:** stage 380, *The Vision Gate*, a 21★ Echo boss. Clearing it shows the ending.
 - Enemies reach level 400 around stage 180. After that they gain a star every 25 stages (21★ by the end) and
   get up to 54% stronger. In simulation a fully maxed 21★ team clears stage 300+ only with Gravity Chamber
   upgrades, and beats the final boss about 70% of the time with everything maxed.

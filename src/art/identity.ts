@@ -25,6 +25,7 @@ export const IDENTITIES: Record<string, Identity> = {
   bastion: identity('#d7b888','#866348','shield','heavy','bulwark','BRONZE'),
   ruka: identity('#e5c283','#568b69','spear','lean','crescent','REEDLAND'),
   kairo: identity('#ffc75d','#4c281e','scarf','balanced','solar','SUN'),
+  arden: identity('#9fc6e2','#1d3e66','shield','balanced','bulwark','BELLHAVEN'),
   varek: identity('#b49bff','#302554','armor','balanced','cannon','ROYAL'),
   tobi: identity('#fff6a4','#443c28','beads','lean','flash','LIGHT'),
   orrin: identity('#82edbc','#1b413c','cape','lean','sage','SAGE'),
