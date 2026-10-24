@@ -13,9 +13,9 @@ export const DISCORD_URL = 'https://discord.gg/5uGK5HDS8e';
 
 export const SOCIAL_LINKS: SocialLink[] = [
   { id: 'discord', label: 'Discord', url: DISCORD_URL },
-  { id: 'tiktok', label: 'TikTok', url: null },
-  { id: 'youtube', label: 'YouTube', url: null },
-  { id: 'reddit', label: 'Reddit', url: null },
+  { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@courtvision.game' },
+  { id: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@NineFoldVision' },
+  { id: 'reddit', label: 'Reddit', url: 'https://www.reddit.com/r/NineFoldVision/' },
 ];
 
 export const activeSocials = (): SocialLink[] => SOCIAL_LINKS.filter((l) => l.url);
