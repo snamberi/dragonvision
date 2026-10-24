@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
 import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl, upgradesHouseUrl } from '../art/buildings';
 import { ACHIEVEMENTS, achievementState } from '../game/achievements';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
@@ -11,6 +11,7 @@ import { dayKey } from '../game/time';
 import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 import type { SaveData } from '../game/types';
 import { type PendingKey, pendingBadges } from '../game/collect';
+import { Tree } from './HomeArt';
 
 /** The Shop has stock you haven't bought from today. */
 function marketFresh(save: SaveData): boolean {
@@ -31,6 +32,7 @@ const DAY_HOUR = 8;
 const DUSK_HOUR = 17;
 const NIGHT_HOUR = 20;
 const PHASE_REFRESH_MS = 300_000;
+const COMPACT_QUERY = '(max-width: 700px)';
 
 /** The city's light follows the player's own clock. */
 export function dayPhase(hour: number): DayPhase {
@@ -48,9 +50,52 @@ function useDayPhase(): DayPhase {
   return phase;
 }
 
+function useCompact(): boolean {
+  const [compact, setCompact] = useState(() => typeof window !== 'undefined' && window.matchMedia(COMPACT_QUERY).matches);
+  useEffect(() => {
+    const media = window.matchMedia(COMPACT_QUERY);
+    const onChange = () => setCompact(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+  return compact;
+}
+
+const PHASE_TEXT: Record<DayPhase, { label: string; line: string }> = {
+  dawn: { label: 'DAWN', line: 'The bakers are up and the shrine bells are ringing.' },
+  day: { label: 'MIDDAY', line: 'Every street is open. Where to first?' },
+  dusk: { label: 'DUSK', line: 'Lanterns are coming on along the high street.' },
+  night: { label: 'NIGHT', line: 'The city sleeps, but its doors never close.' },
+};
+
+interface Spot {
+  id: Building;
+  name: string;
+  art: string;
+  badge?: string;
+}
+
+interface District {
+  id: string;
+  eyebrow: string;
+  title: string;
+  line: string;
+  accent: string;
+  water?: boolean;
+  ids: Building[];
+}
+
+const DISTRICTS: District[] = [
+  { id: 'market', eyebrow: 'TRADE & MAGIC', title: 'Market Row', line: 'Gear up, trade spares and hear your fortune.', accent: '#e0a65a', ids: ['shop', 'armory', 'fusion', 'fortune', 'upgrades'] },
+  { id: 'training', eyebrow: 'GROW STRONGER', title: 'Training Grounds', line: 'Train, take bounties and record your legend.', accent: '#7fb88a', ids: ['dojo', 'gravity', 'bounty', 'hall', 'journal'] },
+  { id: 'arena', eyebrow: 'PROVE YOURSELF', title: 'Arena Quarter', line: 'Rivals, bosses and the endless climb.', accent: '#d9736b', ids: ['colosseum', 'tower', 'gate', 'climb'] },
+  { id: 'harbor', eyebrow: 'VENTURE OUT', title: 'Harbor & Depths', line: 'Send expeditions, delve dungeons, raid giants.', accent: '#6fb0c8', water: true, ids: ['port', 'dungeon', 'raid'] },
+];
+
 export function CityScreen({ save, onOpen }: Props) {
   const now = Date.now();
   const phase = useDayPhase();
+  const compact = useCompact();
   const ev = currentEvent();
   const evProgress = eventProgress(save);
   const dojoReady = save.dojo.reduce((sum, slot) => sum + dojoProgress(save, slot, now).ready, 0);
@@ -60,13 +105,12 @@ export function CityScreen({ save, onOpen }: Props) {
     const p = bountyProgress(save, b);
     return !p.claimed && p.done >= b.goal;
   }).length;
-
   const achievementsReady = ACHIEVEMENTS.filter((a) => {
     const st = achievementState(save, a);
     return st.complete && !st.claimed;
   }).length;
 
-  const buildings: { id: Building; name: string; art: string; badge?: string }[] = [
+  const spots: Spot[] = [
     { id: 'summon', name: 'Summoning Shrine', art: shrineUrl(), badge: save.spins > 0 ? `${save.spins} ORBS` : undefined },
     { id: 'shop', name: 'Shop', art: shopUrl(), badge: marketFresh(save) ? 'NEW' : undefined },
     { id: 'fortune', name: 'Fortune Teller', art: tentUrl(), badge: fortuneReady(save) ? 'FREE' : undefined },
@@ -81,297 +125,321 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
     { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl() },
-    { id: 'dungeon', name: 'Daily Dungeon', art: dojoUrl(), badge: (save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0) ? 'OPEN' : undefined },
-    { id: 'raid', name: 'Boss Raid', art: colosseumUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage/1000).toFixed(0)}K` : undefined },
+    { id: 'dungeon', name: 'Daily Dungeon', art: dojoUrl(), badge: save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0 ? 'OPEN' : undefined },
+    { id: 'raid', name: 'Boss Raid', art: colosseumUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage / 1000).toFixed(0)}K` : undefined },
     { id: 'climb', name: 'Infinite Climb', art: towerUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
     { id: 'journal', name: "Collector's Journal", art: hallUrl() },
     { id: 'event', name: ev.name, art: tentUrl(), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
   ];
-
+  const byId = new Map(spots.map((s) => [s.id, s]));
   const pending = pendingBadges(save);
-  const layout = useCityLayout();
-  const byId = new Map(buildings.map((b) => [b.id, b]));
+  const isPending = (id: Building) => Boolean(pending[id as PendingKey]);
+  const waiting = spots.find((s) => s.id !== 'event' && isPending(s.id));
+  const text = PHASE_TEXT[phase];
+
+  const spot = (s: Spot, style: CSSProperties, className = '') => (
+    <button
+      key={s.id}
+      data-building={s.id}
+      className={`vc-spot ${className} ${s.badge ? 'has-badge' : ''}`}
+      style={style}
+      onClick={() => onOpen(s.id)}
+      aria-label={`${s.name}${s.badge ? `, ${s.badge}` : ''}${isPending(s.id) ? ', something is ready here' : ''}`}
+    >
+      {s.badge && <span className="vc-badge">{s.badge}</span>}
+      <img className="vc-art" src={s.art} alt="" draggable={false} />
+      <span className="vc-label">
+        {isPending(s.id) && <span className="vc-dot" aria-hidden="true" />}
+        {s.name}
+        <i aria-hidden="true">↗</i>
+      </span>
+    </button>
+  );
+
+  const hero = compact ? HERO_TALL : HERO_WIDE;
+  const at = (x: number, y: number, w: number): CSSProperties => ({ left: `${(x / hero.w) * 100}%`, top: `${(y / hero.h) * 100}%`, width: `${(w / hero.w) * 100}%` });
 
   return (
-    <div className="city">
-      <div className={`city-map ${layout.id} time-${phase}`} data-phase={phase} style={{ aspectRatio: `${layout.w} / ${layout.h}` }}>
-        <CityGround layout={layout} />
-        <div className="city-sky-tint" aria-hidden="true" />
-        <div className="city-location">
-          <span>VISION CITY</span>
-          <small>THE HIGHLAND SANCTUARY</small>
-        </div>
-        {layout.plots.map((plot) => {
-          const b = byId.get(plot.id);
-          if (!b) return null;
-          return (
-            <button
-              key={b.id}
-              data-building={b.id}
-              className={`building ${b.badge ? 'ready' : ''} ${plot.id === 'summon' ? 'main' : ''} ${plot.id === 'event' ? 'event-building' : ''}`}
-              style={{ left: `${(plot.x / layout.w) * 100}%`, top: `${((plot.y - SPUR) / layout.h) * 100}%`, width: `${(layout.plotW / layout.w) * 100}%` }}
-              onClick={() => onOpen(b.id)}
-            >
-              <img className="building-art" src={b.art} alt="" draggable={false} />
-              <span className="building-name">{b.name}</span>
-              {b.badge && <span className="badge">{b.badge}</span>}
-              {pending[b.id as PendingKey] && <span className="pending-dot" aria-label="Something is ready here" />}
-            </button>
-          );
-        })}
-      </div>
+    <div className={`vc time-${phase}`} data-phase={phase}>
+      <section className={`vc-hero ${compact ? 'compact' : ''}`} style={{ aspectRatio: `${hero.w} / ${hero.h}` }} aria-label="Vision City">
+        <CityHeroArt layout={hero} phase={phase} />
+        <div className="vc-tint" aria-hidden="true" />
+        <header className="vc-welcome">
+          <div>
+            <span className="vc-eyebrow">VISION CITY · {text.label}</span>
+            <h2>Welcome to Vision City.</h2>
+            <p>{text.line}</p>
+          </div>
+          <button className="vc-next" onClick={() => onOpen(waiting?.id ?? 'event')}>
+            <span>
+              <small>{waiting ? 'SOMETHING IS WAITING' : 'THIS WEEK’S EVENT'}</small>
+              <strong>{waiting ? waiting.name : ev.name}</strong>
+            </span>
+            <b aria-hidden="true">→</b>
+          </button>
+        </header>
+        {spot(byId.get('summon')!, at(hero.summon[0], hero.summon[1], hero.summonW), 'vc-hero-spot')}
+        {spot(byId.get('event')!, at(hero.event[0], hero.event[1], hero.eventW), 'vc-event-spot')}
+        <div className="vc-note"><span aria-hidden="true">✦</span> The Highland Sanctuary</div>
+      </section>
+
+      {DISTRICTS.map((d) => (
+        <DistrictScene key={d.id} district={d} compact={compact} phase={phase} spots={d.ids.map((id) => byId.get(id)!)} renderSpot={spot} />
+      ))}
     </div>
   );
 }
 
-// --- Town plan ---
-// Buildings stand on terraced streets; every building has a short path down to its street, and the streets are joined,
-// so the roads always connect. Wide screens get a landscape plan, phones a tall switchback plan.
+// --- Layout ---
 
-/** Length of the path from a building's door down to its street. */
-const SPUR = 26;
-
-interface Plot {
-  id: Building;
-  x: number;
-  /** The street this building stands on. */
-  y: number;
-}
-
-interface Layout {
-  id: 'wide' | 'tall';
+interface HeroLayout {
   w: number;
   h: number;
-  /** Building width in map units. */
-  plotW: number;
-  plots: Plot[];
-  /** Road polylines (main streets and connectors). */
-  roads: [number, number][][];
-  plaza: { x: number; y: number; r: number };
-  /** Sea in the bottom-right corner, by the port. */
-  sea: [number, number][];
+  sky: number;
+  summon: [number, number];
+  summonW: number;
+  event: [number, number];
+  eventW: number;
+  plaza: [number, number];
 }
 
-const WIDE: Layout = {
-  id: 'wide',
-  w: 1200,
-  h: 1100,
-  plotW: 150,
-  plots: [
-    { id: 'hall', x: 190, y: 270 },
-    { id: 'colosseum', x: 400, y: 270 },
-    { id: 'tower', x: 830, y: 270 },
-    { id: 'gate', x: 1030, y: 270 },
-    { id: 'fortune', x: 130, y: 500 },
-    { id: 'shop', x: 290, y: 500 },
-    { id: 'armory', x: 450, y: 500 },
-    { id: 'summon', x: 620, y: 270 },
-    { id: 'fusion', x: 800, y: 500 },
-    { id: 'dojo', x: 970, y: 500 },
-    { id: 'bounty', x: 250, y: 720 },
-    { id: 'gravity', x: 470, y: 720 },
-    { id: 'upgrades', x: 690, y: 720 },
-    { id: 'port', x: 900, y: 720 },
-    { id: 'dungeon', x: 200, y: 940 },
-    { id: 'raid', x: 450, y: 940 },
-    { id: 'climb', x: 700, y: 940 },
-    { id: 'journal', x: 950, y: 940 },
-    { id: 'event', x: 625, y: 500 },
-  ],
-  roads: [
-    [[110, 270], [1110, 270]],
-    [[30, 500], [1170, 500]],
-    [[150, 720], [1040, 720]],
-    [[150, 940], [1040, 940]],
-    [[620, 270], [620, 940]],
-    [[110, 270], [80, 330], [80, 500]],
-    [[1110, 270], [1140, 380], [1140, 500]],
-    [[150, 720], [110, 640], [110, 500]],
-  ],
-  plaza: { x: 620, y: 500, r: 54 },
-  sea: [[1000, 780], [1050, 735], [1100, 728], [1150, 700], [1200, 690], [1200, 780]],
-};
+const HERO_WIDE: HeroLayout = { w: 1200, h: 600, sky: 250, summon: [600, 488], summonW: 260, event: [955, 540], eventW: 170, plaza: [600, 455] };
+const HERO_TALL: HeroLayout = { w: 600, h: 980, sky: 300, summon: [300, 620], summonW: 300, event: [410, 930], eventW: 220, plaza: [300, 570] };
 
-const TALL_ROWS: [Building, Building | null][] = [
-  ['summon', null],
-  ['shop', 'armory'],
-  ['fortune', 'fusion'],
-  ['dojo', 'gravity'],
-  ['hall', 'colosseum'],
-  ['tower', 'gate'],
-  ['bounty', 'port'],
-  ['upgrades', 'event'],
-  ['dungeon', 'raid'],
-  ['climb', 'journal'],
-];
-const TALL_TOP = 370;
-const TALL_ROW = 255;
-
-const TALL: Layout = {
-  id: 'tall',
-  w: 600,
-  h: TALL_TOP + TALL_ROW * (TALL_ROWS.length - 1) + 110,
-  plotW: 200,
-  plots: TALL_ROWS.flatMap(([a, b], i) => {
-    const y = TALL_TOP + i * TALL_ROW;
-    return b ? [{ id: a, x: 160, y }, { id: b, x: 440, y }] : [{ id: a, x: 300, y }];
-  }),
-  // One street per row, joined at alternating ends like a switchback path down the hill.
-  roads: TALL_ROWS.flatMap((_, i) => {
-    const y = TALL_TOP + i * TALL_ROW;
-    const street: [number, number][] = [[50, y], [550, y]];
-    if (i === TALL_ROWS.length - 1) return [street];
-    const x = i % 2 === 0 ? 550 : 50;
-    return [street, [[x, y], [x, y + TALL_ROW]] as [number, number][]];
-  }),
-  plaza: { x: 300, y: TALL_TOP, r: 46 },
-  sea: [[330, 9999], [380, 1888], [460, 1872], [540, 1850], [600, 1840], [600, 9999]],
-};
-TALL.sea = TALL.sea.map(([x, y]) => [x, Math.min(y, TALL.h)]);
-
-function useCityLayout(): Layout {
-  const query = '(max-width: 700px)';
-  const [tall, setTall] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
-  useEffect(() => {
-    const media = window.matchMedia(query);
-    const onChange = () => setTall(media.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
-  return tall ? TALL : WIDE;
+/** Spot positions inside a district street: one row on wide screens, two columns zig-zagging down on phones. */
+function districtPlan(n: number, compact: boolean): { w: number; h: number; roads: [number, number][][]; plots: [number, number][]; plotW: number } {
+  if (!compact) {
+    const w = 1200;
+    const h = 300;
+    const road = 262;
+    const gap = n > 1 ? 980 / (n - 1) : 0;
+    const startX = n > 1 ? 110 : 600;
+    const plots = Array.from({ length: n }, (_, i) => [startX + i * gap, road - 12] as [number, number]);
+    return { w, h, roads: [[[0, road], [w, road]]], plots, plotW: Math.min(220, gap ? gap * 0.86 : 220) };
+  }
+  const w = 600;
+  const rowH = 270;
+  const rows = Math.ceil(n / 2);
+  const top = 290;
+  const h = top + (rows - 1) * rowH + 50;
+  const plots: [number, number][] = [];
+  const roads: [number, number][][] = [];
+  for (let r = 0; r < rows; r++) {
+    const y = top + r * rowH;
+    const left = r * 2;
+    if (left + 1 < n) plots.push([160, y - 12], [440, y - 12]);
+    else plots.push([300, y - 12]);
+    roads.push([[0, y], [w, y]]);
+    if (r < rows - 1) {
+      const x = r % 2 === 0 ? 560 : 40;
+      roads.push([[x, y], [x, y + rowH]]);
+    }
+  }
+  return { w, h, roads, plots, plotW: 250 };
 }
 
-/** Small deterministic noise so trees and flowers land in the same places every time. */
+function DistrictScene({ district, compact, phase, spots, renderSpot }: { district: District; compact: boolean; phase: DayPhase; spots: Spot[]; renderSpot: (s: Spot, style: CSSProperties, className?: string) => ReactNode }) {
+  const plan = districtPlan(spots.length, compact);
+  return (
+    <section className={`vc-district vc-${district.id}`} style={{ '--accent': district.accent } as CSSProperties} aria-labelledby={`vc-${district.id}-title`}>
+      <header className="vc-district-head">
+        <span className="vc-eyebrow">{district.eyebrow}</span>
+        <h3 id={`vc-${district.id}-title`}>{district.title}</h3>
+        <p>{district.line}</p>
+      </header>
+      <div className="vc-street" style={{ aspectRatio: `${plan.w} / ${plan.h}` }}>
+        <StreetArt plan={plan} water={district.water} phase={phase} seed={district.id.length * 31} />
+        <div className="vc-tint" aria-hidden="true" />
+        {spots.map((s, i) => {
+          const [x, y] = plan.plots[i];
+          return renderSpot(s, { left: `${(x / plan.w) * 100}%`, top: `${(y / plan.h) * 100}%`, width: `${(plan.plotW / plan.w) * 100}%` });
+        })}
+      </div>
+    </section>
+  );
+}
+
+// --- Art ---
+
+const SKY: Record<DayPhase, [string, string]> = {
+  dawn: ['#4b3a6e', '#f0a98f'],
+  day: ['#5f8fc4', '#cfe0da'],
+  dusk: ['#3b3459', '#b68c8c'],
+  night: ['#0d1130', '#2e2c58'],
+};
+
+/** Small deterministic noise so props land in the same places every visit. */
 function noise(i: number): number {
   const x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
 }
 
-function nearRoad(layout: Layout, x: number, y: number, gap: number): boolean {
-  return layout.roads.some((line) =>
-    line.slice(1).some(([x2, y2], i) => {
-      const [x1, y1] = line[i];
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy || 1)));
-      return Math.hypot(x - (x1 + t * dx), y - (y1 + t * dy)) < gap;
-    }),
+function Lamp({ x, y }: { x: number; y: number }) {
+  return (
+    <g>
+      <ellipse className="vc-glow" cx={x} cy={y - 45} rx="34" ry="34" fill="#ffe0a1" />
+      <path d={`M${x - 3} ${y - 44}h6v50h-6Z`} fill="#4d484b" />
+      <path d={`M${x - 11} ${y - 55}h22v20h-22Z`} fill="#5c5150" />
+      <path className="vc-lit" d={`M${x - 7} ${y - 51}h14v12h-14Z`} fill="#ffe1a0" />
+    </g>
   );
 }
 
-function onPlot(layout: Layout, x: number, y: number): boolean {
-  return layout.plots.some((p) => Math.abs(x - p.x) < layout.plotW * 0.62 && y > p.y - (layout.id === 'tall' ? 215 : 185) && y < p.y + 14);
-}
-
-function decorFor(layout: Layout): { trees: [number, number, number][]; flowers: [number, number][]; lamps: [number, number][] } {
-  const trees: [number, number, number][] = [];
-  const flowers: [number, number][] = [];
-  const skyLine = layout.id === 'wide' ? 120 : 110;
-  for (let i = 0; i < 260 && trees.length < (layout.id === 'wide' ? 34 : 30); i++) {
-    const x = 20 + noise(i) * (layout.w - 40);
-    const y = skyLine + 30 + noise(i + 500) * (layout.h - skyLine - 50);
-    if (nearRoad(layout, x, y, 36) || nearRoad(layout, x, y - 40, 30) || onPlot(layout, x, y) || Math.hypot(x - layout.plaza.x, y - layout.plaza.y) < layout.plaza.r + 30) continue;
-    if (layout.sea.length && x > layout.sea[0][0] - 20 && y > layout.sea[layout.sea.length - 2][1] - 20) continue;
-    if (trees.some(([tx, ty]) => Math.hypot(tx - x, ty - y) < 46)) continue;
-    trees.push([x, y, 0.8 + noise(i + 900) * 0.5]);
-  }
-  for (let i = 0; i < 400 && flowers.length < 40; i++) {
-    const x = 10 + noise(i + 2000) * (layout.w - 20);
-    const y = skyLine + 20 + noise(i + 2600) * (layout.h - skyLine - 30);
-    if (!nearRoad(layout, x, y, 22) && !onPlot(layout, x, y)) flowers.push([x, y]);
-  }
-  // Lamps line the main street on both sides of the plaza.
-  const lamps: [number, number][] = [];
-  const main = layout.plaza.y;
-  for (let x = 90; x < layout.w - 60; x += layout.id === 'wide' ? 160 : 250) {
-    if (Math.abs(x - layout.plaza.x) > layout.plaza.r + 30) lamps.push([x + 40, main + 26]);
-  }
-  return { trees, flowers, lamps };
-}
-
-function CityGround({ layout }: { layout: Layout }) {
-  const { w, h, plaza } = layout;
-  const { trees, flowers, lamps } = decorFor(layout);
-  const sky = layout.id === 'wide' ? 130 : 120;
-  const spurs = layout.plots.map((p) => `M${p.x} ${p.y - SPUR - 4}V${p.y}`).join('');
-  const roadPath = layout.roads.map((line) => `M${line.map(([x, y]) => `${x} ${y}`).join('L')}`).join('');
+function Flowers({ w, h, top, count, seed }: { w: number; h: number; top: number; count: number; seed: number }) {
   return (
-    <svg className="city-ground" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" shapeRendering="crispEdges">
-      <defs>
-        <linearGradient id="city-sky" x2="0" y2="1">
-          <stop stopColor="#2a2350" />
-          <stop offset="1" stopColor="#8a6a8f" />
-        </linearGradient>
-        <linearGradient id="city-grass" x2="0" y2="1">
-          <stop stopColor="#4f7a5a" />
-          <stop offset="1" stopColor="#36584a" />
-        </linearGradient>
-        <pattern id="city-tufts" width="24" height="18" patternUnits="userSpaceOnUse">
-          <rect x="3" y="4" width="2" height="2" fill="#5f8c66" />
-          <rect x="15" y="12" width="2" height="2" fill="#2f4f40" />
-          <rect x="9" y="9" width="1" height="2" fill="#6a9a6e" />
-        </pattern>
-        <pattern id="city-cobble" width="16" height="16" patternUnits="userSpaceOnUse">
-          <rect width="16" height="16" fill="#c9b48e" />
-          <rect x="0" y="0" width="7" height="7" fill="#d6c39c" />
-          <rect x="8" y="8" width="7" height="7" fill="#bba582" />
-          <rect x="9" y="1" width="6" height="5" fill="#cdb993" />
-        </pattern>
-      </defs>
-      <rect width={w} height={h} fill="url(#city-grass)" />
-      <rect width={w} height={h} fill="url(#city-tufts)" />
-      {/* Sky and far mountains behind the top terrace. */}
-      <rect width={w} height={sky} fill="url(#city-sky)" />
-      <path
-        d={`M0 ${sky}L${w * 0.08} ${sky - 50}L${w * 0.17} ${sky - 18}L${w * 0.3} ${sky - 78}L${w * 0.42} ${sky - 26}L${w * 0.55} ${sky - 64}L${w * 0.68} ${sky - 20}L${w * 0.8} ${sky - 72}L${w * 0.92} ${sky - 30}L${w} ${sky - 54}V${sky}Z`}
-        fill="#4a3f6e"
-      />
-      <path d={`M0 ${sky}L${w * 0.2} ${sky - 26}L${w * 0.36} ${sky - 8}L${w * 0.6} ${sky - 30}L${w * 0.78} ${sky - 6}L${w} ${sky - 24}V${sky + 10}H0Z`} fill="#3f6150" />
-      <rect x={w * 0.82} y={sky * 0.22} width="34" height="34" fill="#ffe6b3" />
-      <rect x={w * 0.1} y={sky * 0.3} width="90" height="10" fill="#5a4a7a" />
-      <rect x={w * 0.5} y={sky * 0.18} width="120" height="10" fill="#5a4a7a" />
-      {/* Sea by the port. */}
-      <path d={`M${layout.sea.map(([x, y]) => `${x} ${y}`).join('L')}Z`} fill="#2f6f8f" />
-      <path d={`M${layout.sea.map(([x, y]) => `${x} ${y + 6}`).join('L')}`} fill="none" stroke="#7fc6d8" strokeWidth="3" />
-      {/* Roads: dark curb, cobbles, center-line dashes, then the paths to each door. */}
-      <path d={roadPath} fill="none" stroke="#5c4a3a" strokeWidth="42" strokeLinejoin="round" strokeLinecap="round" />
-      <path d={spurs} fill="none" stroke="#5c4a3a" strokeWidth="26" />
-      <path d={roadPath} fill="none" stroke="url(#city-cobble)" strokeWidth="34" strokeLinejoin="round" strokeLinecap="round" />
-      <path d={spurs} fill="none" stroke="url(#city-cobble)" strokeWidth="18" />
-      {/* Center-line dashes on the main boulevard */}
-      <path d={roadPath} fill="none" stroke="#e9d98a" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="14 10" opacity=".55" />
-      {/* Central plaza and fountain. */}
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r + 5} fill="#5c4a3a" />
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r} fill="url(#city-cobble)" />
-      {/* Fountain: outer stone basin */}
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.54} fill="#8a7a6a" />
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.50} fill="#4a8fbf" />
-      {/* Mid basin */}
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.32} fill="#7a6e5e" />
-      <circle cx={plaza.x} cy={plaza.y} r={plaza.r * 0.28} fill="#5cb0d8" />
-      {/* Center column and spray */}
-      <rect x={plaza.x - 2} y={plaza.y - 18} width="4" height="18" fill="#c8beb4" />
-      <ellipse cx={plaza.x} cy={plaza.y - 20} rx="7" ry="4" fill="#a8d8f0" opacity=".8" />
-      <ellipse cx={plaza.x - 5} cy={plaza.y - 16} rx="3" ry="2" fill="#c8eeff" opacity=".7" />
-      <ellipse cx={plaza.x + 5} cy={plaza.y - 16} rx="3" ry="2" fill="#c8eeff" opacity=".7" />
-      <ellipse cx={plaza.x} cy={plaza.y - 10} rx="5" ry="2.5" fill="#daf2ff" opacity=".6" />
-      {flowers.map(([x, y], i) => (
-        <rect key={`f${i}`} x={x} y={y} width="4" height="4" fill={['#ffd23f', '#ff8fbf', '#f4ecd8', '#b794ff'][i % 4]} />
-      ))}
-      {lamps.map(([x, y], i) => (
-        <g key={`l${i}`}>
-          <rect x={x - 2} y={y - 30} width="4" height="30" fill="#2a2240" />
-          <rect x={x - 6} y={y - 38} width="12" height="10" fill="#ffd36b" />
+    <>
+      {Array.from({ length: count }, (_, i) => {
+        const x = 14 + noise(i + seed) * (w - 28);
+        const y = top + noise(i + seed + 400) * (h - top - 12);
+        return (
+          <g key={i} opacity=".85">
+            <path d={`M${x} ${y}v9m-3 -5h6`} stroke="#73a279" strokeWidth="2" />
+            <path d={`M${x - 2} ${y - 2}h5v4h-5Z`} fill={['#f2d49d', '#d89caa', '#b4bec7'][i % 3]} />
+          </g>
+        );
+      })}
+    </>
+  );
+}
+
+function Defs({ id }: { id: string }) {
+  return (
+    <defs>
+      <linearGradient id={`g-${id}`} x2="0" y2="1">
+        <stop stopColor="#789980" />
+        <stop offset="1" stopColor="#395b50" />
+      </linearGradient>
+      <pattern id={`t-${id}`} width="37" height="31" patternUnits="userSpaceOnUse">
+        <path d="M6 10v4h3v-7M27 25v-3h3v4" stroke="#93b18c" strokeWidth="2" opacity=".3" />
+      </pattern>
+      <pattern id={`p-${id}`} width="25" height="18" patternUnits="userSpaceOnUse">
+        <rect width="25" height="18" fill="#c7b18e" />
+        <path d="M0 1H25M0 17H25M12 2V17" stroke="#a28c70" strokeWidth="2" />
+        <path d="M2 4H9M16 4H23" stroke="#e0cda7" strokeWidth="2" />
+      </pattern>
+    </defs>
+  );
+}
+
+function Road({ d, id, width = 54 }: { d: string; id: string; width?: number }) {
+  return (
+    <>
+      <path d={d} fill="none" stroke="#537364" strokeWidth={width + 34} strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="#8e816b" strokeWidth={width + 12} strokeLinejoin="round" />
+      <path d={d} fill="none" stroke={`url(#p-${id})`} strokeWidth={width} strokeLinejoin="round" />
+    </>
+  );
+}
+
+function CityHeroArt({ layout: l, phase }: { layout: HeroLayout; phase: DayPhase }) {
+  const id = useId().replace(/:/g, '');
+  const [top, bottom] = SKY[phase];
+  const night = phase === 'night';
+  const skyline = l.sky + 14;
+  const houses = Array.from({ length: Math.ceil(l.w / 64) }, (_, i) => {
+    const hgt = 38 + Math.round(noise(i + 7) * 46);
+    return { x: i * 64 - 10, w: 54 + Math.round(noise(i + 70) * 18), h: hgt, spire: noise(i + 140) > 0.82 };
+  });
+  const [px, py] = l.plaza;
+  const sunX = l.w * (l.w > 700 ? 0.6 : 0.83);
+  const road = `M${px} ${py}V${l.h + 40}`;
+  return (
+    <svg className="vc-art-bg" viewBox={`0 0 ${l.w} ${l.h}`} preserveAspectRatio="none" shapeRendering="crispEdges" aria-hidden="true">
+      <Defs id={id} />
+      <linearGradient id={`s-${id}`} x2="0" y2="1">
+        <stop stopColor={top} />
+        <stop offset="1" stopColor={bottom} />
+      </linearGradient>
+      <path d={`M0 0H${l.w}V${l.h}H0Z`} fill={`url(#g-${id})`} />
+      <path d={`M0 0H${l.w}V${l.sky + 30}H0Z`} fill={`url(#s-${id})`} />
+      {night &&
+        Array.from({ length: 40 }, (_, i) => (
+          <rect key={i} className={i % 5 === 0 ? 'vc-twinkle' : ''} x={noise(i + 900) * l.w} y={noise(i + 950) * (l.sky - 60)} width="3" height="3" fill="#fff6d6" opacity={0.5 + noise(i) * 0.5} />
+        ))}
+      {/* Sun or moon. */}
+      <path d={`M${sunX} ${l.sky * 0.22}h33v5h5v29h-5v5h-33v-5h-5v-29h5Z`} fill={night ? '#f1ecd6' : phase === 'day' ? '#fff3c4' : '#f7dfac'} />
+      {night && <path d={`M${sunX + 8} ${l.sky * 0.22 + 8}h8v8h-8ZM${sunX + 22} ${l.sky * 0.22 + 20}h6v6h-6Z`} fill="#cfc8b0" />}
+      <path className="vc-cloud" d={`M${l.w * 0.38} ${l.sky * 0.18}h30v-8h50v8h27v9h-107Z M${l.w * 0.08} ${l.sky * 0.34}h32v-7h44v7h26v8h-102Z`} fill={night ? '#5a5a86' : '#dec5bc'} opacity=".45" />
+      <path d={`M0 ${l.sky - 40}L${l.w * 0.12} ${l.sky - 104}L${l.w * 0.22} ${l.sky - 60}L${l.w * 0.38} ${l.sky - 124}L${l.w * 0.53} ${l.sky - 48}L${l.w * 0.7} ${l.sky - 112}L${l.w * 0.86} ${l.sky - 62}L${l.w} ${l.sky - 116}V${l.sky + 10}H0Z`} fill={night ? '#2c2a4a' : '#625573'} />
+      {/* The town skyline: rooftops with windows that light up after dark. */}
+      {houses.map((hs, i) => (
+        <g key={i}>
+          <path d={`M${hs.x} ${skyline}V${skyline - hs.h}h${hs.w}V${skyline}Z`} fill={night ? '#272543' : '#4d4466'} />
+          <path d={`M${hs.x - 4} ${skyline - hs.h}L${hs.x + hs.w / 2} ${skyline - hs.h - 20}L${hs.x + hs.w + 4} ${skyline - hs.h}Z`} fill={night ? '#3a2f4f' : '#7b4f57'} />
+          {hs.spire && <path d={`M${hs.x + hs.w / 2 - 4} ${skyline - hs.h - 44}h8v26h-8Z`} fill={night ? '#3a2f4f' : '#7b4f57'} />}
+          {[0, 1].map((k) => (
+            <path key={k} className="vc-lit vc-window" d={`M${hs.x + 10 + k * (hs.w - 30)} ${skyline - hs.h + 14}h10v10h-10Z`} fill="#ffd98f" />
+          ))}
         </g>
       ))}
-      {trees.map(([x, y, s], i) => (
-        <g key={`t${i}`} transform={`translate(${x} ${y}) scale(${s})`}>
-          <rect x="-12" y="2" width="24" height="5" fill="#00000033" />
-          <rect x="-3" y="-8" width="6" height="12" fill="#5a3a22" />
-          <path d="M-14 -6L0 -34L14 -6Z" fill="#2f5a3f" />
-          <path d="M-10 -18L0 -42L10 -18Z" fill="#3f7350" />
-        </g>
+      <path d={`M0 ${skyline}Q${l.w * 0.25} ${skyline - 18} ${l.w * 0.5} ${skyline + 10}T${l.w} ${skyline}V${l.h}H0Z`} fill={`url(#g-${id})`} />
+      <path d={`M0 ${skyline}Q${l.w * 0.25} ${skyline - 18} ${l.w * 0.5} ${skyline + 10}T${l.w} ${skyline}V${l.h}H0Z`} fill={`url(#t-${id})`} />
+      {/* Low walls frame the plaza. */}
+      <g stroke="#adab86" strokeWidth="8">
+        <path d={`M20 ${skyline + 66}H${px - 180}M${px + 180} ${skyline + 66}H${l.w - 20}`} />
+        <path d={`M20 ${skyline + 88}H${px - 180}M${px + 180} ${skyline + 88}H${l.w - 20}`} />
+      </g>
+      {Array.from({ length: Math.floor(l.w / 50) }, (_, i) => {
+        const x = 20 + i * 50;
+        return Math.abs(x - px) < 185 ? null : <path key={i} d={`M${x} ${skyline + 52}h9v50h-9Z`} fill="#d0c4a1" />;
+      })}
+      <Road d={road} id={id} width={70} />
+      <ellipse cx={px} cy={py} rx={l.w > 700 ? 210 : 170} ry="62" fill="#8e816b" />
+      <ellipse cx={px} cy={py} rx={l.w > 700 ? 200 : 160} ry="54" fill={`url(#p-${id})`} />
+      {/* Fountain. */}
+      <g transform={`translate(${l.w > 700 ? px - 165 : px - 118} ${py + 22})`}>
+        <path d="M-34 -6h68v18h-68Z" fill="#8a9483" />
+        <path d="M-28 -2h56v10h-56Z" fill="#397482" />
+        <path className="vc-water" d="M-20 2h14m10 0h14" stroke="#89bbba" strokeWidth="3" />
+        <path d="M-4 -34h8v30h-8Z" fill="#b8b2a2" />
+        <path className="vc-water" d="M-10 -38h20v6h-20Z" fill="#a8d8f0" opacity=".8" />
+      </g>
+      <Flowers w={l.w} h={l.h} top={skyline + 110} count={l.w > 700 ? 46 : 32} seed={3} />
+      <Tree x={l.w > 700 ? 120 : 70} y={l.h - (l.w > 700 ? 70 : 230)} size={l.w > 700 ? 1.5 : 0.9} />
+      <Tree x={l.w > 700 ? 300 : 540} y={l.h - (l.w > 700 ? 30 : 330)} size={l.w > 700 ? 1.1 : 0.8} pink />
+      {l.w > 700 && <Tree x={l.w - 90} y={l.h - 90} size={1.4} />}
+      <Lamp x={px - (l.w > 700 ? 230 : 190)} y={py + 10} />
+      <Lamp x={px + (l.w > 700 ? 230 : 190)} y={py + 10} />
+      {l.w > 700 && <Lamp x={px - 60} y={l.h - 10} />}
+      <g className="vc-butterfly" fill="#f5d3ab">
+        <path d={`M${l.w * 0.2} ${skyline + 140}h7v6h-7m9 -3h6v7h-6`} />
+      </g>
+    </svg>
+  );
+}
+
+function StreetArt({ plan, water, phase, seed }: { plan: ReturnType<typeof districtPlan>; water?: boolean; phase: DayPhase; seed: number }) {
+  const id = useId().replace(/:/g, '');
+  const { w, h, roads, plots } = plan;
+  const d = roads.map((line) => `M${line.map(([x, y]) => `${x} ${y}`).join('L')}`).join('');
+  const wide = w > 700;
+  // Trees and lamps sit in the gaps between buildings, never on them.
+  const gaps = wide ? plots.slice(1).map(([x], i) => (x + plots[i][0]) / 2) : [];
+  return (
+    <svg className="vc-art-bg" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" shapeRendering="crispEdges" aria-hidden="true" data-phase={phase}>
+      <Defs id={id} />
+      <path d={`M0 0H${w}V${h}H0Z`} fill={`url(#g-${id})`} />
+      <path d={`M0 0H${w}V${h}H0Z`} fill={`url(#t-${id})`} />
+      {/* A hedge line and bunting in the district's colour. */}
+      <path d={`M0 0H${w}V26H0Z`} fill="#3c6152" />
+      <path d={`M0 26H${w}`} stroke="#2c4a40" strokeWidth="4" />
+      {Array.from({ length: Math.ceil(w / 40) }, (_, i) => (
+        <path key={i} d={`M${i * 40} 34h28l-14 16Z`} fill={i % 2 ? 'var(--accent)' : '#f4e6c4'} opacity=".85" />
       ))}
+      <path d={`M0 34H${w}`} stroke="#5b4b3e" strokeWidth="2" />
+      {water && wide && (
+        <g>
+          <path d={`M${w - 150} ${h}V${h - 120}h40v-30h110V${h}Z`} fill="#397482" />
+          <path className="vc-water" d={`M${w - 120} ${h - 100}h40m10 30h50m-80 30h40`} stroke="#89bbba" strokeWidth="3" />
+        </g>
+      )}
+      <Road d={d} id={id} />
+      <Flowers w={w} h={h} top={60} count={wide ? 26 : 30} seed={seed} />
+      {wide &&
+        gaps.map((x, i) =>
+          i % 2 === 0 ? <Tree key={i} x={x} y={h - 70} size={0.55} pink={(i + seed) % 3 === 0} /> : <Lamp key={i} x={x} y={h - 60} />,
+        )}
+      {!wide && roads.filter((_, i) => i % 2 === 0).map(([[, y]], i) => <Lamp key={i} x={300} y={y - 30} />)}
     </svg>
   );
 }

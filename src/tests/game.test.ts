@@ -260,6 +260,22 @@ describe('evolve all and empty teams', () => {
     expect(evolveAll(after).count).toBe(0);
   });
 
+  it('evolves team and gear-wearing fighters as far as the copies allow', () => {
+    // 1 team fighter + 26 spare copies = 27 one-star copies, exactly enough for a 4★.
+    let save: SaveData = newSave();
+    for (let i = 0; i < 26; i++) save = withUnit(save, 'kairo', 1, 1).save;
+    const team = evolveAll(save).save;
+    expect(team.units.find((u) => u.uid === 'u1')!.star).toBe(4);
+    expect(team.units).toHaveLength(1);
+
+    // Same for a benched fighter wearing gear.
+    let geared: SaveData = newSave();
+    const g = withUnit(geared, 'mei', 1, 1);
+    geared = { ...g.save, units: g.save.units.map((u) => (u.uid === g.unit.uid ? { ...u, gear: { weapon: 'x' } } : u)) };
+    for (let i = 0; i < 8; i++) geared = withUnit(geared, 'mei', 1, 1).save;
+    expect(evolveAll(geared).save.units.find((u) => u.uid === g.unit.uid)!.star).toBe(3);
+  });
+
   it('lets the team go empty', () => {
     const r = toggleTeamMember(newSave(), 'u1');
     expect(r.ok).toBe(true);

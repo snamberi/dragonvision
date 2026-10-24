@@ -9,6 +9,7 @@ import './upgrade.css';
 import './today.css';
 import './areas.css';
 import './events.css';
+import './city.css';
 import { App } from './ui/App';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 

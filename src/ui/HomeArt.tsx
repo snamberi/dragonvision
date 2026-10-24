@@ -118,7 +118,7 @@ export const HOME_PLACES = {
   tall: { w:600,h:1120,house:[300,485],mail:[110,653],chest:[460,607],resident:[290,736],dummy:[465,890],trophy:[130,900],sign:[451,1080] },
 };
 
-function Tree({ x, y, size = 1, pink = false }: { x:number;y:number;size?:number;pink?:boolean }) {
+export function Tree({ x, y, size = 1, pink = false }: { x:number;y:number;size?:number;pink?:boolean }) {
   return <g transform={`translate(${x} ${y}) scale(${size})`}>
     <ellipse cx="0" cy="0" rx="48" ry="13" fill="#1f3c3b" opacity=".3"/>
     <path d="M-9 -65H10V1H-9ZM-24 -65H-7V-39H-17V-48H-24Z" fill="#705440"/><path d="M-4 -56H3V-4H-4Z" fill="#a47c50"/>
