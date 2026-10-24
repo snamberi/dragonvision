@@ -602,7 +602,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
             {battle.result === 'won' && !towerFloor && stageNumber === FINAL_STAGE && rewards?.firstClear && (
               <div className="the-end">
                 <b>THE END</b>
-                <p>Kael falls and the Vision Gate opens. You have conquered Dragon Vision!</p>
+                <p>Echo falls and the Vision Gate opens. You have conquered Dragon Vision!</p>
                 <p className="muted">Keep growing your fighters in the City, or climb the Rival Tower.</p>
               </div>
             )}

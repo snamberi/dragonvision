@@ -8,8 +8,8 @@ import {paintFighter} from '../art/sprite';
 import {identityFor} from '../art/identity';
 describe('Golden shrine',()=>{
  it('adds 10 exclusive and 10 normal families with complete playable data',()=>{
-  expect(FAMILIES).toHaveLength(28);expect(GOLDEN_FAMILIES).toHaveLength(10);
-  const all=[...FAMILIES,...GOLDEN_FAMILIES];expect(new Set(all.map(f=>f.id)).size).toBe(38);
+  expect(FAMILIES).toHaveLength(29);expect(GOLDEN_FAMILIES).toHaveLength(10);
+  const all=[...FAMILIES,...GOLDEN_FAMILIES];expect(new Set(all.map(f=>f.id)).size).toBe(39);
   const art=new Set<string>();
   for(const f of all){expect(getFamily(f.id)).toBe(f);expect(awakeningTree(f.id)).toHaveLength(6);expect(identityFor(f.id)).toBeDefined();art.add(JSON.stringify(paintFighter(f.forms[0].look,f.id)))}
   expect(art.size).toBe(all.length);

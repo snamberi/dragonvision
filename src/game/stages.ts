@@ -93,7 +93,7 @@ export const CHAPTER_NAMES = [
   'Blossom Valley Raid',
   'Thunder Peaks',
   'Tournament of Masters',
-  'Echo Kael Rising',
+  'The Echo Rising',
   'Crimson Throne',
   // Act III: Beyond the Cap
   'Starfall Expanse',
@@ -149,7 +149,7 @@ export function getStage(number: number): Stage {
   const enemies: EnemySpec[] = [];
 
   if (kind !== 'normal') {
-    // The last stage is always Kael, the Corrupted Echo, guarding the Vision Gate.
+    // The last stage is always Echo (id 'kael'), the Corrupted Echo, guarding the Vision Gate.
     const leader = number === TOTAL_STAGES ? villains.find((v) => v.id === 'kael')! : villains[(chapter - 1) % villains.length];
     enemies.push({
       familyId: leader.id,
