@@ -10,6 +10,7 @@ import { spareUnits } from '../game/fusion';
 import { dayKey } from '../game/time';
 import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 import type { SaveData } from '../game/types';
+import { type PendingKey, pendingBadges } from '../game/collect';
 
 /** The Shop has stock you haven't bought from today. */
 function marketFresh(save: SaveData): boolean {
@@ -87,6 +88,7 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'event', name: ev.name, art: tentUrl(), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
   ];
 
+  const pending = pendingBadges(save);
   const layout = useCityLayout();
   const byId = new Map(buildings.map((b) => [b.id, b]));
 
@@ -113,6 +115,7 @@ export function CityScreen({ save, onOpen }: Props) {
               <img className="building-art" src={b.art} alt="" draggable={false} />
               <span className="building-name">{b.name}</span>
               {b.badge && <span className="badge">{b.badge}</span>}
+              {pending[b.id as PendingKey] && <span className="pending-dot" aria-label="Something is ready here" />}
             </button>
           );
         })}

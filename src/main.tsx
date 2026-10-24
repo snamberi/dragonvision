@@ -6,6 +6,7 @@ import './styles.css';
 import './visuals.css';
 import './home.css';
 import './upgrade.css';
+import './today.css';
 import './areas.css';
 import './events.css';
 import { App } from './ui/App';

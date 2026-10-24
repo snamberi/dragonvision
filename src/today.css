@@ -1,0 +1,144 @@
+.today-panel {
+  margin: 12px 16px;
+  padding: 12px 14px;
+  border: 2px solid #3a2f6a;
+  border-radius: 10px;
+  background: #1a1440e6;
+  color: #f4ecd8;
+}
+
+.today-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.today-panel h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.today-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.today-panel li button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto 16px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid #ffffff1a;
+  border-radius: 6px;
+  background: #ffffff0d;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.today-panel li button:hover,
+.today-panel li button:focus-visible {
+  background: #ffffff1f;
+}
+
+.today-panel li.claimable button {
+  border-color: #ffcf4d;
+}
+
+.today-panel li.done {
+  opacity: 0.55;
+}
+
+.today-check {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff1f;
+  font-size: 13px;
+}
+
+.today-panel li.claimable .today-check {
+  background: #ff4d5e;
+  color: #fff;
+}
+
+.today-panel li.done .today-check {
+  background: #3fae6a;
+  color: #fff;
+}
+
+.today-label {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-detail {
+  font-size: 13px;
+  color: #f4ecd8b3;
+  text-align: right;
+}
+
+.today-toggle {
+  margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .today-panel li button {
+    grid-template-columns: 22px minmax(0, 1fr) 16px;
+  }
+
+  .today-detail {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+/* Red dots for places with something ready. */
+.pending-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff4d5e;
+  border: 2px solid #120b2e;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.building .pending-dot {
+  top: 2px;
+  right: 8%;
+}
+
+.tabs button {
+  position: relative;
+}
+
+.tabs .pending-dot {
+  top: 4px;
+  right: calc(50% - 20px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pending-dot {
+    animation: pending-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes pending-pulse {
+  50% {
+    transform: scale(1.25);
+  }
+}

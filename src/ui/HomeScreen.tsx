@@ -10,12 +10,14 @@ import { HOME_PLACES, HomeLandscape, HomeProp, HouseArt } from './HomeArt';
 import { DailyChestPanel, HousePanel, MailboxPanel, TrainingPanel, TrophyPanel } from './HomePanels';
 import { PixelIcon } from './PixelIcon';
 import { Sprite } from './Sprite';
+import type { PendingKey } from '../game/collect';
+import { TodayPanel } from './TodayPanel';
 import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 
 type Panel='house'|'resident'|'mail'|'daily'|'training'|'trophies'|null;
-interface Props { save:SaveData;update:Updater;onTravel:(tab:Tab)=>void;onUpdates:()=>void;onEvent?:()=>void }
+interface Props { save:SaveData;update:Updater;onTravel:(tab:Tab)=>void;onUpdates:()=>void;onEvent?:()=>void;onGo?:(target:Exclude<PendingKey,'login'>)=>void;toast?:(message:string)=>void }
 
-export function HomeScreen({save,update,onTravel,onUpdates,onEvent}:Props) {
+export function HomeScreen({save,update,onTravel,onUpdates,onEvent,onGo,toast}:Props) {
   const [panel,setPanel]=useState<Panel>(null);
   const [compact,setCompact]=useState(()=>window.matchMedia('(max-width:700px)').matches);
   const [,tick]=useState(0);
@@ -55,6 +57,7 @@ export function HomeScreen({save,update,onTravel,onUpdates,onEvent}:Props) {
       <div className="home-map-note"><span aria-hidden="true">✦</span> A place to rest. A world to explore.</div>
     </section>
     {onEvent&&compact&&<EventBanner save={save} onOpen={onEvent} inline/>}
+    {onGo&&<TodayPanel save={save} update={update} toast={toast} onGo={(t)=>t==='login'?setPanel('daily'):onGo(t)}/>}
     {(panel==='house'||panel==='resident')&&<HousePanel save={save} update={update} onClose={close} selectResident={panel==='resident'}/>}
     {panel==='mail'&&<MailboxPanel save={save} update={update} onClose={close} onUpdates={()=>{close();onUpdates();}}/>}
     {panel==='daily'&&<DailyChestPanel save={save} update={update} onClose={close}/>}

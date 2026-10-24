@@ -9,6 +9,7 @@ import { loadSave, writeSave } from '../game/save';
 import { loginReady } from '../game/login';
 import type { SaveData } from '../game/types';
 import { teamUnits } from '../game/progression';
+import { tabBadges } from '../game/collect';
 import { BattleScreen } from './BattleScreen';
 import { type SideMode, SIDE_MODE_HOME, isSideMode } from '../game/sideModes';
 import { type Building, CityScreen } from './CityScreen';
@@ -154,6 +155,7 @@ export function App() {
 
   const tab: Tab =
     view.kind === 'tab' ? view.tab : view.kind === 'fighter' ? 'fighters' : view.kind === 'building' ? 'city' : 'stages';
+  const badges = tabBadges(save);
   const toCity = () => setView({ kind: 'tab', tab: 'city' });
   const goBattle = (next: Extract<View, { kind: 'battle' }>) => {
     if (teamUnits(save).length === 0) {
@@ -286,7 +288,7 @@ export function App() {
             />
           )
         ) : view.tab === 'home' ? (
-          <HomeScreen save={save} update={update} onTravel={tab=>setView({kind:'tab',tab})} onUpdates={()=>setPopup('updates')} onEvent={()=>setView({kind:'building',building:'event'})}/>
+          <HomeScreen save={save} update={update} onTravel={tab=>setView({kind:'tab',tab})} onUpdates={()=>setPopup('updates')} onEvent={()=>setView({kind:'building',building:'event'})} toast={setToast} onGo={(t)=>setView(t==='fighters'?{kind:'tab',tab:'fighters'}:{kind:'building',building:t})}/>
         ) : view.tab === 'city' ? (
           <CityScreen save={save} onOpen={(building) => setView({ kind: 'building', building })} />
         ) : view.tab === 'inventory' ? (
@@ -300,11 +302,13 @@ export function App() {
 
       {view.kind !== 'battle' && (
         <nav className="tabs">
+          {/* Recomputed on each render; the minute sync keeps timers fresh. */}
           {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button key={t} className={`${t === tab ? 'active' : ''} ${t === 'stages' ? 'play-tab' : ''}`} onClick={() => setView({ kind: 'tab', tab: t })}>
               <PixelIcon kind={t} size={22} />
               <span className="tab-long">{TAB_LABELS[t]}</span>
               <span className="tab-short">{TAB_SHORT[t] ?? TAB_LABELS[t]}</span>
+              {(badges as Partial<Record<Tab, boolean>>)[t] && t !== tab && <span className="pending-dot" aria-label="Something is ready" />}
             </button>
           ))}
         </nav>
