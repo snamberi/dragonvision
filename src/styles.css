@@ -3179,6 +3179,8 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
   border: 2px solid var(--gold);
   border-radius: 8px;
   color: var(--ink);
+}
+
 /* Gear compare and bulk salvage */
 .gear-compare {
   display: flex;
