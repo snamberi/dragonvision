@@ -239,6 +239,8 @@ export interface SaveData {
   event?: EventProgress;
   /** Active Wanted Posters (up to 3 at a time). */
   wantedPosters?: WantedPoster[];
+  /** Day the current posters were posted; a new set only appears on a new day. */
+  wantedDay?: string;
   /** Best floor reached in Infinite Climb this week. */
   climbBest?: number;
   /** Week key for Infinite Climb leaderboard ("2026-W43"). */
@@ -278,13 +280,15 @@ export interface WantedPoster {
   id: string;
   /** Stage to clear. */
   stage: number;
-  /** Class that must be used (all 5 fighters). Null means any composition. */
+  /** A fighter of this class must be on the winning team. Null means any team. */
   requiredClass: string | null;
   /** Coin reward. */
   coins: number;
   gems: number;
   /** Unix ms when this poster expires. */
   expiresAt: number;
+  /** Won the poster's stage today with the required class. */
+  done?: boolean;
   claimed: boolean;
 }
 

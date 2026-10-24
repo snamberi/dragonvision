@@ -1,6 +1,6 @@
 import { useActionFeedback } from './useActionFeedback';
 import { BOUNTIES, bountyProgress, bountyReward, claimBounty } from '../game/bounty';
-import { activePosters, claimWantedPoster, refreshWantedPosters } from '../game/wanted';
+import { claimWantedPoster, refreshWantedPosters, todaysPosters } from '../game/wanted';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
@@ -59,21 +59,19 @@ export function BountyScreen({ save, update: commit, onBack }: Props) {
       <section className="panel">
         <div className="section-head">
           <h3>Wanted Posters</h3>
-          <span className="muted small-text">Bounties that expire daily — meet the stage + class requirement to claim.</span>
+          <span className="muted small-text">Three a day. Win the stage today with the required class on your team, then claim once.</span>
         </div>
         {(() => {
           const day = dayKey();
-          const refreshed = refreshWantedPosters(save, day);
-          const posters = activePosters(refreshed, day);
-          if (posters.length === 0) return <p className="muted">No active posters right now — check back tomorrow.</p>;
+          const posters = todaysPosters(save, day);
           return posters.map((p) => (
             <div key={p.id} className={`bounty-row ${p.claimed ? 'claimed' : ''}`}>
               <div className="bounty-text">
-                <span>Clear Stage {p.stage}{p.requiredClass ? ` with ${p.requiredClass}s` : ''}</span>
-                <span className="muted small-text">● {p.coins.toLocaleString()} · ◆ {p.gems}</span>
+                <span>Win Stage {p.stage}{p.requiredClass ? ` with a ${p.requiredClass} on your team` : ''}</span>
+                <span className="muted small-text">● {p.coins.toLocaleString()} · ◆ {p.gems}{p.done && !p.claimed ? ' · ready!' : ''}</span>
               </div>
-              <button className="btn small primary" disabled={p.claimed} onClick={() => update((s) => claimWantedPoster(refreshWantedPosters(s, day), p.id), 'Bounty claimed!')}>
-                {p.claimed ? 'Claimed' : 'Claim'}
+              <button className="btn small primary" disabled={p.claimed || !p.done} onClick={() => update((s) => claimWantedPoster(refreshWantedPosters(s, day), p.id), 'Bounty claimed!')}>
+                {p.claimed ? 'Claimed' : p.done ? 'Claim' : 'Not yet'}
               </button>
             </div>
           ));

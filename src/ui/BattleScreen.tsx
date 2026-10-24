@@ -29,7 +29,9 @@ import {
 } from '../game/battle';
 import { recordWin } from '../game/bounty';
 import { battleOptions } from '../game/fighterBonus';
-import { teamSlots } from '../game/progression';
+import { teamSlots, teamUnits } from '../game/progression';
+import { recordWantedWin } from '../game/wanted';
+import { dayKey } from '../game/time';
 import { ARENAS } from '../game/arenas';
 import { equippedSkin } from '../game/skins';
 import { finishSurvival, nextWave, survivalCoins, survivalWave } from '../game/survival';
@@ -259,7 +261,9 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
       return;
     }
     const earned = withDailyBoost(save, rewardsFor(save, stageNumber));
-    update((s) => recordWin(applyRewards(s, stageNumber, earned), { firstClear: earned.firstClear, boss, flawless }));
+    update((s) =>
+      recordWantedWin(recordWin(applyRewards(s, stageNumber, earned), { firstClear: earned.firstClear, boss, flawless }), stageNumber, teamUnits(s), dayKey()),
+    );
     setRewards(earned);
     if (run.mode === 'single') return;
     const total: Run = {
