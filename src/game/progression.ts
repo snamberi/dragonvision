@@ -212,7 +212,7 @@ function hasGear(u: Unit): boolean {
 export function duplicatesFor(save: SaveData, unit: Unit): Unit[] {
   return save.units
     // Fighters training in the Dojo are never used up.
-    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !isBusy(save, u.uid))
+    .filter((u) => u.uid !== unit.uid && u.familyId === unit.familyId && u.star === unit.star && !u.locked && !isBusy(save, u.uid))
     // Spend the cheapest copies first: not on the team, no gear, then fewest coins invested.
     .sort(
       (a, b) =>
