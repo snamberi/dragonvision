@@ -1,7 +1,7 @@
 import { completeJournalEntry, journalFamilies, overallCompletion } from '../game/journal';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { Portrait, Stars } from './Sprite';
 import { useActionFeedback } from './useActionFeedback';
 
@@ -17,7 +17,7 @@ export function JournalScreen({ save, update: commit, onBack }: Props) {
   const entries = journalFamilies(save);
 
   return (
-    <div className="tower">
+    <div className="tower bld bld-training journal-screen" style={districtStyle("Collector's Journal")}>
       {feedback}
       <BuildingHeader title="Collector's Journal" onBack={onBack}>
         <p className="muted">

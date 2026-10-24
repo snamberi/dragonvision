@@ -6,7 +6,7 @@ import { ROLES, gravityLevel, upgradeGravity } from '../game/gravity';
 import { FAMILIES, GOLDEN_FAMILIES, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { ROLE_COLORS } from './rarity';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 export function GravityScreen({ save, update: commit, onBack }: Props) {
   const {update,feedback}=useActionFeedback(commit);
   return (
-    <div className="gravity area-polished">{feedback}
+    <div className="gravity area-polished bld bld-training" style={districtStyle("Gravity Chamber")}>{feedback}
       <BuildingHeader title="Gravity Chamber" onBack={onBack}>
         <p className="muted">
           Train under heavy gravity. Each level gives every fighter of that role +{Math.round(GRAVITY_PER_LEVEL * 100)}% HP,

@@ -5,7 +5,7 @@ import { ACHIEVEMENTS, achievementState, allForms, claimAchievement, setTitle, u
 import { FAMILIES, GOLDEN_FAMILIES, FUSIONS, LEGENDARIES } from '../game/roster';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { Sprite } from './Sprite';
 import { orbs } from './format';
 
@@ -22,7 +22,7 @@ export function HallScreen({ save, update: commit, onBack }: Props) {
   const titles = unlockedTitles(save);
   const seen = new Set(save.seenForms);
   return (
-    <div className="hall area-polished">{feedback}
+    <div className="hall area-polished bld bld-training" style={districtStyle("Hall of Legends")}>{feedback}
       <BuildingHeader title="Hall of Legends" onBack={onBack}>
         <p className="muted">Achievements pay gems and Spin Orbs, and many unlock a title shown on your Home screen. The collection log keeps every form you have ever owned.</p>
       </BuildingHeader>

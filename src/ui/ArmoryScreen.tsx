@@ -9,7 +9,7 @@ import { RELIC_CRAFT_COST, RELIC_TEMPLATES, craftRelic, equipRelic, equippedReli
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { GearCard, SetBonusText } from './GearCard';
 
 interface Props {
@@ -47,7 +47,7 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
   };
 
   return (
-    <div className="armory area-polished">{feedback}
+    <div className="armory area-polished bld bld-market" style={districtStyle("Armory")}>{feedback}
       <BuildingHeader title="Armory" onBack={onBack}>
         <p className="muted">
           Weapons, armor and accessories. Each fighter wears 1 weapon, 1 armor and 2 accessories. New stock every day; better

@@ -12,6 +12,7 @@ import './events.css';
 import './city.css';
 import './arena.css';
 import './fighters-ui.css';
+import './buildings-a.css';
 import { App } from './ui/App';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 

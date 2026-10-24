@@ -1,7 +1,7 @@
 import { useId, type CSSProperties } from 'react';
 import { Sprite } from './Sprite';
-export type InteriorKind = 'dojo'|'armory'|'fusion'|'gravity'|'port'|'bounty'|'fortune'|'tower'|'hall'|'colosseum'|'gate'|'shop'|'summon'|'upgrades';
-export const INTERIOR_TITLES:Record<string,InteriorKind>={'Training Dojo':'dojo','Armory':'armory','Fusion Lab':'fusion','Gravity Chamber':'gravity','Expedition Port':'port','Bounty Board':'bounty','Fortune Teller':'fortune','Rival Tower':'tower','Hall of Legends':'hall','Colosseum':'colosseum','Survival Gate':'gate','Shop':'shop','Summoning Shrine':'summon','Upgrades House':'upgrades'};
+export type InteriorKind = 'dojo'|'armory'|'fusion'|'gravity'|'port'|'bounty'|'fortune'|'tower'|'hall'|'colosseum'|'gate'|'shop'|'summon'|'upgrades'|'journal';
+export const INTERIOR_TITLES:Record<string,InteriorKind>={'Training Dojo':'dojo','Armory':'armory','Fusion Lab':'fusion','Gravity Chamber':'gravity','Expedition Port':'port','Bounty Board':'bounty','Fortune Teller':'fortune','Rival Tower':'tower','Hall of Legends':'hall','Colosseum':'colosseum','Survival Gate':'gate','Shop':'shop','Summoning Shrine':'summon','Upgrades House':'upgrades',"Collector's Journal":'journal'};
 const ROOMS:Record<InteriorKind,{wall:string;floor:string;light:string;resident:string;caption:string}>={
  dojo:{wall:'#684b43',floor:'#765942',light:'#ffd898',resident:'mei',caption:'THE TRAINING HALL'},
  armory:{wall:'#3e3948',floor:'#4c4346',light:'#ffac65',resident:'bruno',caption:'THE EMBER FORGE'},
@@ -17,6 +17,7 @@ const ROOMS:Record<InteriorKind,{wall:string;floor:string;light:string;resident:
  shop:{wall:'#604348',floor:'#715148',light:'#ffd891',resident:'kenji',caption:'THE LANTERN MARKET'},
  summon:{wall:'#352743',floor:'#45374e',light:'#d7b4ff',resident:'orrin',caption:'THE SUMMONING SANCTUM'},
  upgrades:{wall:'#2a2450',floor:'#3a3264',light:'#ffd23f',resident:'kairo',caption:'THE UPGRADES HOUSE'},
+ journal:{wall:'#4e3f3c',floor:'#5c4739',light:'#f3d186',resident:'tobi',caption:'THE ARCHIVIST’S STUDY'},
 };
 function Sword({x,y,flip=false}:{x:number;y:number;flip?:boolean}) {return <g transform={`translate(${x} ${y}) rotate(${flip?-22:22})`}><path d="M0 0L-5 6V48L0 54L5 48V6Z" fill="#c9dce8"/><path d="M0 4V45" stroke="#f5f3df" strokeWidth="2"/><path d="M-12 51H12" stroke="#d9a458" strokeWidth="5"/><path d="M0 53V70" stroke="#8e5d45" strokeWidth="5"/></g>}
 function Trophy({x,y}:{x:number;y:number}) {return <g transform={`translate(${x} ${y})`}><path d="M-14 0H14V17L5 26V36H15V42H-15V36H-5V26L-14 17Z" fill="#edbe61"/><path d="M-14 5H-25V16L-14 23M14 5H25V16L14 23" fill="none" stroke="#a77a3e" strokeWidth="5"/><path d="M-8 4V16L-3 23" stroke="#ffe8a0" strokeWidth="4"/></g>}
@@ -72,6 +73,16 @@ export function BuildingInterior({kind}:{kind:InteriorKind}) {
      <path d="M465 102H646L620 125H496Z" fill="#493845"/><path d="M552 31V105M552 34L604 88H552Z" fill="#ede1bb" stroke="#69525a" strokeWidth="4"/>
      <path d="M60 162H740M110 129V197M250 129V197M550 129V197M690 129V197" stroke="#7c5a45" strokeWidth="12"/>
      <path d="M300 190h180l-10 35H310Z" fill="#ad8c63"/><path d="M327 192l21 20 35-10 37 14 32-15" fill="none" stroke="#765f58" strokeWidth="4"/>
+   </>}
+   {kind==='upgrades'&&<>
+     {[80,560].map(x=><g key={x}><rect x={x} y="30" width="160" height="140" fill="#1d1838"/>{[70,118,166].map(y=><path key={y} d={`M${x-6} ${y}h172`} stroke="#8a7a3a" strokeWidth="7"/>)}{[0,1,2].map(r=>[0,1,2,3].map(c=><g key={`${r}${c}`}><rect x={x+10+c*37} y={36+r*48} width="30" height="30" fill={(r+c)%2?'#b08a4c':'#8c6a3e'}/><path d={`M${x+10+c*37} ${51+r*48}h30M${x+25+c*37} ${36+r*48}v30`} stroke="#5a4428" strokeWidth="2"/></g>))}</g>)}
+     <rect x="320" y="150" width="160" height="40" fill="#5a4a2c"/><rect x="312" y="144" width="176" height="10" fill="#d0b064"/><path d="M350 140L400 128L450 140L400 148Z" fill="#f1e2bf"/>
+     <g className="room-crystal"><path d="M400 40L420 64L400 88L380 64Z" fill={cfg.light}/></g><circle cx="400" cy="64" r="38" fill={cfg.light} opacity=".12"/>
+   </>}
+   {kind==='journal'&&<>
+     {[70,530].map(x=><g key={x}><rect x={x} y="20" width="200" height="150" fill="#2c2228"/>{[58,100,142].map((y,i)=><g key={y}><path d={`M${x-6} ${y}h212`} stroke="#9a6f4f" strokeWidth="7"/>{Array.from({length:11},(_,j)=><rect key={j} x={x+8+j*17} y={y-32+((i+j)%3)*3} width={12} height={30-((i+j)%3)*3} fill={['#a5574f','#4f7aa5','#7fa36a','#d0a55a','#8c6aa5'][(i*3+j)%5]}/>)}</g>)}</g>)}
+     <path d="M372 196L392 128H408L428 196Z" fill="#6e4a38"/><path d="M350 128L400 112L450 128L400 140Z" fill="#f1e2bf"/><path d="M400 113V140" stroke="#a88a62" strokeWidth="3"/><path d="M362 125L392 117M410 117L440 125" stroke="#b39b7a" strokeWidth="2"/>
+     <circle cx="400" cy="60" r="26" fill="#f3d18633"/><path d="M400 34V20" stroke="#5a4636" strokeWidth="4"/><rect x="390" y="40" width="20" height="22" fill="#f3d186"/>
    </>}
    {kind==='hall'&&<>
      {[140,330,520].map((x,i)=><g key={x}><path d={`M${x} 20h140v107l-70-23-70 23Z`} fill={['#81485a','#4a597d','#566a58'][i]}/><path d={`M${x+17} 23v80m106-80v80`} stroke="#caa775" strokeWidth="3"/><Trophy x={x+70} y={50}/><rect x={x+25} y="171" width="90" height="45" fill="#a19691"/><rect x={x+18} y="165" width="104" height="10" fill="#cdc0a9"/><Trophy x={x+70} y={120}/></g>)}

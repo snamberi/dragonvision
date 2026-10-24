@@ -57,15 +57,11 @@
   .special-impact {animation:none!important;}
 }
 /* Illustrated interiors use the same pixel vocabulary as the exterior buildings. */
-.building-header.interior-header {padding:0;overflow:hidden;border-color:#877094;}
 .interior-scene {position:relative;height:260px;overflow:hidden;background:#292237;border-bottom:3px solid #9f8297;}
 .interior-scene>svg {display:block;width:100%;height:100%;image-rendering:pixelated;}
 .interior-scene:after {content:'';position:absolute;inset:0;box-shadow:inset 0 -28px 24px #120e2360;pointer-events:none;}
 .interior-resident {position:absolute;right:20%;bottom:8%;z-index:1;}
 .interior-scene-label {position:absolute;left:18px;bottom:14px;z-index:2;font:10px/1.5 var(--pixel);letter-spacing:1px;color:#fff0d1;padding:7px 9px;background:#20182dce;border-left:3px solid var(--room-light);}
-.interior-copy {padding:20px 22px;background:linear-gradient(120deg,#30243e,#201a33);}
-.interior-copy h2 {margin:8px 0 12px;color:#ffe8c4;}
-.interior-copy p {max-width:900px;line-height:1.4;}
 .room-energy {animation:room-energy 3s ease-in-out infinite alternate;}
 @keyframes room-energy {to{opacity:.45;}}
 .room-crystal {animation:room-crystal 3s steps(8) infinite alternate;}
@@ -79,7 +75,6 @@
 @media(max-width:700px) {
  .interior-scene {height:190px;}
  .interior-scene>svg {width:140%;margin-left:-20%;}
- .interior-copy {padding:16px;}
  .interior-scene-label {font-size:9px;left:10px;bottom:10px;letter-spacing:0;max-width:86%;}
  .interior-resident {right:16%;bottom:10%;}
  .interior-resident .sprite {width:72px!important;height:72px!important;}

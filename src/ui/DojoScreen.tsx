@@ -1,6 +1,6 @@
 import { ActivityScene } from './ActivityScene';
 import { useActionFeedback } from './useActionFeedback';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { useEffect, useState } from 'react';
 import { DOJO_MINUTES_PER_LEVEL, DOJO_SLOTS, levelCap } from '../game/balance';
 import { collectTraining, dojoProgress, startTraining, stopTraining } from '../game/dojo';
@@ -68,7 +68,7 @@ export function DojoScreen({ save, update: commit, onBack }: Props) {
   const full = save.dojo.length >= DOJO_SLOTS;
 
   return (
-    <div className="dojo area-polished">{feedback}
+    <div className="dojo area-polished bld bld-training" style={districtStyle("Training Dojo")}>{feedback}
       <BuildingHeader title="Training Dojo" onBack={onBack}>
         <p className="muted">
           Idle fighters train here and gain 1 level every {DOJO_MINUTES_PER_LEVEL} minutes, even while you're away, up to their

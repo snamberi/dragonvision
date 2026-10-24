@@ -15,6 +15,7 @@ import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
 import { FighterCard } from './FighterCard';
 import { Sprite } from './Sprite';
+import { BackToCity, districtStyle } from './BuildingHeader';
 
 interface Props {
   save: SaveData;
@@ -86,14 +87,12 @@ export function SummonScreen({ save, update, onBack }: Props) {
     update((s) => ({ ...s, focusFamilyId: s.focusFamilyId === familyId ? null : familyId }));
 
   return (
-    <div className={`summon ${golden?'golden-shrine':''}`}>
-      <button className="btn ghost summon-back" onClick={onBack}>
-        ← City
-      </button>
-      <section className="panel summon-main">
+    <div className={`summon bld bld-market ${golden?'golden-shrine':''}`} style={districtStyle('Summoning Shrine')}>
+      <BackToCity onBack={onBack} className="summon-back" />
+      <section className="panel summon-main bh-frame">
         <BuildingInterior kind="summon"/>
         <div className="summon-content">
-        <div className="eyebrow">Vision City</div>
+        <span className="bh-eyebrow">Vision City · Market Row</span>
         <h2>{golden?'Golden Summoning':'Summoning Shrine'}</h2>
         <div className="summon-banners" role="group" aria-label="Summoning pool">
           {(['normal','golden'] as const).map(b=><button key={b} className={`banner-tab ${banner===b?'selected':''} ${b}`} aria-pressed={banner===b} disabled={spinning} onClick={()=>{setBanner(b);setShowAll(false);setResults([]);setPieces([]);setRevealed(0);setPhase('idle')}}><ItemIcon icon={b==='golden'?'goldenOrb':'spinOrb'} size={42}/><span><b>{b==='golden'?'GOLDEN':'NORMAL'}</b><small>{b==='golden'?'10 exclusive fighters · 60 gems / orb':`${FAMILIES.length} fighters · Spin Orbs`}</small></span></button>)}
