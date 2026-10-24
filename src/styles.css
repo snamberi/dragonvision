@@ -2583,8 +2583,6 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
 @media (prefers-reduced-motion:reduce) {
  *,*:before,*:after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; }
 }
-.building-header { position:relative; padding-right:160px; min-height:135px; overflow:hidden; }
-.header-building-art { position:absolute; right:20px; top:10px; width:120px; height:110px; object-fit:contain; image-rendering:pixelated; filter:drop-shadow(0 10px 0 #100c2222); }
 .arena-stage { isolation:isolate; overflow:hidden; }
 .arena-slot { z-index:1; }
 .support-fx { position:absolute; inset:-10px; color:var(--energy); pointer-events:none; z-index:4; }
@@ -2594,7 +2592,6 @@ button:focus-visible { outline:3px solid #ffe1a3; outline-offset:4px; }
 @keyframes support-rise { from { scale:.3; opacity:1; translate:0 20px; } to { scale:1.4; opacity:0; translate:0 -30px; } }
 .fortune-spinning { animation:fortune-spin 1.5s ease-in-out; }
 @keyframes fortune-spin { 50% { rotate:180deg; scale:.85; filter:brightness(1.7); } 90% { rotate:360deg; box-shadow:0 0 65px #efccff; } }
-@media(max-width:500px) { .building-header { padding-right:100px; } .header-building-art { right:8px; top:22px; width:80px; height:80px; } }
 
 /* Readable shard chips and no empty HP bar over knocked-out fighters. */
 .shard-chip {

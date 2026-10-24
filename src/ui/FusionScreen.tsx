@@ -1,6 +1,6 @@
 import { ActivityScene } from './ActivityScene';
 import { useActionFeedback } from './useActionFeedback';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { useState } from 'react';
 import { SHARD_FUSION_COST } from '../game/balance';
 import { canFuse as fusionCheck, fuseFighters, fuseShard, fusionParts, sellPrice, sellSpares, spareUnits } from '../game/fusion';
@@ -42,7 +42,7 @@ export function FusionScreen({ save, update: commit, onBack }: Props) {
   };
 
   return (
-    <div className="fusion area-polished">{feedback}
+    <div className="fusion area-polished bld bld-market" style={districtStyle("Fusion Lab")}>{feedback}
       <BuildingHeader title="Fusion Lab" onBack={onBack}>
         <p className="muted">
           Turn spare copies into something useful. Fuse {SHARD_FUSION_COST} copies of the same star into an <b>evolution shard</b>,

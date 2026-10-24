@@ -1,0 +1,110 @@
+/* City buildings, dressed in Home's language: a lilac-framed scene, warm dark panels, dark chips with a gold
+   trim, parchment for what matters most, and the street's accent color running down the left edge. */
+
+/* ---------- Shared header (every building) ---------- */
+.bh-back {display:inline-flex;align-items:center;gap:9px;margin:0 0 14px;padding:10px 15px;font:11px/1.4 var(--pixel);color:#fff0cf;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #100c20;cursor:pointer;transition:background-color .18s,border-color .18s,translate .18s;}
+.bh-back span {font:20px/1 var(--body);color:#efd398;}
+.bh-back:hover,.bh-back:focus-visible {background:#3c3547;border-color:#ffe6ac;}
+@media (hover:hover) {.bh-back:hover {translate:-2px 0;}}
+
+.bh-frame {position:relative;isolation:isolate;padding:0;margin:0 0 22px;overflow:hidden;border:2px solid #92859a;border-radius:0;background:linear-gradient(160deg,#3a3044,#262234 70%);box-shadow:0 4px #100c20;color:#efe4d6;}
+.bh-frame .interior-scene {border-bottom:3px solid var(--accent,#92859a);}
+.bh-frame .interior-scene:after {box-shadow:inset 0 0 95px #14282c55,inset 0 -28px 24px #120e2360;}
+.bh-frame .interior-scene-label {background:#22243be6;border:1px solid #b4a480;border-left:4px solid var(--accent,#b4a480);box-shadow:2px 3px #100c2066;}
+.bh-copy,.bh-frame .summon-content {padding:18px 22px 20px;background:linear-gradient(110deg,#403546,#292536);box-shadow:inset 4px 0 var(--accent,#92859a);}
+.bh-eyebrow {display:block;font:16px/1.2 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--accent,#e2bc85);}
+.bh-copy h2,.bh-frame .summon-content h2 {margin:8px 0 8px;font:16px/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 3px #302c43;}
+.bh-copy p {margin:4px 0 0;max-width:72ch;font-size:19px;line-height:1.4;color:#cfc3b8;}
+.bh-copy .muted {color:#cfc3b8;}
+
+/* ---------- Market Row and Training Grounds screens ---------- */
+.bld {--bld-panel:linear-gradient(160deg,#3a3044,#262234 70%);--bld-line:#92859a;--chip:#303038ee;--chip-line:#b4a183;--parch:#ffe4a4;--parch-line:#785e49;--parch-ink:#503c39;color:#efe4d6;}
+.bld .muted {color:#cfc3b8;}
+
+/* Panels: Home's dark card with a hard shadow; the street accent marks the left edge. */
+.bld .panel:not(.bh-frame) {background:var(--bld-panel);border:2px solid var(--bld-line);border-radius:0;box-shadow:0 4px #100c20,inset 4px 0 var(--accent),inset 0 0 60px #0003;padding:18px 20px;}
+.bld .panel .panel {box-shadow:2px 3px #100c2066,inset 0 0 40px #0002;border-width:1px;}
+.bld .panel h3,.bld .section-head h3,.bld .panel>h2 {font:13px/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 2px #1f1b2e;margin-top:0;}
+.bld .section-head {align-items:baseline;gap:10px 16px;}
+.bld .eyebrow {font:12px/1.2 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--accent);}
+
+/* Buttons: dark chips by default, parchment for the main action. */
+.bld .btn {border-radius:0;background:var(--chip);border:1px solid var(--chip-line);color:#fff0cf;box-shadow:2px 3px #100c2066;}
+.bld .btn:not(:disabled):hover,.bld .btn:not(:disabled):focus-visible {background:#3c3547;border-color:#ffe6ac;}
+.bld .btn.primary,.bld .btn.special {background:var(--parch);border:2px solid var(--parch-line);color:var(--parch-ink);box-shadow:2px 3px #162f3255;}
+.bld .btn.primary:not(:disabled):hover,.bld .btn.primary:not(:disabled):focus-visible {background:#fff0c4;border-color:#5f4636;}
+.bld .btn.big {padding:14px 22px;}
+.bld .btn:disabled {opacity:.55;}
+
+/* Progress bars: a dark well with a parchment-gold fill. */
+.bld .bar {height:10px;background:#1b1a29;border:1px solid #6d6178;}
+.bld .bar>i {background:linear-gradient(90deg,#e0a65a,#ffe4a4);}
+
+/* Row cards (bounties, trophies, wanted posters, offers): Home's chip card with a parchment pin. */
+.bld.area-polished .bounty-row,.bld .bounty-row {border:1px solid var(--chip-line);background:linear-gradient(120deg,#3a3044,#2c2836);box-shadow:2px 3px #100c2066,inset 4px 0 var(--accent);padding:14px 16px;}
+.bld.bounty.area-polished .bounty-row::before {display:none;}
+.bld .bounty-row.complete {border-color:#e8c98a;box-shadow:2px 3px #100c2066,inset 4px 0 #efcf85;background:linear-gradient(120deg,#4a3f3a,#2f2a34);}
+.bld .bounty-row.claimed,.bld .bounty-row.done {opacity:.6;}
+.bld .bounty-text>span:first-child {color:#fff0cf;}
+
+/* Shop. */
+.bld .shop-offer {border:1px solid var(--chip-line);background:linear-gradient(160deg,#3a3044,#2a2636);box-shadow:2px 3px #100c2066;border-radius:0;}
+.bld .shop-offer.legendary {border:2px solid #e8c98a;background:radial-gradient(ellipse at 50% 0,#ffd23f22,transparent 65%),linear-gradient(160deg,#4a3d3a,#2a2636);box-shadow:2px 3px #100c2066,inset 0 3px #ffd23f;}
+.bld .shop-offer.sold {opacity:.5;}
+
+/* Summon: the portal sits in the framed room; banners become chips, featured becomes parchment. */
+.bld .summon-main.bh-frame {padding:0;}
+.bld .banner-tab {border-radius:0;background:var(--chip);border:1px solid var(--chip-line);box-shadow:2px 3px #100c2066;color:#fff0cf;}
+.bld .banner-tab.selected {border:2px solid #e8c98a;box-shadow:2px 3px #100c2066,inset 0 3px var(--accent);background:#403546;}
+.bld .featured-banner {border:2px solid var(--parch-line);background:var(--parch);color:var(--parch-ink);box-shadow:2px 3px #162f3255;}
+.bld .featured-banner b {color:#7a3b24;}
+.bld .pull-card {border-radius:0;box-shadow:2px 3px #100c2066;}
+
+/* Summon focus list and spin purchase box: chips, with the focused fighter in parchment. */
+.bld .focus-item {border-radius:0;background:var(--chip);border:1px solid var(--chip-line);box-shadow:2px 3px #100c2066;color:#fff0cf;}
+.bld .focus-item:not(:disabled):hover,.bld .focus-item:focus-visible {background:#3c3547;border-color:#ffe6ac;}
+.bld .focus-item.active {background:var(--parch);border:2px solid var(--parch-line);color:var(--parch-ink);}
+.bld .focus-item.active .focus-meta {color:#6b5440;}
+.bld .buy-spins {border-radius:0;background:#2c2836;border:1px solid var(--chip-line);box-shadow:2px 3px #100c2066,inset 4px 0 var(--accent);}
+
+/* Upgrades House cards. */
+.bld .upgrade-card {box-shadow:2px 3px #100c2066,inset 0 3px var(--accent)!important;}
+
+/* Dojo, Gravity, Fusion and Fortune keep their room colors but use Home's trim. */
+.bld.dojo.area-polished .dojo-slot {border:1px solid var(--chip-line);box-shadow:2px 3px #100c2066,inset 0 -5px #a4946340;}
+.bld.gravity.area-polished .gravity-card {border-width:2px;box-shadow:2px 3px #100c2066;}
+.bld.fusion.area-polished .fusion-recipe {border:2px solid var(--bld-line);box-shadow:2px 3px #100c2066,inset 4px 0 var(--accent);}
+.bld.fortune.area-polished .fortune-lucky {border:2px solid var(--bld-line);box-shadow:0 4px #100c20,inset 4px 0 var(--accent);}
+.bld .spare {border-radius:0;}
+
+/* Armory: gear tiles and the Forge read as chips; compare deltas stay green/red. */
+.bld .gear-grid>*,.bld .rune-card,.bld .rune-slot-tag {border-radius:0;}
+.bld .set-list>*,.bld .set-effects>* {border-left:3px solid var(--accent);}
+
+/* Parchment tags inside these screens. */
+.bld .tag,.bld .spare-tag,.bld .shard-chip {font:9px/1.4 var(--pixel);padding:4px 6px;background:var(--parch);border:2px solid var(--parch-line);color:var(--parch-ink);box-shadow:2px 2px #162f3255;border-radius:0;}
+
+@media(max-width:700px) {
+ .bh-back {padding:9px 12px;font-size:10px;}
+ .bh-copy,.bh-frame .summon-content {padding:15px 16px 17px;}
+ .bh-copy h2,.bh-frame .summon-content h2 {font-size:13px;}
+ .bh-copy p {font-size:17px;}
+ .bh-eyebrow {font-size:15px;letter-spacing:1px;}
+ .bld .panel:not(.bh-frame) {padding:15px 14px;}
+ .bld .panel h3,.bld .section-head h3 {font-size:11px;}
+}
+@media(prefers-reduced-motion:reduce) {
+ .bh-back,.bld .btn {transition:none;}
+}
+
+/* Activity vignettes (Dojo, Fusion, Gravity, Fortune, Hall): Home's frame and a warm caption instead of navy. */
+.bld .activity-scene {border:2px solid var(--bld-line);box-shadow:0 4px #100c20,inset 4px 0 var(--accent);}
+.bld .activity-caption {background:linear-gradient(90deg,#2c2836f2 62%,#2c283600);}
+.bld .activity-caption>span {font:13px/1.2 var(--body);letter-spacing:2px;color:var(--accent);}
+.bld .activity-caption h3 {color:#fff0cf;text-shadow:2px 2px #1f1b2e;}
+.bld .activity-caption p {color:#cfc3b8;}
+
+/* Collector's Journal entries and Armory rune cards: Home's chips. */
+.bld.journal-screen .panel.floor {background:linear-gradient(120deg,#3a3044,#2c2836);border:1px solid var(--chip-line);box-shadow:2px 3px #100c2066,inset 4px 0 var(--accent);padding:12px 14px;margin-bottom:10px;}
+.bld.journal-screen .panel.floor.cleared {opacity:.65;}
+.bld .rune-card {background:linear-gradient(160deg,#3a3044,#2a2636);box-shadow:2px 3px #100c2066;}

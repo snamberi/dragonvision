@@ -4,7 +4,7 @@ import { claimWantedPoster, refreshWantedPosters, todaysPosters } from '../game/
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { orbs } from './format';
 import { type MaterialReward, materialText } from '../game/materials';
 
@@ -21,7 +21,7 @@ function rewardText(r: { coins?: number; spins?: number; gems?: number } & Mater
 export function BountyScreen({ save, update: commit, onBack }: Props) {
   const {update,feedback}=useActionFeedback(commit);
   return (
-    <div className="bounty area-polished">{feedback}
+    <div className="bounty area-polished bld bld-training" style={districtStyle("Bounty Board")}>{feedback}
       <BuildingHeader title="Bounty Board" onBack={onBack}>
         <p className="muted">Daily bounties reset at midnight, weekly ones on Monday. Progress counts from when each period starts.</p>
       </BuildingHeader>

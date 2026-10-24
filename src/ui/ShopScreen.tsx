@@ -6,7 +6,7 @@ import { getFamily } from '../game/roster';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { GearIcon } from './GearCard';
 import { ItemIcon } from './ItemIcon';
 import { PixelIcon } from './PixelIcon';
@@ -70,7 +70,7 @@ export function ShopScreen({ save, update: commit, onBack }: Props) {
   };
 
   return (
-    <div className="shop area-polished">{feedback}
+    <div className="shop area-polished bld bld-market" style={districtStyle("Shop")}>{feedback}
       <BuildingHeader title="Shop" onBack={onBack}>
         <p className="muted">Six new offers every day, plus one legendary offer in gold. Each offer sells once.</p>
       </BuildingHeader>

@@ -7,7 +7,7 @@ import { getFamily } from '../game/roster';
 import { luckyFamilyId } from '../game/summon';
 import type { SaveData, Unit } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { BuildingHeader, districtStyle } from './BuildingHeader';
 import { FighterCard } from './FighterCard';
 import { Sprite } from './Sprite';
 
@@ -42,7 +42,7 @@ export function FortuneScreen({ save, update: commit, onBack }: Props) {
   };
 
   return (
-    <div className="fortune area-polished">{feedback}
+    <div className="fortune area-polished bld bld-market" style={districtStyle("Fortune Teller")}>{feedback}
       <BuildingHeader title="Fortune Teller" onBack={onBack}>
         <p className="muted">One free summon every day, and a lucky fighter who is {LUCKY_MULTIPLIER}× as likely to appear in every summon today.</p>
       </BuildingHeader>

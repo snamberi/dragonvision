@@ -13,6 +13,7 @@ import {
 import { buyCollectionUpgrade, buyStorageUpgrade, collectionCap, gearStorageSize } from '../game/upgrades';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
+import { BackToCity, districtStyle } from './BuildingHeader';
 
 interface Props {
   save: SaveData;
@@ -27,14 +28,12 @@ export function UpgradesHouseScreen({ save, update, onBack }: Props) {
   const currentStorage = gearStorageSize(save);
 
   return (
-    <div className="upgrades-house">
-      <button className="btn ghost summon-back" onClick={onBack}>
-        ← City
-      </button>
-      <section className="panel summon-main">
+    <div className="upgrades-house bld bld-market" style={districtStyle('Upgrades House')}>
+      <BackToCity onBack={onBack} className="summon-back" />
+      <section className="panel summon-main bh-frame">
         <BuildingInterior kind="upgrades" />
         <div className="summon-content">
-          <div className="eyebrow">Vision City</div>
+          <span className="bh-eyebrow">Vision City · Market Row</span>
           <h2>Upgrades House</h2>
           <p className="muted">Expand your collection and gear storage to hold more fighters and equipment.</p>
 
