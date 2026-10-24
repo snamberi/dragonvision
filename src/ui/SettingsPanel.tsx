@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CommunityLinks, DiscordButton } from './SocialLinks';
 import { setSoundSettings, soundSettings } from '../audio/sound';
 import { exportCode, importCode } from '../game/save';
 import type { SaveData } from '../game/types';
@@ -75,6 +76,11 @@ export function SettingsPanel({ save, update }: { save: SaveData; update: Update
 
   return (
     <section className="settings">
+      <h3>Community</h3>
+      <p className="small-text">Share your fighters, report bugs and hear about updates first.</p>
+      <DiscordButton />
+      <CommunityLinks />
+
       <h3>Sound</h3>
       <div className="button-row">
         <button className={`btn small ${sound.music ? 'primary' : ''}`} onClick={() => toggle('music')}>

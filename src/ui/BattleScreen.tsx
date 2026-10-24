@@ -8,6 +8,7 @@ import { identityFor } from '../art/identity';
 import { PixelIcon } from './PixelIcon';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KI_BLAST_COST, KI_MAX, REPLAY_COIN_SHARE } from '../game/balance';
+import { queueInvite } from '../content/social';
 import {
   type Action,
   type ActionEvent,
@@ -265,6 +266,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
       recordWantedWin(recordWin(applyRewards(s, stageNumber, earned), { firstClear: earned.firstClear, boss, flawless }), stageNumber, teamUnits(s), dayKey()),
     );
     setRewards(earned);
+    queueInvite(stageNumber, earned.firstClear);
     if (run.mode === 'single') return;
     const total: Run = {
       ...run,

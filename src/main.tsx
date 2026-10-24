@@ -14,6 +14,7 @@ import './arena.css';
 import './fighters-ui.css';
 import './buildings-a.css';
 import './buildings-b.css';
+import './social.css';
 import { App } from './ui/App';
 import { ErrorBoundary } from './ui/ErrorBoundary';
 

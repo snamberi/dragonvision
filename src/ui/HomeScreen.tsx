@@ -12,6 +12,7 @@ import { PixelIcon } from './PixelIcon';
 import { Sprite } from './Sprite';
 import type { PendingKey } from '../game/collect';
 import { TodayPanel } from './TodayPanel';
+import { DiscordButton } from './SocialLinks';
 import { EVENT_STAGES, currentEvent, eventProgress, eventTimeLeft, formatTimeLeft } from '../game/events';
 
 type Panel='house'|'resident'|'mail'|'daily'|'training'|'trophies'|null;
@@ -57,6 +58,7 @@ export function HomeScreen({save,update,onTravel,onUpdates,onEvent,onGo,toast}:P
       <div className="home-map-note"><span aria-hidden="true">✦</span> A place to rest. A world to explore.</div>
     </section>
     {onEvent&&compact&&<EventBanner save={save} onOpen={onEvent} inline/>}
+    <DiscordButton className="home-discord"/>
     {onGo&&<TodayPanel save={save} update={update} toast={toast} onGo={(t)=>t==='login'?setPanel('daily'):onGo(t)}/>}
     {(panel==='house'||panel==='resident')&&<HousePanel save={save} update={update} onClose={close} selectResident={panel==='resident'}/>}
     {panel==='mail'&&<MailboxPanel save={save} update={update} onClose={close} onUpdates={()=>{close();onUpdates();}}/>}

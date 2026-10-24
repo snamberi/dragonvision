@@ -38,6 +38,8 @@ import { ClimbScreen } from './ClimbScreen';
 import { JournalScreen } from './JournalScreen';
 import { EventScreen } from './EventScreen';
 import { Modal } from './Modal';
+import { DiscordButton, SocialIconRow } from './SocialLinks';
+import { takeInvite } from '../content/social';
 import { SettingsPanel } from './SettingsPanel';
 import { WhatsNew } from './WhatsNew';
 import { LoginPopup } from './LoginPopup';
@@ -64,7 +66,7 @@ type View =
 
 export type Updater = (change: (save: SaveData) => SaveData) => boolean;
 
-type Popup = 'updates' | 'login' | 'settings' | null;
+type Popup = 'updates' | 'login' | 'settings' | 'discord' | null;
 
 export function App() {
   const [save, setSave] = useState<SaveData>(loadSave);
@@ -72,6 +74,11 @@ export function App() {
   const [popup, setPopup] = useState<Popup>(null);
   const closePopup = useCallback(() => setPopup(null), []);
   const [view, setView] = useState<View>({ kind: 'tab', tab: 'home' });
+  // A milestone invite waits until the player is out of battle (after any Auto-Progress run has stopped).
+  useEffect(() => {
+    if (view.kind === 'battle' || popup) return;
+    if (takeInvite()) setPopup('discord');
+  }, [view, popup]);
   const [toast, setToast] = useState<string | null>(null);
   const saveRef = useRef(save);
   saveRef.current = save;
@@ -181,6 +188,7 @@ export function App() {
           <span className="gem" title="Gems"><PixelIcon kind="gem" size={16} /> {compact(save.gems)}</span>
         </div>
         <div className="corner-buttons">
+          <SocialIconRow />
           {loginReady(save) && (
             <button className="corner-btn alert" onClick={() => setPopup('login')} aria-label="Daily login reward" title="Daily login reward">
               <PixelIcon kind="gem" size={18} />
@@ -316,6 +324,15 @@ export function App() {
 
       {popup === 'updates' && <WhatsNew onClose={closePopup} />}
       {popup === 'login' && <LoginPopup save={save} update={update} onClose={closePopup} />}
+      {popup === 'discord' && (
+        <Modal title="You broke the gate!" onClose={closePopup} className="discord-invite">
+          <p>That was a big one. Share it with the community: show off your team, compare builds and hear about new fighters first.</p>
+          <DiscordButton />
+          <div className="button-row">
+            <button className="btn" onClick={closePopup}>Not now</button>
+          </div>
+        </Modal>
+      )}
       {popup === 'settings' && (
         <Modal title="Settings" onClose={closePopup}>
           <SettingsPanel save={save} update={update} />
