@@ -98,6 +98,8 @@ export interface Unit {
   sigTier?: number;
   /** Team wins this fighter took part in; sets its mastery level. */
   mastery?: number;
+  /** Locked fighters are never used up as evolution copies or in bulk sell/fuse. */
+  locked?: boolean;
 }
 
 /** A saved formation: five pads of unit ids. */

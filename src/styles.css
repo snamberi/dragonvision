@@ -3075,3 +3075,108 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 .preset-row .preset-members { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; }
 .preset-name { display: flex; gap: 6px; align-items: center; }
 .preset-name input { width: 9em; }
+
+/* --- Fighters QoL: team tools, filters, locks, previews, undo --- */
+.team-tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 4px;
+}
+
+.collection-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.filter-search {
+  width: 100%;
+  max-width: 320px;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.chip-btn {
+  padding: 3px 10px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip-btn.on {
+  border-color: var(--gold);
+  background: var(--panel-2);
+  color: var(--gold);
+}
+
+.chip-btn.clear {
+  opacity: 0.8;
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.card-actions .card-action {
+  flex: 1;
+}
+
+.card-lock {
+  flex: 0 0 auto;
+  min-width: 34px;
+}
+
+.card-lock.on,
+.lock-toggle.on {
+  border-color: var(--gold);
+}
+
+.lock-toggle {
+  margin-left: 6px;
+}
+
+.plan-list {
+  max-height: 40vh;
+  overflow-y: auto;
+  margin: 8px 0 12px;
+  padding-left: 18px;
+}
+
+.plan-list li {
+  margin: 2px 0;
+}
+
+.undo-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  max-width: calc(100vw - 32px);
+  background: var(--panel-2);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  color: var(--ink);
+}

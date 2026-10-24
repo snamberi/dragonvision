@@ -24,7 +24,7 @@ export function spareUnits(save: SaveData): Spare[] {
   const best = bestCopies(save);
   const bestStar = new Map(save.units.filter((u) => best.has(u.uid)).map((u) => [u.familyId, u.star]));
   return save.units
-    .filter((u) => !best.has(u.uid) && !save.team.includes(u.uid) && !isBusy(save, u.uid))
+    .filter((u) => !best.has(u.uid) && !u.locked && !save.team.includes(u.uid) && !isBusy(save, u.uid))
     .map((unit) => ({ unit, usefulForEvolving: bestStar.get(unit.familyId) === unit.star }))
     .sort((a, b) => a.unit.star - b.unit.star || Number(a.usefulForEvolving) - Number(b.usefulForEvolving) || a.unit.level - b.unit.level);
 }

@@ -1,4 +1,5 @@
 import { PixelIcon } from './PixelIcon';
+import { toggleLock } from '../game/teamTools';
 import { equipSkin, equippedSkin, skinsFor } from '../game/skins';
 import { useState } from 'react';
 import { MAX_LEVEL, MAX_STARS, RESET_GEM_COST, levelCap, starMilestoneBonus } from '../game/balance';
@@ -105,6 +106,14 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
             Lv {unit.level} <Stars star={unit.star} />
             {save.team.includes(uid) && <span className="tag">ON TEAM</span>}
             {isTraining(save, uid) && <span className="tag">IN DOJO</span>}
+            <button
+              className={`btn small lock-toggle ${unit.locked ? 'on' : ''}`}
+              aria-pressed={Boolean(unit.locked)}
+              title={unit.locked ? 'Locked: never used as an evolution copy or sold' : 'Lock this fighter'}
+              onClick={() => update((s) => toggleLock(s, uid))}
+            >
+              {unit.locked ? '🔒 Locked' : '🔓 Lock'}
+            </button>
           </div>
           <div className="stat-grid">
             <span>HP {stats.hp.toLocaleString()}</span>
