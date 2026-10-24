@@ -9,6 +9,8 @@ import { TRAITS, WALL_SCENES, wallRule, wallSceneKey } from '../game/encounters'
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
 import { type Run, newRun } from './run';
+import { preFightAdvice } from '../game/advice';
+import { getFamily, roleFor } from '../game/roster';
 import { Sprite, Stars } from './Sprite';
 import { StoryScene } from './StoryScene';
 
@@ -217,6 +219,13 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
   const enemyPower = Math.round(
     stage.enemies.reduce((sum, e) => sum + power(e.familyId, e.star, e.level), 0) * enemyStrengthForStage(stageNumber),
   );
+  const [stopOnSet, setStopOnSet] = useState(true);
+  const [coinGoal, setCoinGoal] = useState('');
+  const farmStops = {
+    setPiece: Boolean(wallSetFor(stageNumber)) && stopOnSet,
+    coinTarget: Number(coinGoal) > save.coins ? Number(coinGoal) : null,
+  };
+  const advice = team.length > 0 ? preFightAdvice(team.map((u) => roleFor(getFamily(u.familyId))), stage) : '';
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="panel stage-card modal stage-sheet" onClick={(e) => e.stopPropagation()}>
@@ -254,6 +263,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
                 first clear, {Math.round(WALL_SET_REPLAY_CHANCE * 100)}% on replays. 4 pieces: {GEAR_EFFECTS[wallSetFor(stage.number)!.effect].text}.
               </div>
             )}
+            {advice && <div className="small-text stage-advice">Tip: {advice}</div>}
           </div>
           <div className="power-compare">
             <span>Your team {teamPower.toLocaleString()}</span>
@@ -301,7 +311,7 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
         <div className="auto-runs">
           {replay ? (
             <div className="auto-run">
-              <button className="btn" onClick={() => onPlay(stageNumber, newRun('farm', farmLimit === 'all' ? null : Number(farmLimit)))}>
+              <button className="btn" onClick={() => onPlay(stageNumber, newRun('farm', farmLimit === 'all' ? null : Number(farmLimit), farmStops))}>
                 Auto-Farm
               </button>
               <select value={farmLimit} onChange={(e) => setFarmLimit(e.target.value)} aria-label="Auto-Farm runs">
@@ -311,7 +321,28 @@ function StageSheet({ save, stageNumber, farmLimit, setFarmLimit, onClose, onPla
                 <option value="50">50 runs</option>
                 <option value="all">Until I stop</option>
               </select>
-              <span className="muted small-text">Replays this stage for 7.5% coins. Stops on a defeat.</span>
+              <span className="muted small-text">Replays this stage for {Math.round(REPLAY_COIN_SHARE * 100)}% coins. Stops on a defeat.</span>
+              <div className="farm-stops small-text">
+                {wallSetFor(stageNumber) && (
+                  <label>
+                    <input type="checkbox" checked={stopOnSet} onChange={(e) => setStopOnSet(e.target.checked)} /> Stop when a set piece drops
+                  </label>
+                )}
+                <label>
+                  Stop at{' '}
+                  <input
+                    type="number"
+                    min={0}
+                    step={1000}
+                    inputMode="numeric"
+                    placeholder="coins"
+                    value={coinGoal}
+                    onChange={(e) => setCoinGoal(e.target.value)}
+                    aria-label="Stop when coins reach"
+                  />{' '}
+                  coins
+                </label>
+              </div>
             </div>
           ) : stage.kind === 'normal' ? (
             <div className="auto-run">

@@ -2318,6 +2318,29 @@ div.card-open {
   gap: 8px;
 }
 
+.farm-stops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  width: 100%;
+}
+
+.farm-stops input[type='number'] {
+  width: 110px;
+}
+
+.stage-advice {
+  margin-top: 4px;
+  color: var(--gold, #f2c14e);
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
 .special-box {
   margin: 6px 0;
   padding: 8px;
