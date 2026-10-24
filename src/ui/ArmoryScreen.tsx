@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useActionFeedback } from './useActionFeedback';
-import { BOSS_GEAR_SETS, SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
+import { autoEquipTeam, benchWouldHelp, salvageCandidates, salvageFiltered } from '../game/gearTools';
+import { BOSS_GEAR_SETS, RARITIES, RARITY_LABEL, type Rarity, SHOP_REFRESH_GEMS, SETS, buyOffer, refreshShop, sellItem, sellValueOf, shopStock, syncShop, wearer } from '../game/gear';
 import { REROLL_COST, duplicateItems, dustFor, forgeDust, rerollSub, salvageDuplicates, salvageItem } from '../game/forge';
 import { describeBonus } from '../game/bonus';
 import { RUNE_FRAG_COST, RUNE_TEMPLATES, craftRune } from '../game/rune';
@@ -25,6 +27,24 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
   const spareDust = spares.reduce((sum, i) => sum + dustFor(i), 0);
   const dust = forgeDust(save);
   const rollable = save.items.filter((i) => (i.subs ?? []).length > 0);
+  const [maxRarity, setMaxRarity] = useState<Rarity>('uncommon');
+  const [withBoss, setWithBoss] = useState(false);
+  const [openReroll, setOpenReroll] = useState<string | null>(null);
+  const bulk = salvageCandidates(save, { maxRarity, includeBossSets: withBoss });
+  const bulkDust = bulk.reduce((sum, i) => sum + dustFor(i), 0);
+  const team = save.team.filter((t): t is string => Boolean(t));
+
+  const salvageBulk = () => {
+    const ok = window.confirm(`Salvage ${bulk.length} unworn piece${bulk.length === 1 ? '' : 's'} (${RARITY_LABEL[maxRarity]} and below) for ${bulkDust} Forge Dust?`);
+    if (ok) update((s) => salvageFiltered(s, { maxRarity, includeBossSets: withBoss }).save, `Salvaged ${bulk.length} pieces for ${bulkDust} Forge Dust`);
+  };
+
+  const gearUpTeam = () => {
+    const bench = benchWouldHelp(save, team) && window.confirm('Better gear is on fighters who are off the team. Take it from the bench?');
+    const result = autoEquipTeam(save, bench);
+    if (result.changed === 0) update((s) => s, 'Your team already wears its best gear');
+    else update(() => result.save, `Equipped ${result.changed} piece${result.changed === 1 ? '' : 's'} across your team`);
+  };
 
   return (
     <div className="armory area-polished">{feedback}
@@ -34,6 +54,16 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
           rarities show up as you go deeper into the story. Wear 2 or 4 pieces of one set for its bonus.
         </p>
       </BuildingHeader>
+
+      <section className="panel">
+        <div className="section-head">
+          <h3>Quick gear</h3>
+          <button className="btn small primary" disabled={team.length === 0} onClick={gearUpTeam}>
+            Gear up team
+          </button>
+        </div>
+        <p className="muted small-text">Puts the best free gear on every team fighter, finishing set bonuses where it can. Team fighters never lose gear to each other.</p>
+      </section>
 
       <section className="panel">
         <div className="section-head">
@@ -95,11 +125,31 @@ export function ArmoryScreen({ save, update: commit, onBack }: Props) {
         >
           {spares.length === 0 ? 'No spare copies' : `Salvage ${spares.length} spare cop${spares.length === 1 ? 'y' : 'ies'} (+${spareDust} ✧)`}
         </button>
+        <div className="salvage-filter mt-sm">
+          <label className="small-text">
+            Salvage unworn up to{' '}
+            <select value={maxRarity} onChange={(e) => setMaxRarity(e.target.value as Rarity)} aria-label="Highest rarity to salvage">
+              {RARITIES.map((r) => (
+                <option key={r} value={r}>
+                  {RARITY_LABEL[r]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="small-text">
+            <input type="checkbox" checked={withBoss} onChange={(e) => setWithBoss(e.target.checked)} /> include boss set pieces
+          </label>
+          <button className="btn small" disabled={bulk.length === 0} onClick={salvageBulk}>
+            {bulk.length === 0 ? 'Nothing matches' : `Salvage ${bulk.length} (+${bulkDust} ✧)`}
+          </button>
+        </div>
         {rollable.length > 0 && (
           <div className="gear-grid mt-sm">
             {rollable.map((item) => (
-              <GearCard key={item.id} save={save} item={item}>
-                {(item.subs ?? []).map((sub, idx) => (
+              <GearCard key={item.id} save={save} item={item} onClick={() => setOpenReroll(openReroll === item.id ? null : item.id)}>
+                {openReroll !== item.id ? (
+                  <button className="btn small ghost" onClick={() => setOpenReroll(item.id)}>Reroll stats ▾</button>
+                ) : (item.subs ?? []).map((sub, idx) => (
                   <button
                     key={idx}
                     className="btn small"
