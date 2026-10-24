@@ -453,3 +453,7 @@ export const armoryUrl = () => landmarkUrl('armory') || paintAscii('armory', ARM
 export const hallUrl = () => landmarkUrl('hall') || paintAscii('hall', HALL, HALL_PALETTE);
 export const colosseumUrl = () => landmarkUrl('colosseum') || paintAscii('colosseum', COLOSSEUM, COLOSSEUM_PALETTE);
 export const gateUrl = () => landmarkUrl('gate') || paintAscii('gate', GATE, GATE_PALETTE);
+export const dungeonUrl = () => landmarkUrl('dungeon') || dojoUrl();
+export const raidUrl = () => landmarkUrl('raid') || colosseumUrl();
+export const climbUrl = () => landmarkUrl('climb') || towerUrl();
+export const journalUrl = () => landmarkUrl('journal') || hallUrl();

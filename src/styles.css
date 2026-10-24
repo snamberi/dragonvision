@@ -2731,12 +2731,8 @@ div.gear-open { cursor:default; }
 }
 
 /* ---------- Colosseum, Survival, Hall, Login ---------- */
-.boss-panel { display:flex; flex-wrap:wrap; align-items:center; gap:18px; }
 .boss-info { flex:1; min-width:240px; display:flex; flex-direction:column; gap:6px; }
-.boss-bar { display:block; height:16px; background:#3a1220; border:2px solid #120b2e; }
-.boss-bar i { display:block; height:100%; background:linear-gradient(90deg,#ff4a3d,#ff8a1f); transition:width .4s steps(8); }
 .boss-damage { font-size:20px; }
-.survival-panel { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 .collection-forms { display:flex; flex-wrap:wrap; gap:8px; }
 .collection-form { display:flex; flex-direction:column; align-items:center; width:96px; padding:4px; background:var(--bg-2); border:2px solid var(--line); text-align:center; line-height:1.05; }
 .collection-form small { font-size:13px; }

@@ -1,0 +1,138 @@
+/* Arena Quarter + Harbor & Depths buildings, drawn in Home's language: a framed street-front scene,
+   pixel-font titles over parchment eyebrows, dark gradient cards, parchment tags and gold meters. */
+.qscreen {display:flex;flex-direction:column;gap:18px;}
+.qs {gap:10px;}
+.qs-back {align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 14px;font:18px var(--body);color:#f7e1bd;background:#262536;border:1px solid #b49a76;box-shadow:2px 3px #141722;cursor:pointer;}
+.qs-back b {font:20px/1 var(--body);color:#e6bc7c;}
+.qs-back:hover,.qs-back:focus-visible {background:#3c3547;border-color:#ffe6ac;}
+
+.qs-scene {position:relative;isolation:isolate;overflow:hidden;min-height:340px;border:2px solid #92859a;box-shadow:0 4px #100c20;background:#547463;}
+.qs-scene:after {content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 95px #14282c44;z-index:3;}
+.qs-bg {position:absolute;inset:0;width:100%;height:100%;}
+/* A soft top shade keeps the title readable over any sky, like Home's welcome corner. */
+.qs-scene:before {content:'';position:absolute;inset:0 0 auto 0;height:58%;z-index:1;pointer-events:none;background:linear-gradient(180deg,#1d1a2e99,#1d1a2e4d 45%,transparent);}
+.qs-copy {position:absolute;z-index:4;left:27px;top:24px;max-width:min(560px,58%);pointer-events:none;}
+.qs-copy h2 {font:clamp(13px,1.5vw,19px)/1.7 var(--pixel);color:#fff0cf;margin:10px 0 4px;text-shadow:2px 3px #302c43;}
+.qs-copy p {margin:0;font-size:20px;line-height:1.25;color:#efe4d6;text-shadow:1px 2px #39384a;}
+.qs-copy .vc-eyebrow {color:#fff1d6;text-shadow:1px 1px #302c43;}
+.qs-status {position:absolute;z-index:4;right:24px;top:24px;display:grid;gap:5px;padding:12px 17px;min-width:150px;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #202b324d;text-align:left;}
+.qs-status small {font:11px var(--body);letter-spacing:1.5px;color:#d6b895;text-transform:uppercase;}
+.qs-status strong {font:12px/1.5 var(--pixel);color:#fff1cf;}
+.qs-building {position:absolute;z-index:2;left:50%;bottom:6%;width:min(300px,42%);transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(5px 8px 0 #20343333);}
+.qs-figure {position:absolute;z-index:3;left:calc(50% + min(170px,23%));bottom:7%;filter:drop-shadow(3px 5px 0 #20343344);}
+.qs-figure:before {content:'';position:absolute;left:50%;bottom:2px;width:64px;height:10px;translate:-50% 0;background:#203c3699;border-radius:50%;z-index:-1;}
+
+/* Cards: Home's trophy/dialog language. */
+.qp {display:flex;flex-direction:column;gap:14px;padding:18px 20px 20px;background:linear-gradient(120deg,#30313c,#242532);border:2px solid #565261;box-shadow:0 4px #100c20;color:#f2e8d9;}
+.qp-head {display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:-18px -20px 0;padding:14px 20px 12px;background:linear-gradient(110deg,#403546,#292536);border-bottom:1px solid #927a62;box-shadow:inset 4px 0 var(--qs-accent,#e2bc85);}
+.qp-head h3 {margin:4px 0 0;font:13px/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 2px #1f1b2e;}
+.qp-head .vc-eyebrow {color:var(--qs-accent,#e2bc85);}
+.qp p {margin:0;font-size:19px;line-height:1.3;color:#cfc3b8;}
+.qp b,.qp strong {color:#ffe2a6;}
+.qp .btn {min-height:44px;}
+.qp>.btn,.qboss-info>.btn {align-self:flex-start;justify-self:start;min-width:220px;}
+.qscreen .vc-eyebrow {display:block;font:12px/1.2 var(--body);letter-spacing:2px;}
+
+.qtag {display:inline-flex;align-items:center;gap:6px;padding:5px 8px;font:9px/1.4 var(--pixel);background:#ffe4a4;border:2px solid #785e49;color:#503c39;box-shadow:2px 2px #162f3255;white-space:nowrap;}
+.qtag.dark {background:#303038;border:1px solid #b4a183;color:#ffdfa3;}
+.qtag.done {background:#cfe6c4;border-color:#5f7d5a;color:#2f4a34;}
+
+.qstats {display:flex;flex-wrap:wrap;gap:10px;}
+.qstat {display:grid;gap:4px;flex:1 1 130px;min-width:0;padding:10px 14px;background:#22243b;border:1px solid #6e6274;}
+.qstat small {font:12px var(--body);letter-spacing:1.5px;color:#d6b895;text-transform:uppercase;}
+.qstat b {font:12px/1.5 var(--pixel);color:#fff1cf;overflow-wrap:anywhere;}
+
+.qrows {display:grid;gap:8px;}
+.qr {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 14px;border:1px solid #565261;background:linear-gradient(120deg,#2b2c37,#22232f);}
+.qr.ready {border-color:#c9a36b;background:linear-gradient(120deg,#49403d,#2c2a35);}
+.qr.done {border-color:#738d77;background:linear-gradient(120deg,#303e39,#242d32);}
+.qr.locked {opacity:.62;}
+.qr-main {display:grid;gap:4px;min-width:0;}
+.qr-main>span:first-child {font-size:20px;color:#f7ead6;}
+.qr-main small {font-size:17px;color:#bdb3c4;}
+.qr-side {display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+
+.qm {position:relative;display:block;height:14px;background:#1a1b26;border:1px solid #6e6274;box-shadow:inset 0 2px #0c0d16;overflow:hidden;}
+.qm i {position:absolute;inset:0 auto 0 0;background:linear-gradient(180deg,#ffe08a,#d9a441);box-shadow:inset 0 -3px #b07c2c;}
+.qm.hp i {background:linear-gradient(180deg,#ff8f6b,#d24a3a);box-shadow:inset 0 -3px #9a2f26;}
+.qm.ticks:after {content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 2px),#0c0d16 calc(20% - 2px) 20%);}
+
+/* Colosseum boss card. */
+.qboss {display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center;}
+.qboss-portrait {display:grid;place-items:end center;width:170px;height:180px;border:1px solid #a58d6c66;border-radius:100px 100px 0 0;background:radial-gradient(ellipse at 50% 70%,#7a3f3a55,#22243b 70%);box-shadow:inset 0 -12px #53645544;}
+.qboss-info {display:grid;gap:10px;min-width:0;}
+.qboss-info h3 {margin:0;font:15px/1.6 var(--pixel);color:#fff0cf;}
+
+/* Tower floors keep their structure; only the skin changes. */
+.qscreen .floor-list {display:grid;gap:10px;}
+.qscreen .floor {display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:14px;margin:0;padding:12px 16px;border:1px solid #565261;background:linear-gradient(120deg,#2b2c37,#22232f);box-shadow:none;border-radius:0;}
+.qscreen .floor.next {border:2px solid #c9a36b;background:linear-gradient(120deg,#49403d,#2c2a35);box-shadow:0 0 0 3px #c9a36b22,0 4px #100c20;}
+.qscreen .floor.cleared {border-color:#738d77;background:linear-gradient(120deg,#303e39,#242d32);}
+.qscreen .floor.locked {opacity:.7;}
+.qscreen .floor-num {display:grid;gap:5px;justify-items:start;font:15px/1.4 var(--pixel);color:#fff0cf;}
+.qscreen .floor-body {display:grid;gap:6px;min-width:0;}
+.qscreen .floor-body b {font:10px/1.6 var(--pixel);color:#ffe2a6;}
+.qscreen .floor .rule {font-size:17px;color:#ffc58a;}
+.qscreen .floor-cleared summary {font:18px var(--body);color:#e6bc7c;padding:10px 0;cursor:pointer;}
+
+/* Harbor: expedition trips and the party picker. */
+.qscreen .trip-list {display:grid;gap:10px;}
+.qscreen .trip {display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;margin:0;padding:12px 16px;border:1px solid #565261;background:linear-gradient(120deg,#2b2c37,#22232f);box-shadow:0 3px #100c20;border-radius:0;}
+.qscreen .trip.done {border-color:#c9a36b;background:linear-gradient(120deg,#49403d,#2c2a35);}
+.qscreen .trip.risky {box-shadow:inset 4px 0 #d9736b,0 3px #100c20;}
+.qscreen .trip-info {display:grid;gap:4px;min-width:0;}
+.qscreen .voyage-track {position:relative;height:12px;margin:2px 0 6px;background:repeating-linear-gradient(90deg,#3a7487 0 10px,#2f6274 10px 20px);border:1px solid #6e6274;}
+.qscreen .voyage-track i {position:absolute;top:-6px;translate:-50% 0;font-style:normal;color:#ffe08a;text-shadow:1px 1px #100c20;}
+.qscreen .trip-reward {color:#ffe2a6;}
+.qscreen .spare-grid.trip-pick {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+.qscreen .spare {display:grid;justify-items:center;gap:4px;padding:10px 8px;background:#22243b;border:1px solid #6e6274;color:#f2e8d9;border-radius:0;}
+.qscreen .spare.picked {border:2px solid #ffd58a;background:#49403d;box-shadow:inset 0 -3px #c9a36b;}
+.qscreen .spare-name {font:9px/1.5 var(--pixel);color:#fff0cf;text-align:center;}
+.qchoices {display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+
+/* Event: stage plaques and the shop counter. */
+.qscreen .event-stages {display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.qscreen .event-stage {display:grid;gap:6px;justify-items:start;padding:12px;border:1px solid #565261;background:linear-gradient(120deg,#2b2c37,#22232f);border-radius:0;}
+.qscreen .event-stage b {font:10px/1.6 var(--pixel);color:#fff0cf;}
+.qscreen .event-stage small {font-size:16px;color:#cfc3b8;}
+.qscreen .event-stage.cleared {border-color:#738d77;background:linear-gradient(120deg,#303e39,#242d32);}
+.qscreen .event-stage.boss {border:2px solid #c9a36b;}
+.qscreen .event-stage.locked {opacity:.6;}
+.qscreen .event-shop {display:grid;gap:8px;}
+.qscreen .event-offer {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 14px;border:1px solid #565261;background:linear-gradient(120deg,#2b2c37,#22232f);border-radius:0;font-size:20px;}
+.qscreen .event-offer.sold-out {opacity:.6;}
+.qscreen .event-price {font:9px/1.4 var(--pixel);}
+
+/* Climb history bars. */
+.qhist {display:grid;gap:8px;}
+.qhist-row {display:grid;grid-template-columns:110px minmax(0,1fr) 54px;align-items:center;gap:12px;font-size:18px;color:#cfc3b8;}
+.qhist-row.now {color:#ffe2a6;}
+.qhist-row b {font:10px var(--pixel);color:#fff0cf;text-align:right;}
+
+@media(max-width:700px) {
+ .qs-scene {min-height:430px;}
+ .qs-copy {left:16px;right:16px;top:16px;max-width:none;}
+ .qs-copy h2 {font-size:13px;margin:8px 0 3px;}
+ .qs-copy p {font-size:18px;}
+ .qs-copy .vc-eyebrow {font-size:10px;letter-spacing:1px;}
+ .qs-status {left:16px;right:auto;top:auto;bottom:16px;min-width:0;padding:8px 12px;}
+ .qs-status strong {font-size:10px;}
+ .qs-building {width:min(220px,54%);bottom:4%;left:66%;}
+ .qs-figure {left:auto;right:12px;bottom:28%;}
+ .qp {padding:16px 14px 16px;gap:12px;}
+ .qp-head {margin:-16px -14px 0;padding:12px 14px 10px;}
+ .qp-head h3 {font-size:11px;}
+ .qboss {grid-template-columns:1fr;justify-items:center;text-align:center;}
+ .qboss-info {justify-items:center;width:100%;}
+ .qboss-info .qm {width:100%;}
+ .qp>.btn,.qboss-info>.btn {align-self:stretch;justify-self:stretch;min-width:0;}
+ .qscreen .floor {grid-template-columns:54px minmax(0,1fr);}
+ .qscreen .floor>.btn,.qscreen .floor>.muted {grid-column:1/-1;justify-self:stretch;text-align:center;}
+ .qscreen .trip {grid-template-columns:1fr;}
+ .qhist-row {grid-template-columns:86px minmax(0,1fr) 44px;font-size:16px;}
+ .qr {grid-template-columns:1fr;}
+ .qr-side {justify-content:flex-start;}
+}
+@media(prefers-reduced-motion:reduce) {
+ .qs .vc-cloud,.qs .vc-water,.qs .vc-twinkle {animation:none!important;}
+}

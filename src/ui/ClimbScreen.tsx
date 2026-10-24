@@ -1,7 +1,8 @@
 import { BEAT_LAST_WEEK_REWARD, climbReward, climbWeekKey, lastWeekBest, syncClimbWeek } from '../game/climb';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { climbUrl } from '../art/buildings';
+import { QMeter, QPanel, QuarterScene } from './QuarterScene';
 
 interface Props {
   save: SaveData;
@@ -11,7 +12,6 @@ interface Props {
 }
 
 const MILESTONE_FLOORS = [10, 20, 30, 50, 100];
-const PCT_MAX = 100;
 
 export function ClimbScreen({ save, onBack, onChallenge }: Props) {
   const week = climbWeekKey();
@@ -23,61 +23,65 @@ export function ClimbScreen({ save, onBack, onChallenge }: Props) {
   const top = Math.max(1, ...history.map((h) => h.best));
 
   return (
-    <div className="tower">
-      <BuildingHeader title="Infinite Climb" onBack={onBack}>
-        <p className="muted">
-          Endless floors of escalating rivals. Each new floor you clear this week pays out and raises your weekly best. Floors reset every Monday.
-        </p>
-      </BuildingHeader>
+    <div className="climb qscreen">
+      <QuarterScene
+        quarter="arena"
+        title="Infinite Climb"
+        art={climbUrl()}
+        onBack={onBack}
+        line="Endless floors of escalating rivals. Every new floor this week pays out and raises your weekly best. Floors reset each Monday."
+        status={{ label: 'This week', value: `Best ${best}F` }}
+      />
 
-      <section className="panel">
-        <h3>This week</h3>
-        <p>Best floor: <strong>{best}</strong></p>
-        {target > 0 && (
-          <p className="muted small-text">
-            {best > target
-              ? `You beat last week's best (${target}F). Bonus collected!`
-              : `Beat last week's best (${target}F) for ◆ ${BEAT_LAST_WEEK_REWARD.gems} and ${BEAT_LAST_WEEK_REWARD.spins} Spin Orbs.`}
-          </p>
+      <QPanel eyebrow="THIS WEEK" title={`Floor ${nextFloor} awaits`} aside={<span className="qtag">BEST {best}F</span>}>
+        {target > 0 ? (
+          <>
+            <p>
+              {best > target
+                ? `You beat last week's best (${target}F). Bonus collected!`
+                : `Beat last week's best (${target}F) for ◆ ${BEAT_LAST_WEEK_REWARD.gems} and ${BEAT_LAST_WEEK_REWARD.spins} Spin Orbs.`}
+            </p>
+            <QMeter value={Math.min(1, best / (target + 1))} label="Progress toward last week's best" />
+          </>
+        ) : (
+          <p>Set a weekly best: every floor you clear counts.</p>
         )}
-        <button className="btn primary" onClick={() => onChallenge(nextFloor)}>
+        <button className="btn primary big" onClick={() => onChallenge(nextFloor)}>
           {best > 0 ? `Challenge Floor ${nextFloor}` : 'Start Climb'}
         </button>
-      </section>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Weekly bests</h3>
-        <div className="bounty-list">
+      <QPanel eyebrow="YOUR RECORD" title="Weekly bests">
+        <div className="qhist">
           {history.map((h) => (
-            <div key={h.week} className="bounty-row">
-              <div className="bounty-text">
-                <span>{h.week === week ? 'This week' : h.week}</span>
-                <span className="bar"><i style={{ width: `${(h.best / top) * PCT_MAX}%` }} /></span>
-              </div>
-              <span className="muted">{h.best}F</span>
+            <div key={h.week} className={`qhist-row ${h.week === week ? 'now' : ''}`}>
+              <span>{h.week === week ? 'This week' : h.week}</span>
+              <QMeter value={h.best / top} label={`${h.week}: floor ${h.best}`} />
+              <b>{h.best}F</b>
             </div>
           ))}
         </div>
-      </section>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Milestone rewards</h3>
-        <div className="bounty-list">
+      <QPanel eyebrow="WAYPOINTS" title="Milestone rewards">
+        <div className="qrows">
           {MILESTONE_FLOORS.map((floor) => {
             const r = climbReward(floor);
             const cleared = best >= floor;
             return (
-              <div key={floor} className={`bounty-row ${cleared ? 'claimed' : ''}`}>
-                <div className="bounty-text">
+              <div key={floor} className={`qr ${cleared ? 'done' : 'locked'}`}>
+                <div className="qr-main">
                   <span>Floor {floor}</span>
-                  <span className="muted small-text">● {r.coins.toLocaleString()}{r.gems > 0 && ` · ◆ ${r.gems}`}</span>
+                  <small>● {r.coins.toLocaleString()}{r.gems > 0 && ` · ◆ ${r.gems}`}</small>
                 </div>
-                <span className="muted">{cleared ? '✓ Cleared' : 'Locked'}</span>
+                <div className="qr-side">
+                  <span className={`qtag ${cleared ? 'done' : 'dark'}`}>{cleared ? '✓ CLEARED' : 'LOCKED'}</span>
+                </div>
               </div>
             );
           })}
         </div>
-      </section>
+      </QPanel>
     </div>
   );
 }

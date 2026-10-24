@@ -1,7 +1,8 @@
 import { RAID_GEMS_PER_PHASE, RAID_PHASES, RAID_ROUNDS, raidAttemptsLeft, raidBoss, raidSet, weekKey } from '../game/raid';
 import { SetBonusText } from './GearCard';
 import type { SaveData } from '../game/types';
-import { BuildingHeader } from './BuildingHeader';
+import { raidUrl } from '../art/buildings';
+import { QPanel, QuarterScene } from './QuarterScene';
 import { Sprite } from './Sprite';
 
 interface Props {
@@ -24,61 +25,62 @@ export function RaidScreen({ save, onBack, onFight }: Props) {
   const defeated = totalDamage >= boss.pool;
 
   return (
-    <div className="raid area-polished">
-      <BuildingHeader title="Boss Raid" onBack={onBack}>
-        <p className="muted">
-          A weekly boss with a huge shared HP pool. Each attempt lasts {RAID_ROUNDS} rounds; the damage you deal carries over all week.
-        </p>
-      </BuildingHeader>
+    <div className="raid qscreen">
+      <QuarterScene
+        quarter="harbor"
+        title="Boss Raid"
+        art={raidUrl()}
+        onBack={onBack}
+        line={`A weekly titan with a huge shared HP pool. Each attempt lasts ${RAID_ROUNDS} rounds; your damage carries over all week.`}
+        status={{ label: 'Attempts today', value: `${attempts} left` }}
+        figure={<Sprite familyId={boss.familyId} star={boss.star} size={84} className="idle" />}
+      />
 
-      <section className="panel">
-        <div className="section-head">
-          <h3>{boss.name}</h3>
-          <span className="chip">Week {week}</span>
-        </div>
-        <Sprite familyId={boss.familyId} star={boss.star} size={96} />
-        <p className="muted">Lv {boss.level} · {boss.star}★</p>
-
-        <div className="raid-bar-wrap mt-sm">
-          <div className="bar hp raid-hp-bar">
-            <i style={{ width: `${PCT_MAX - hpPct}%` }} />
+      <QPanel eyebrow={`WEEK ${week}`} title={boss.name} aside={<span className="qtag">{defeated ? 'DEFEATED' : `${clearedPhases.length}/${RAID_PHASES} PHASES`}</span>}>
+        <div className="qboss">
+          <span className="qboss-portrait">
+            <Sprite familyId={boss.familyId} star={boss.star} size={130} className="idle" />
+          </span>
+          <div className="qboss-info">
+            <p>Lv {boss.level} · {boss.star}★</p>
+            <span className="qm hp ticks" role="meter" aria-label="Raid boss HP" aria-valuemin={0} aria-valuemax={PCT_MAX} aria-valuenow={PCT_MAX - hpPct}>
+              <i style={{ width: `${PCT_MAX - hpPct}%` }} />
+            </span>
+            <p>
+              <b>{totalDamage.toLocaleString()}</b> / {boss.pool.toLocaleString()} damage · {clearedPhases.length} / {RAID_PHASES} phases
+            </p>
+            <button className="btn primary big" disabled={attempts <= 0 || defeated} onClick={onFight}>
+              {defeated ? 'Defeated this week' : `Raid Boss (${attempts} left today)`}
+            </button>
+            {attempts <= 0 && !defeated && <p>No attempts left today. Come back tomorrow.</p>}
           </div>
-          <div className="raid-phase-markers">
-            {Array.from({ length: RAID_PHASES - 1 }, (_, idx) => (
-              <span key={idx} className="raid-phase-tick" style={{ left: `${((idx + 1) / RAID_PHASES) * PCT_MAX}%` }} />
-            ))}
-          </div>
         </div>
+      </QPanel>
 
-        <p className="muted mt-sm">
-          {totalDamage.toLocaleString()} / {boss.pool.toLocaleString()} damage · {clearedPhases.length} / {RAID_PHASES} phases
-        </p>
-
-        <button className="btn primary mt-sm" disabled={attempts <= 0 || defeated} onClick={onFight}>
-          {defeated ? 'Defeated this week' : `Raid Boss (${attempts} left today)`}
-        </button>
-        {attempts <= 0 && !defeated && <p className="muted small-text">No attempts left today. Come back tomorrow.</p>}
-      </section>
-
-      <section className="panel">
-        <h3>Phase Rewards</h3>
+      <QPanel eyebrow="WAR SPOILS" title="Phase rewards">
         {set && (
-          <p className="small-text">
+          <p>
             This week's set: <SetBonusText setId={set.id} />
           </p>
         )}
-        {Array.from({ length: RAID_PHASES }, (_, idx) => {
-          const phase = idx + 1;
-          const done = clearedPhases.includes(phase);
-          return (
-            <div key={phase} className={`raid-phase-row ${done ? 'claimed' : ''}`}>
-              <span>Phase {phase}</span>
-              <span className="muted">◆ {RAID_GEMS_PER_PHASE} gems{set ? ` + ${set.name} piece` : ''}</span>
-              <span>{done ? '✓' : '—'}</span>
-            </div>
-          );
-        })}
-      </section>
+        <div className="qrows">
+          {Array.from({ length: RAID_PHASES }, (_, idx) => {
+            const phase = idx + 1;
+            const done = clearedPhases.includes(phase);
+            return (
+              <div key={phase} className={`qr ${done ? 'done' : ''}`}>
+                <div className="qr-main">
+                  <span>Phase {phase}</span>
+                  <small>◆ {RAID_GEMS_PER_PHASE} gems{set ? ` + ${set.name} piece` : ''}</small>
+                </div>
+                <div className="qr-side">
+                  <span className={`qtag ${done ? 'done' : 'dark'}`}>{done ? '✓ CLEARED' : 'AHEAD'}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </QPanel>
     </div>
   );
 }

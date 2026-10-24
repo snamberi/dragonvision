@@ -32,25 +32,6 @@
 
 /* --- Event screen --- */
 .event-screen { display: grid; gap: 14px; }
-.event-hero {
-  position: relative;
-  overflow: hidden;
-  padding: 16px;
-  border: 2px solid var(--event-line);
-  background:
-    linear-gradient(90deg, #120c22f0 0%, #120c22c8 55%, #120c2233 100%),
-    linear-gradient(135deg, var(--event-sky-top, #2d2442), var(--event-sky-bottom, #4a2a6a));
-  color: #fff6d8;
-  text-shadow: 1px 1px #120c22;
-}
-.event-hero > *:not(.event-featured) { position: relative; z-index: 1; max-width: calc(100% - 110px); }
-@media (max-width: 700px) { .event-hero > *:not(.event-featured) { max-width: none; } }
-.event-hero h2 { margin: 2px 0 6px; }
-.event-hero p { margin: 0 0 10px; max-width: 60ch; }
-.event-hero .event-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; }
-.event-hero .event-meta b { color: var(--event-gold); }
-.event-hero .event-featured { position: absolute; right: 10px; bottom: 0; opacity: .95; }
-@media (max-width: 700px) { .event-hero .event-featured { position: static; display: block; margin-top: 8px; } }
 
 .event-stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .event-stage { display: grid; gap: 4px; padding: 10px; border: 2px solid var(--event-line); background: var(--event-panel); color: #f0e6ff; }

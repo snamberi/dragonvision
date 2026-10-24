@@ -1,26 +1,33 @@
+import { gateUrl } from '../art/buildings';
 import { survivalCoins } from '../game/survival';
 import type { SaveData } from '../game/types';
-import { BuildingHeader } from './BuildingHeader';
+import { QPanel, QuarterScene } from './QuarterScene';
+
+const SAMPLE_WAVES = 10;
+const MINI_BOSS_EVERY = 5;
 
 export function SurvivalScreen({ save, onBack, onStart }: { save: SaveData; onBack: () => void; onStart: () => void }) {
   return (
-    <div className="survival">
-      <BuildingHeader title="Survival Gate" onBack={onBack}>
-        <p className="muted">
-          Endless waves of enemies, each stronger than the last. Your fighters keep their HP, Ki and special bars between waves:
-          there is no healing. Every 5th wave has a mini-boss. When your team falls, you are paid for every wave cleared, plus a
-          Spin Orb every 5 waves.
-        </p>
-      </BuildingHeader>
-      <section className="panel survival-panel">
-        <div className="gravity-level">
-          Best: wave {save.survivalBest}
+    <div className="survival qscreen">
+      <QuarterScene
+        quarter="arena"
+        title="Survival Gate"
+        art={gateUrl()}
+        onBack={onBack}
+        line="Endless waves, each stronger than the last. No healing between waves: HP, Ki and special bars carry over."
+        status={{ label: 'Best run', value: `Wave ${save.survivalBest}` }}
+      />
+      <QPanel eyebrow="THE ENDLESS GATE" title="Hold the line" aside={<span className="qtag">BEST {save.survivalBest}</span>}>
+        <div className="qstats">
+          <span className="qstat"><small>Mini-boss</small><b>Every {MINI_BOSS_EVERY}th wave</b></span>
+          <span className="qstat"><small>{SAMPLE_WAVES} waves pay</small><b>● {survivalCoins(SAMPLE_WAVES).toLocaleString()}</b></span>
+          <span className="qstat"><small>Bonus</small><b>1 Spin Orb / {MINI_BOSS_EVERY} waves</b></span>
         </div>
-        <p className="muted">Clearing 10 waves pays about ● {survivalCoins(10).toLocaleString()} and 2 Spin Orbs.</p>
+        <p>When your team falls, you are paid for every wave cleared.</p>
         <button className="btn primary big" onClick={onStart}>
           Enter the Gate
         </button>
-      </section>
+      </QPanel>
     </div>
   );
 }

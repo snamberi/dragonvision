@@ -1,5 +1,5 @@
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
-import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl, upgradesHouseUrl } from '../art/buildings';
+import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl, upgradesHouseUrl, dungeonUrl, raidUrl, climbUrl, journalUrl } from '../art/buildings';
 import { ACHIEVEMENTS, achievementState } from '../game/achievements';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
 import { attemptsLeft, bossProgress } from '../game/worldBoss';
@@ -125,10 +125,10 @@ export function CityScreen({ save, onOpen }: Props) {
     { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
     { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
     { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl() },
-    { id: 'dungeon', name: 'Daily Dungeon', art: dojoUrl(), badge: save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0 ? 'OPEN' : undefined },
-    { id: 'raid', name: 'Boss Raid', art: colosseumUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage / 1000).toFixed(0)}K` : undefined },
-    { id: 'climb', name: 'Infinite Climb', art: towerUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
-    { id: 'journal', name: "Collector's Journal", art: hallUrl() },
+    { id: 'dungeon', name: 'Daily Dungeon', art: dungeonUrl(), badge: save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0 ? 'OPEN' : undefined },
+    { id: 'raid', name: 'Boss Raid', art: raidUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage / 1000).toFixed(0)}K` : undefined },
+    { id: 'climb', name: 'Infinite Climb', art: climbUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
+    { id: 'journal', name: "Collector's Journal", art: journalUrl() },
     { id: 'event', name: ev.name, art: tentUrl(), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
   ];
   const byId = new Map(spots.map((s) => [s.id, s]));

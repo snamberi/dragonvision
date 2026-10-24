@@ -12,7 +12,8 @@ import { teamSlots } from '../game/progression';
 import { dayKey } from '../game/time';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { dungeonUrl } from '../art/buildings';
+import { QPanel, QuarterScene } from './QuarterScene';
 import { useActionFeedback } from './useActionFeedback';
 
 interface Props {
@@ -38,39 +39,40 @@ export function DungeonScreen({ save, update: commit, onBack, onFight }: Props) 
   };
 
   return (
-    <div className="dungeon area-polished">{feedback}
-      <BuildingHeader title="Daily Dungeon" onBack={onBack}>
-        <p className="muted">A key-gated battle with a new rule each day. Win once for gems and a Relic Shard.</p>
-      </BuildingHeader>
+    <div className="dungeon qscreen">{feedback}
+      <QuarterScene
+        quarter="harbor"
+        title="Daily Dungeon"
+        art={dungeonUrl()}
+        onBack={onBack}
+        line="A key-gated battle with a new rule each day. Win once for gems and a Relic Shard."
+        status={{ label: "Today's rule", value: rule }}
+      />
 
-      <section className="panel">
-        <div className="section-head">
-          <h3>Today&apos;s Dungeon</h3>
-          <span className="chip">{rule}</span>
+      <QPanel eyebrow="TODAY'S DEPTHS" title={rule} aside={<span className={`qtag ${cleared ? 'done' : ''}`}>{cleared ? '✓ CLEARED' : `${keys} KEY${keys === 1 ? '' : 'S'}`}</span>}>
+        <p>{DUNGEON_RULE_TEXT[rule]}</p>
+        <div className="qstats">
+          <span className="qstat"><small>Attempts</small><b>{attempts} / {DUNGEON_DAILY_ATTEMPTS}</b></span>
+          <span className="qstat"><small>Dungeon keys</small><b>{keys}</b></span>
+          <span className="qstat"><small>Per login</small><b>+{DUNGEON_KEYS_PER_LOGIN} key</b></span>
         </div>
-        <p className="muted"><strong>{rule}:</strong> {DUNGEON_RULE_TEXT[rule]}</p>
-        <p className="muted">Attempts today: {attempts} / {DUNGEON_DAILY_ATTEMPTS}</p>
-        <p className="muted">Dungeon Keys: {keys} <span className="small-text">(+{DUNGEON_KEYS_PER_LOGIN} with every daily login claim)</span></p>
         {cleared && <p className="success">Dungeon cleared today! Come back tomorrow.</p>}
-        {!cleared && squad.length === 0 && (
-          <p className="muted small-text">None of your team fighters can enter today. Put a Support or Drainer on your team.</p>
-        )}
-        {!cleared && keys <= 0 && <p className="muted small-text">No keys left. Claim your daily login reward for another.</p>}
+        {!cleared && squad.length === 0 && <p>None of your team fighters can enter today. Put a Support or Drainer on your team.</p>}
+        {!cleared && keys <= 0 && <p>No keys left. Claim your daily login reward for another.</p>}
         {!cleared && (
-          <div className="row gap-sm mt-sm">
-            <button className="btn primary" disabled={!canAttempt} onClick={challenge}>
-              Challenge (costs 1 key)
-            </button>
-          </div>
+          <button className="btn primary big" disabled={!canAttempt} onClick={challenge}>
+            Challenge (costs 1 key)
+          </button>
         )}
-      </section>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Rewards</h3>
-        <p className="muted">◆ {dungeonRewards.gems} gems</p>
-        <p className="muted">+ {dungeonRewards.relicShard} Relic Shard</p>
-        <p className="muted small-text">Relic Shards combine into Artifact Relics in the Armory.</p>
-      </section>
+      <QPanel eyebrow="WHAT LIES BELOW" title="Rewards">
+        <div className="qstats">
+          <span className="qstat"><small>Gems</small><b>◆ {dungeonRewards.gems}</b></span>
+          <span className="qstat"><small>Relic Shard</small><b>+{dungeonRewards.relicShard}</b></span>
+        </div>
+        <p>Relic Shards combine into Artifact Relics in the Armory.</p>
+      </QPanel>
     </div>
   );
 }

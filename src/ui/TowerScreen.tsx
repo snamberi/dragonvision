@@ -2,7 +2,8 @@ import { TOWER_FLOORS } from '../game/balance';
 import { power, teamUnits } from '../game/progression';
 import { RULE_TEXT, towerRewards, towerStage } from '../game/tower';
 import type { SaveData } from '../game/types';
-import { BuildingHeader } from './BuildingHeader';
+import { towerUrl } from '../art/buildings';
+import { QPanel, QuarterScene } from './QuarterScene';
 import { Portrait, Stars } from './Sprite';
 import { orbs } from './format';
 
@@ -33,23 +34,24 @@ export function TowerScreen({ save, onBack, onChallenge }: Props) {
   const clearedFloors = Array.from({ length: save.towerFloor }, (_, i) => save.towerFloor - i);
 
   return (
-    <div className="tower">
-      <BuildingHeader title="Rival Tower" onBack={onBack}>
-        <p className="muted">
-          {TOWER_FLOORS} floors of rival squads, each with a twist rule. Every floor pays once: coins and 2 Spin Orbs, plus gems and an
-          evolution shard every 5th floor. Your team power: {teamPower.toLocaleString()}.
-        </p>
-      </BuildingHeader>
-      {done && <p className="the-end">You conquered the Rival Tower!</p>}
-      <div className="floor-list">
-        {ahead.map(renderFloor)}
-      </div>
-      {clearedFloors.length > 0 && (
-        <details className="floor-cleared" open={done}>
-          <summary className="muted">Cleared floors ({clearedFloors.length})</summary>
-          <div className="floor-list">{clearedFloors.map(renderFloor)}</div>
-        </details>
-      )}
+    <div className="tower qscreen">
+      <QuarterScene
+        quarter="arena"
+        title="Rival Tower"
+        art={towerUrl()}
+        onBack={onBack}
+        line={`${TOWER_FLOORS} floors of rival squads, each with a twist rule. Every floor pays once, with gems and a shard every 5th floor.`}
+        status={{ label: done ? 'Conquered' : 'Next floor', value: done ? `${TOWER_FLOORS}F ✓` : `${next}F · power ${teamPower.toLocaleString()}` }}
+      />
+      <QPanel eyebrow={done ? 'THE SUMMIT' : 'THE CLIMB'} title={done ? 'You conquered the Rival Tower!' : `${TOWER_FLOORS - save.towerFloor} floors to go`} aside={<span className="qtag">{save.towerFloor}/{TOWER_FLOORS}</span>}>
+        <div className="floor-list">{ahead.map(renderFloor)}</div>
+        {clearedFloors.length > 0 && (
+          <details className="floor-cleared" open={done}>
+            <summary>Cleared floors ({clearedFloors.length})</summary>
+            <div className="floor-list">{clearedFloors.map(renderFloor)}</div>
+          </details>
+        )}
+      </QPanel>
     </div>
   );
 
