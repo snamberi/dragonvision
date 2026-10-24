@@ -1,4 +1,3 @@
-import { ActivityScene } from './ActivityScene';
 import { useActionFeedback } from './useActionFeedback';
 import { useEffect, useState } from 'react';
 import { EXPEDITION_HOURS, EXPEDITION_MAX_PARTY, EXPEDITION_SLOTS } from '../game/balance';
@@ -6,7 +5,8 @@ import { claimExpedition, expeditionDone, recallExpedition, startExpedition, tim
 import { findUnit, isBusy, power, unitName } from '../game/progression';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { portUrl } from '../art/buildings';
+import { QPanel, QuarterScene } from './QuarterScene';
 import { Portrait, Stars } from './Sprite';
 import { orbs } from './format';
 
@@ -55,23 +55,25 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
   };
 
   return (
-    <div className="port area-polished">{feedback}
-      <BuildingHeader title="Expedition Port" onBack={onBack}>
-        <p className="muted">
-          Send up to {EXPEDITION_MAX_PARTY} idle fighters on a trip. They come back with coins, plus Spin Orbs on longer trips and a
-          chance of gems. Bigger parties bring back more. {EXPEDITION_SLOTS} trips can be out at once.
-        </p>
-      </BuildingHeader>
-      <ActivityScene kind="port" status={`${save.expeditions.length} expeditions at sea · ${party.length} fighters selected`} active={save.expeditions.length > 0}/>
+    <div className="port qscreen">{feedback}
+      <QuarterScene
+        quarter="harbor"
+        title="Expedition Port"
+        art={portUrl()}
+        onBack={onBack}
+        line={`Send up to ${EXPEDITION_MAX_PARTY} idle fighters on a trip for coins, Spin Orbs on longer trips and a chance of gems. Bigger parties bring back more.`}
+        status={{ label: 'Docks', value: `${save.expeditions.length} / ${EXPEDITION_SLOTS} at sea` }}
+      />
 
+      <QPanel eyebrow="AT SEA" title="Voyages" aside={<span className="qtag">{save.expeditions.length}/{EXPEDITION_SLOTS}</span>}>
       <div className="trip-list">
-        {save.expeditions.length === 0 && <p className="muted">No trips out right now.</p>}
+        {save.expeditions.length === 0 && <p>No trips out right now. Plan one below.</p>}
         {save.expeditions.map((e) => {
           const done = expeditionDone(e, now);
           const elapsed = e.hours * MS_PER_HOUR - timeLeft(e, now);
           const progress = Math.min(PROGRESS_MAX, Math.max(0, PROGRESS_MAX * (elapsed / (e.hours * MS_PER_HOUR))));
           return (
-            <section key={e.id} className={`panel trip ${done ? 'done' : ''} ${e.path === 'risky' ? 'risky' : ''}`}>
+            <section key={e.id} className={`trip ${done ? 'done' : ''} ${e.path === 'risky' ? 'risky' : ''}`}>
               <div className="trip-party">
                 {e.uids.map((uid) => {
                   const u = findUnit(save, uid);
@@ -101,15 +103,15 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
           );
         })}
       </div>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Plan a trip</h3>
-        <div className="path-select button-row">
+      <QPanel eyebrow="THE HARBORMASTER" title="Plan a trip" aside={<span className="qtag">{party.length}/{EXPEDITION_MAX_PARTY} PICKED</span>}>
+        <div className="qchoices">
           <button className={`btn small ${path === 'safe' ? 'primary' : ''}`} onClick={() => setPath('safe')}>⚓ Safe</button>
           <button className={`btn small ${path === 'risky' ? 'risky-btn' : ''}`} onClick={() => setPath('risky')}>⚡ Risky (+50% coins, 20% fail)</button>
         </div>
-        {path === 'risky' && <p className="muted small-text warn-text">Risky path: coins ×1.5, but 20% chance of coming home empty-handed.</p>}
-        <div className="button-row">
+        {path === 'risky' && <p className="warn-text">Risky path: coins ×1.5, but 20% chance of coming home empty-handed.</p>}
+        <div className="qchoices">
           {EXPEDITION_HOURS.map((h) => (
             <button key={h} className={`btn small ${hours === h ? 'primary' : ''}`} onClick={() => setHours(h)}>
               {h} hour{h === 1 ? '' : 's'}
@@ -119,9 +121,9 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
             Send {party.length}/{EXPEDITION_MAX_PARTY}
           </button>
         </div>
-        {full && <p className="muted small-text">Both docks are busy. Collect a trip first.</p>}
+        {full && <p>Both docks are busy. Collect a trip first.</p>}
         <div className="spare-grid trip-pick">
-          {idle.length === 0 && <p className="muted">No idle fighters. Team, Dojo and traveling fighters can't go.</p>}
+          {idle.length === 0 && <p>No idle fighters. Team, Dojo and traveling fighters can't go.</p>}
           {idle.map((u) => (
             <button key={u.uid} className={`spare ${party.includes(u.uid) ? 'picked' : ''}`} onClick={() => toggle(u.uid)} aria-pressed={party.includes(u.uid)}>
               <Portrait familyId={u.familyId} star={u.star} size={36} />
@@ -132,7 +134,7 @@ export function PortScreen({ save, update: commit, onBack }: Props) {
             </button>
           ))}
         </div>
-      </section>
+      </QPanel>
     </div>
   );
 }

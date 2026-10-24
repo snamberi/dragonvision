@@ -1,4 +1,4 @@
-import { type CSSProperties, useState } from 'react';
+import { useState } from 'react';
 import { ARENAS, WEATHER_TEXT } from '../game/arenas';
 import { EVENT_STAGES, currentEvent, eventProgress, eventStageUnlocked, eventTimeLeft, eventTokens, formatTimeLeft, introSceneKey, replayTokensLeft, EVENT_REPLAY_DAILY_CAP } from '../game/events';
 import { buyEventOffer, eventOffers, offerLeft } from '../game/eventShop';
@@ -6,7 +6,8 @@ import { getFamily } from '../game/roster';
 import { markScene, sceneSeen } from '../game/story';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { BuildingHeader } from './BuildingHeader';
+import { tentUrl } from '../art/buildings';
+import { QPanel, QuarterScene } from './QuarterScene';
 import { Sprite } from './Sprite';
 import { StoryScene } from './StoryScene';
 import { useActionFeedback } from './useActionFeedback';
@@ -49,33 +50,37 @@ export function EventScreen({ save, update: commit, onBack, onFight }: Props) {
     if (next !== undefined) onFight(next);
   };
 
-  const heroStyle = { '--event-sky-top': arena?.skyTop, '--event-sky-bottom': arena?.skyBottom } as CSSProperties;
+  const sky: [string, string] | undefined = arena ? [arena.skyTop, arena.skyBottom] : undefined;
+  const skin = (save.ownedSkins ?? []).includes(ev.skinId) ? ev.skinId : undefined;
 
   return (
-    <div className="event-screen">
+    <div className="event-screen qscreen">
       {feedback}
-      <BuildingHeader title={ev.name} onBack={onBack}>
-        <p className="muted">A limited chapter that changes every Monday. Clear its 10 stages for {ev.currency}, then spend them in the event shop before it closes.</p>
-      </BuildingHeader>
+      <QuarterScene
+        quarter="event"
+        eyebrow="VISION CITY · WEEKLY EVENT"
+        title={ev.name}
+        art={tentUrl()}
+        sky={sky}
+        onBack={onBack}
+        line={ev.tagline}
+        status={{ label: 'Ends in', value: formatTimeLeft(eventTimeLeft()) }}
+        figure={<Sprite familyId={ev.featured} star={3} size={84} skinId={skin} className="idle" />}
+      />
 
-      <section className="event-hero" style={heroStyle}>
-        <div className="eyebrow">WEEKLY EVENT</div>
-        <h2>{ev.name}</h2>
-        <p>{ev.tagline}</p>
-        <div className="event-meta">
-          <span>Ends in <b>{formatTimeLeft(eventTimeLeft())}</b></span>
-          <span>{ev.currency}: <b>{progress.currency}</b></span>
-          <span>{arena?.name} · {WEATHER_TEXT[ev.weather]}</span>
-          <span>Featured: <b>{getFamily(ev.featured).name}</b> (rate-up on the Summoning Shrine)</span>
+      <QPanel eyebrow="THIS WEEK" title="Event details" aside={<span className="qtag">{progress.currency} {ev.currency.toUpperCase()}</span>}>
+        <p>A limited chapter that changes every Monday. Clear its 10 stages for {ev.currency}, then spend them in the event shop before it closes.</p>
+        <div className="qstats">
+          <span className="qstat"><small>Ends in</small><b>{formatTimeLeft(eventTimeLeft())}</b></span>
+          <span className="qstat"><small>{ev.currency}</small><b>{progress.currency}</b></span>
+          <span className="qstat"><small>Arena</small><b>{arena?.name} · {WEATHER_TEXT[ev.weather]}</b></span>
+          <span className="qstat"><small>Featured</small><b>{getFamily(ev.featured).name}</b></span>
         </div>
-        <span className="event-featured" aria-hidden="true">
-          <Sprite familyId={ev.featured} star={3} size={96} skinId={(save.ownedSkins ?? []).includes(ev.skinId) ? ev.skinId : undefined} />
-        </span>
-      </section>
+        <p>{getFamily(ev.featured).name} has a rate-up on the Summoning Shrine all week.</p>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Event chapter · {progress.cleared}/{EVENT_STAGES} cleared</h3>
-        <p className="muted small-text">Replay {ev.currency} left today: {replayTokensLeft(save)}/{EVENT_REPLAY_DAILY_CAP}</p>
+      <QPanel eyebrow="EVENT CHAPTER" title={`${progress.cleared}/${EVENT_STAGES} stages cleared`} aside={<span className="qtag dark">REPLAY {replayTokensLeft(save)}/{EVENT_REPLAY_DAILY_CAP}</span>}>
+        <p>Replay {ev.currency} left today: {replayTokensLeft(save)}/{EVENT_REPLAY_DAILY_CAP}</p>
         <div className="event-stages">
           {Array.from({ length: EVENT_STAGES }, (_, i) => i + 1).map((n) => {
             const cleared = n <= progress.cleared;
@@ -95,11 +100,10 @@ export function EventScreen({ save, update: commit, onBack, onFight }: Props) {
         {progress.cleared >= EVENT_STAGES && (
           <button className="btn ghost small" onClick={() => setScene({ title: `${ev.name} · Finale`, key: finaleKey })}>Replay the finale</button>
         )}
-      </section>
+      </QPanel>
 
-      <section className="panel">
-        <h3>Event shop</h3>
-        <p className="muted small-text">{ev.currency} and shop limits reset when the event ends. Skins you buy are yours to keep.</p>
+      <QPanel eyebrow="FESTIVAL STALL" title="Event shop" aside={<span className="qtag">{progress.currency} {ev.currency.toUpperCase()}</span>}>
+        <p>{ev.currency} and shop limits reset when the event ends. Skins you buy are yours to keep.</p>
         <div className="event-shop">
           {eventOffers(ev).map((offer) => {
             const left = offerLeft(save, offer);
@@ -108,7 +112,7 @@ export function EventScreen({ save, update: commit, onBack, onFight }: Props) {
               <div key={offer.id} className={`event-offer ${left === 0 ? 'sold-out' : ''}`}>
                 <span>
                   {offer.label}
-                  <small className="muted"> · {left === 0 ? 'sold out' : `${left} left`}</small>
+                  <small> · {left === 0 ? 'sold out' : `${left} left`}</small>
                 </span>
                 <button
                   className="btn small"
@@ -123,7 +127,7 @@ export function EventScreen({ save, update: commit, onBack, onFight }: Props) {
             );
           })}
         </div>
-      </section>
+      </QPanel>
 
       {scene && <StoryScene title={scene.title} lines={scene.key === finaleKey ? ev.finale : ev.intro} onDone={closeScene} />}
     </div>

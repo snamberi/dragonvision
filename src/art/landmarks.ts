@@ -39,6 +39,49 @@ export function landmarkUrl(kind:string):string {
   poly([[16,32],[68,25],[82,34],[82,62],[68,69],[16,65]],shadow);r(16,32,54,33,stone);r(13,29,57,5,'#e2d2ae');r(16,43,54,3,gold);r(16,57,54,3,gold);
   for(let i=0;i<6;i++){const x=19+i*8;r(x,35,4,7,ink);r(x,48,4,9,ink);r(x-1,34,6,2,'#ad9982')}
   r(38,51,13,17,ink);r(41,54,7,13,'#9c4d43');for(const x of [22,62]){r(x,16,2,14,wood);r(x+2,17,10,6,'#ba5e4c')}stairs(30,67,35);
+ }else if(kind==='dungeon'){
+  // A cave mouth in a mossy crag: torches, an iron keystone and steps leading down into the dark.
+  poly([[12,67],[20,34],[34,18],[56,14],[72,24],[84,67]],'#4f4b59');
+  poly([[17,67],[25,38],[38,24],[55,21],[68,30],[79,67]],'#716b7c');
+  r(31,25,9,2,'#9a93a3');r(56,26,7,2,'#9a93a3');r(23,46,6,2,'#8a8494');r(70,44,6,2,'#8a8494');
+  poly([[33,67],[33,45],[39,37],[57,37],[63,45],[63,67]],'#2f2a38');
+  poly([[37,67],[37,47],[42,41],[54,41],[59,47],[59,67]],'#110f19');
+  for(const [x,y] of [[32,44],[35,39],[41,35],[47,34],[53,35],[59,39],[62,44]])r(x,y,4,3,stone);
+  r(44,30,8,6,gold);r(47,31,2,2,ink);r(47,33,2,2,ink);
+  r(40,56,16,2,'#4c4656');r(42,60,12,2,'#36313f');r(44,64,8,2,'#231f2b');
+  for(const x of [27,67]){r(x,45,2,11,ink);r(x-1,41,4,5,'#ff9b3d');r(x,42,2,3,'#ffe08a')}
+  r(19,60,7,3,'#586b50');r(70,58,8,3,'#586b50');r(24,57,4,2,'#7d9a62');r(73,55,4,2,'#7d9a62');
+ }else if(kind==='raid'){
+  // A titan war camp: a spiked palisade around a crenellated gate, red war banners and braziers.
+  for(let x=14;x<80;x+=6){r(x,36,5,30,wood);poly([[x,36],[x+2.5,29],[x+5,36]],'#a8805a')}
+  r(14,52,70,2,'#57423a');
+  r(33,24,30,43,stone);r(30,20,36,5,'#e2d2ae');for(let i=0;i<6;i++)r(30+i*6,15,4,5,'#e2d2ae');
+  r(33,30,30,2,gold);
+  poly([[39,67],[39,47],[43,41],[53,41],[57,47],[57,67]],ink);
+  for(let x=41;x<56;x+=4)r(x,44,1,23,'#8f7a52');r(39,52,18,1,'#8f7a52');r(39,59,18,1,'#8f7a52');
+  r(42,32,12,7,'#efe1be');r(44,34,2,2,ink);r(50,34,2,2,ink);r(46,37,4,1,ink);
+  for(const x of [22,72]){r(x,6,2,30,wood);r(x+2,8,10,13,'#b8433a');r(x+5,12,4,4,gold);r(x+2,21,10,2,'#7e2a26')}
+  for(const x of [19,74]){r(x,60,7,6,ink);r(x+1,55,5,5,'#ff7b3d');r(x+2,53,3,3,'#ffd36b')}
+ }else if(kind==='climb'){
+  // An endless spire that climbs past the clouds, ringed by a spiral stair and crowned with a crystal.
+  r(32,52,32,16,shadow);r(34,52,28,15,stone);
+  r(37,38,22,14,'#b6a7c3');r(40,24,16,14,'#cbbfd6');r(43,12,10,12,'#ddd4e8');
+  r(35,51,26,2,gold);r(38,37,20,2,gold);r(41,23,14,2,gold);
+  for(let i=0;i<12;i++){const side=i%2;r(side?57:33,64-i*4.5,6,2,'#806e68')}
+  window(44,56,8,9);window(45,41,6,7,'#c3addc');window(46,27,4,6,'#c3addc');
+  poly([[48,0],[54,7],[48,13],[42,7]],'#8be6cf');r(46,4,3,4,'#e6fff7');
+  r(16,30,22,4,'#eef0ffcc');r(20,27,10,3,'#eef0ffcc');r(60,18,22,4,'#eef0ffcc');r(66,15,10,3,'#eef0ffcc');
+  stairs(34,68,28);
+ }else if(kind==='journal'){
+  // A scholars' library: bookshelf windows, columns, and a great open journal on the roof ridge.
+  poly([[20,34],[72,29],[82,35],[82,64],[72,69],[20,65]],shadow);r(18,34,56,32,'#d7c8a8');
+  roof(14,21,62,'#4f6788');
+  poly([[33,6],[47,10],[47,22],[33,18]],'#f4ecd8');poly([[49,10],[63,6],[63,18],[49,22]],'#f4ecd8');r(47,10,2,13,wood);
+  for(let i=0;i<3;i++){r(36,10+i*3,8,1,'#9a8c78');r(52,10+i*3,8,1,'#9a8c78')}
+  for(const x of [24,58]){r(x,40,13,19,ink);for(let i=0;i<5;i++){r(x+1+i*2.4,41,2,8,['#b8433a','#4f6788','#e4c17b','#5e8f6a','#8f6aa8'][i]);r(x+1+i*2.4,50,2,8,['#5e8f6a','#e4c17b','#b8433a','#8f6aa8','#4f6788'][i])}r(x,49,13,1,wood)}
+  r(41,44,14,22,ink);r(43,46,10,19,'#6a4b3f');r(51,55,1,2,gold);
+  for(const x of [20,71]){r(x,38,4,26,'#eee0bc');r(x-1,37,6,2,'#bfae8a')}
+  stairs(30,67,36);lamp(14,52);
  }else{
   const timber=['dojo','shop','armory'].includes(kind),tech=['lab','gravity'].includes(kind);
   const face=tech?'#687a87':timber?'#d1b38b':stone;
