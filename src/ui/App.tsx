@@ -41,6 +41,9 @@ import { Modal } from './Modal';
 import { DiscordButton, SocialIconRow } from './SocialLinks';
 import { takeInvite } from '../content/social';
 import { SettingsPanel } from './SettingsPanel';
+import { AccountChip, CloudConflictDialog } from './AccountPanel';
+import { startAccounts } from '../cloud/account';
+import { connectCloud, noteSaveChanged } from '../cloud/sync';
 import { WhatsNew } from './WhatsNew';
 import { LoginPopup } from './LoginPopup';
 import { type Run, newRun } from './run';
@@ -85,7 +88,20 @@ export function App() {
 
   useEffect(() => {
     writeSave(save);
+    noteSaveChanged(save);
   }, [save]);
+
+  // Ninefold account: restore a session or finish a sign-in that just came back (loads nothing when signed out).
+  useEffect(() => {
+    connectCloud({
+      getSave: () => saveRef.current,
+      replaceSave: (next) => {
+        saveRef.current = next;
+        setSave(next);
+      },
+    });
+    void startAccounts();
+  }, []);
 
   // Every new screen starts at the top.
   useEffect(() => {
@@ -188,6 +204,7 @@ export function App() {
           <span className="gem" title="Gems"><PixelIcon kind="gem" size={16} /> {compact(save.gems)}</span>
         </div>
         <div className="corner-buttons">
+          <AccountChip onOpen={() => setPopup('settings')} />
           <SocialIconRow />
           {loginReady(save) && (
             <button className="corner-btn alert" onClick={() => setPopup('login')} aria-label="Daily login reward" title="Daily login reward">
@@ -324,6 +341,7 @@ export function App() {
 
       {popup === 'updates' && <WhatsNew onClose={closePopup} />}
       {popup === 'login' && <LoginPopup save={save} update={update} onClose={closePopup} />}
+      <CloudConflictDialog />
       {popup === 'discord' && (
         <Modal title="You broke the gate!" onClose={closePopup} className="discord-invite">
           <p>That was a big one. Share it with the community: show off your team, compare builds and hear about new fighters first.</p>

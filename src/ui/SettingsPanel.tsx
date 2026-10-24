@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CommunityLinks, DiscordButton } from './SocialLinks';
+import { AccountSection } from './AccountPanel';
 import { setSoundSettings, soundSettings } from '../audio/sound';
 import { exportCode, importCode } from '../game/save';
 import type { SaveData } from '../game/types';
@@ -76,6 +77,9 @@ export function SettingsPanel({ save, update }: { save: SaveData; update: Update
 
   return (
     <section className="settings">
+      <h3>Ninefold account</h3>
+      <AccountSection />
+
       <h3>Community</h3>
       <p className="small-text">Share your fighters, report bugs and hear about updates first.</p>
       <DiscordButton />

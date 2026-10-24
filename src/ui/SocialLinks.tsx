@@ -30,6 +30,10 @@ const ICONS: Record<SocialId, { edge: string; fill: string; light: string; glyph
       </>
     ),
   },
+  instagram: {
+    edge: '#7a1f6e', fill: '#c13584', light: '#e1306c',
+    glyph: <path fill="#fff" d="M4 4h8v1h1v6h-1v1H4v-1H3V5h1zm1 1v6h6V5zm2 1h2v1h1v2H9v1H7V9H6V7h1zm0 1v2h2V7zm3-1h1v1h-1z" />,
+  },
   youtube: { edge: '#8f0000', fill: '#ff0000', light: '#ff4a4a', glyph: <path fill="#fff" d="M6 5h1v1h1v1h1v1h1v1H9v1H8v1H7v1H6z" /> },
   reddit: {
     edge: '#a83300', fill: '#ff4500', light: '#ff7a45',

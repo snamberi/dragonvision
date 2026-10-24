@@ -111,6 +111,11 @@ export function loadSave(): SaveData {
   return newSave();
 }
 
+/** A save from elsewhere (the cloud), checked and brought up to date; null when it isn't a Dragon Vision save. */
+export function parseSave(data: unknown): SaveData | null {
+  return isValid(data) ? migrate(data) : null;
+}
+
 export function writeSave(save: SaveData): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(save));

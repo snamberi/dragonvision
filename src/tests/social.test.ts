@@ -3,7 +3,7 @@ import { activeSocials, inviteMilestone, queueInvite, shouldInvite, takeInvite }
 
 describe('community links', () => {
   it('only shows links that have an address', () => {
-    expect(activeSocials().map((l) => l.id)).toEqual(['discord', 'tiktok', 'youtube', 'reddit']);
+    expect(activeSocials().map((l) => l.id)).toEqual(['discord', 'tiktok', 'instagram', 'youtube', 'reddit']);
     expect(activeSocials().every((l) => l.url?.startsWith('https://'))).toBe(true);
   });
 

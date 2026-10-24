@@ -1,0 +1,15 @@
+/* Ninefold account: Settings box, top-bar chip and the cloud conflict dialog. */
+.account-box { display: grid; gap: 8px; margin-bottom: 8px; }
+.account-provider { display: inline-flex; align-items: center; gap: 6px; }
+.google-g { display: inline-grid; place-items: center; width: 16px; height: 16px; background: #fff; color: #4285f4; font-weight: 700; font-size: 11px; line-height: 1; }
+.account-error { color: #ff8a7a; }
+.account-name { display: grid; gap: 4px; }
+.account-name-row { display: flex; gap: 8px; }
+.account-name-row input { flex: 1 1 auto; min-width: 0; padding: 6px 8px; background: rgba(0, 0, 0, 0.3); color: inherit; border: 2px solid rgba(244, 236, 216, 0.35); font: inherit; }
+.account-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 132px; padding: 4px 8px; background: rgba(0, 0, 0, 0.35); color: inherit; border: 2px solid rgba(244, 236, 216, 0.4); font: inherit; font-size: 12px; cursor: pointer; }
+.account-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-dot { flex: none; width: 8px; height: 8px; background: #6fe08a; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4); }
+.account-chip.sync-error .account-dot { background: #ff7a6b; }
+.conflict-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 8px 0; }
+.conflict-card { display: grid; gap: 4px; padding: 8px; background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(244, 236, 216, 0.3); font-size: 13px; }
+@media (max-width: 520px) { .account-chip { max-width: 96px; } }
