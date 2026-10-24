@@ -1,0 +1,112 @@
+/* Fighters, fighter detail and Items, drawn in Home's language: framed scenes, dark Home panels,
+   pixel headers under gold eyebrows, dark label chips and parchment for whatever is selected or ready. */
+.fx {display:flex;flex-direction:column;gap:18px;}
+.fx-eyebrow {display:block;font:12px/1.2 var(--body);letter-spacing:2px;color:#e2bc85;text-transform:uppercase;}
+
+/* Hero banner, built like Home's map frame. */
+.fx-hero {position:relative;isolation:isolate;overflow:hidden;min-height:210px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;padding:22px 24px 18px;border:2px solid #92859a;background:#547463;box-shadow:0 4px #100c20;}
+.fx-hero:after {content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 95px #14282c55;z-index:1;}
+.fx-hero-bg {position:absolute;inset:0;width:100%;height:100%;z-index:0;image-rendering:pixelated;}
+.fx-hero-text,.fx-stats {position:relative;z-index:2;}
+.fx-hero h2 {font:clamp(13px,1.6vw,19px)/1.6 var(--pixel);color:#fff0cf;margin:8px 0 2px;text-shadow:2px 3px #302c43;}
+.fx-hero p {font-size:20px;margin:0;color:#f1e5d8;text-shadow:1px 2px #39384a;max-width:44ch;}
+.fx-stats {list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;}
+.fx-stats li {display:grid;gap:3px;padding:8px 12px;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #202b324d;}
+.fx-stats small {font:11px var(--body);letter-spacing:1.5px;color:#d6b895;text-transform:uppercase;}
+.fx-stats b {font:11px var(--pixel);color:#fff1cf;}
+.fx-stats li.ready {background:#ffe4a4;border:2px solid #785e49;}
+.fx-stats li.ready small,.fx-stats li.ready b {color:#503c39;}
+
+/* Panels: Home's card surface with a lilac frame and a hard drop shadow. */
+.app:not(.home-view) .fx .panel,.fx .team-arena {background:linear-gradient(120deg,#30313c,#242532);border:2px solid #92859a;border-radius:0;box-shadow:0 4px #100c20,inset 0 0 40px #0000002e;color:#f4ecd8;margin-bottom:0;}
+.fx .panel h3,.fx .arena-head h2,.fx .section-head h2 {font:13px/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 2px #1f1b2e;margin:4px 0 10px;}
+.fx .panel > .fx-eyebrow + h3 {margin-top:6px;}
+.fx .muted {color:#cfc3b8;}
+
+/* Buttons: dark label chips; primary actions in parchment, like Home's badges. */
+.fx .btn {background:#303038;border:1px solid #b4a183;border-radius:0;color:#fff0d0;box-shadow:2px 3px #10142099;}
+.fx .btn:hover:not(:disabled),.fx .btn:focus-visible {border-color:#ffdfa3;color:#ffdfa3;filter:none;}
+.fx .btn.primary {background:#ffe4a4;border:2px solid #785e49;color:#503c39;}
+.fx .btn.primary:hover:not(:disabled),.fx .btn.primary:focus-visible {background:#fff0c4;color:#3c2c29;border-color:#785e49;}
+.fx .btn.ghost {background:transparent;}
+.fx .btn:disabled {opacity:.45;}
+.fx .btn.glow {box-shadow:0 0 0 2px #ffdfa3,0 0 14px #ffd27a99,2px 3px #10142099;}
+.fx select,.fx input[type='search'],.fx .filter-search,.fx .preset-name input {background:#22243b;border:1px solid #b4a183;border-radius:0;color:#fff0d0;font:18px var(--body);padding:6px 10px;min-height:36px;}
+
+/* Team formation */
+.fx .team-arena {padding:14px;}
+.fx .arena-head {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.fx .arena-power {font:10px/1.5 var(--pixel);color:#503c39;background:#ffe4a4;border:2px solid #785e49;padding:5px 8px;box-shadow:2px 2px #162f3255;}
+.fx .arena-help {color:#cfc3b8;}
+.fx .arena-stage {border:2px solid #92859a;box-shadow:inset 0 0 60px #14282c55;}
+.fx .hud-card {background:linear-gradient(160deg,#30313c,#22232f);border:1px solid #565261;border-top:3px solid var(--tier,#b4a183);border-radius:0;}
+.fx .hud-card.empty {background:#1f202acc;border:1px dashed #565261;}
+.fx .hud-name {font:9px/1.5 var(--pixel);color:#fff0cf;}
+.fx .team-tools {display:flex;flex-wrap:wrap;gap:8px;}
+
+/* Presets */
+.fx .preset-row {padding:8px 10px;background:#ffffff08;border:1px solid #565261;}
+
+/* Collection header, filters and cards */
+.fx .fx-section-head {display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding:14px 18px 12px;background:linear-gradient(110deg,#403546,#292536);border:2px solid #92859a;box-shadow:inset 4px 0 #e2bc85,0 4px #100c20;}
+.fx .fx-section-head h2 {margin:6px 0 0;}
+.fx-head-actions {display:flex;gap:8px;align-items:center;}
+.fx .collection-filters {display:flex;flex-direction:column;gap:8px;}
+.fx .chip-btn {background:#303038;border:1px solid #b4a183;border-radius:0;color:#f4e6cf;font:10px/1.4 var(--pixel);padding:6px 9px;box-shadow:2px 2px #10142080;}
+.fx .chip-btn.on {background:#ffe4a4;border:2px solid #785e49;color:#503c39;}
+.fx .chip-btn.clear {background:transparent;color:#e2bc85;}
+.fx .unit-grid .card {background:linear-gradient(170deg,#30313c,#22232f);box-shadow:0 4px #100c20,inset 0 0 0 1px #ffffff12;}
+.fx .card-name {color:#fff0cf;text-shadow:1px 2px #1f1b2e;}
+.fx .card-ribbon,.fx .card .badge {font-family:var(--pixel);}
+.fx .card-team {background:#ffe4a4;color:#503c39;border:2px solid #785e49;box-shadow:2px 2px #162f3255;}
+.fx .card-actions .btn {min-height:36px;}
+.fx .collection-more {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:linear-gradient(120deg,#30313c,#242532);border:2px solid #92859a;box-shadow:0 4px #100c20;}
+.fx .undo-bar {background:#ffe4a4;border:2px solid #785e49;color:#503c39;border-radius:0;box-shadow:3px 4px #10142099;}
+.fx .undo-bar .btn {background:#503c39;color:#ffe4a4;border-color:#785e49;}
+.app:not(.home-view) .fx .modal.panel,.app:not(.home-view) .fx .gear-picker {background:linear-gradient(120deg,#30313c,#242532);}
+.fx .plan-list li {border-bottom:1px solid #565261;}
+
+/* Fighter detail: the hero panel becomes a little framed scene. */
+.app:not(.home-view) .fx-detail .detail-hero.panel {position:relative;overflow:hidden;background:
+  linear-gradient(180deg,#00000000 62%,#4f5d6355 62%,#4f5d63aa 70%,#547463 70%,#4b6a59 100%),
+  linear-gradient(180deg,#5d4f7c,#a8798a 55%,#d9a483 70%);}
+.fx-detail .detail-hero:after {content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 95px #14282c55;}
+.fx-detail .detail-hero > * {position:relative;z-index:1;}
+.fx-detail .detail-info {padding:14px;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #202b324d;}
+.fx-detail .detail-info h2 {font:clamp(13px,1.5vw,18px)/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 3px #302c43;}
+.fx-detail .eyebrow {color:#e2bc85;letter-spacing:2px;}
+.fx-detail .tag {background:#ffe4a4;color:#503c39;border:2px solid #785e49;}
+.fx-detail .special-box {background:#1f2030;border:1px solid #b4a183;}
+.fx-detail .gear-slot {background:#22232f;border:1px dashed #8a8296;border-radius:0;}
+.fx-detail .gear-slot.filled {border:1px solid #b4a183;background:linear-gradient(160deg,#30313c,#22232f);}
+.fx-detail .mastery-bar {background:#111a27;border:1px solid #646064;}
+.fx-detail .level-wall {background:#ffe4a41a;border-left:3px solid #e2bc85;}
+
+/* Items: the Vault mural gets Home's frame; tabs are chips, the active one parchment. */
+.fx-inv .inventory-mural {border:2px solid #92859a;box-shadow:0 4px #100c20;margin:0;}
+.fx-inv .inventory-mural h2 {color:#fff0cf;text-shadow:2px 3px #302c43;}
+.fx-inv .inventory-mural small {color:#e2bc85;}
+.fx-inv .purse {margin:0;}
+.fx-inv .purse > span {background:#22243b;border:1px solid #b4a480;box-shadow:2px 3px #202b324d;}
+.fx-inv .inv-tabs {gap:6px;margin-bottom:0;}
+.fx-inv .inv-tabs button {background:#303038;border:1px solid #b4a183;color:#f4e6cf;box-shadow:2px 2px #10142080;}
+.fx-inv .inv-tabs button.active {background:#ffe4a4;border:2px solid #785e49;color:#503c39;}
+.fx-inv .bag {padding:14px;}
+.fx-inv .inv-slot {background:linear-gradient(160deg,#30313c,#22232f);border:1px solid #565261;box-shadow:inset 0 0 18px #0000004d,2px 3px #10142066;}
+.fx-inv .inv-slot.active {border:2px solid #ffdfa3;box-shadow:0 0 0 2px #785e49,0 0 12px #ffd27a66;}
+.fx-inv .inv-slot.empty {background:#1f2029;border:1px solid #3a3946;box-shadow:inset 0 0 12px #0006;}
+.fx-inv .slot-count,.fx-inv .slot-tag {font-family:var(--pixel);}
+.fx-inv .item-detail h3 {margin-top:0;}
+.fx-inv .legend-row {padding:8px 10px;background:#ffffff08;border:1px solid #565261;}
+.fx-inv .legend-row.ready {border-color:#e2bc85;background:#ffe4a41a;}
+
+@media (max-width:700px) {
+  .fx-hero {min-height:200px;padding:18px 16px 14px;}
+  .fx-hero p {font-size:18px;}
+  .fx .fx-section-head {padding:12px 14px;}
+  .fx-stats li {padding:7px 9px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .fx .btn,.fx .card {transition:none;}
+}
+.fx .hud-card .role-tag {display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;padding:2px 3px;}

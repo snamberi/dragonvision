@@ -92,7 +92,7 @@ export function FighterDetail({ save, uid, update, toast, onBack }: Props) {
   const mastery = masteryProgress(unit.mastery ?? 0);
 
   return (
-    <div className="detail">
+    <div className="detail fx fx-detail">
       <button className="btn ghost" onClick={onBack}>
         ← Fighters
       </button>

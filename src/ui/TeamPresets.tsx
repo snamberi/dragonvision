@@ -28,6 +28,7 @@ export function TeamPresets({ save, update, toast }: Props) {
 
   return (
     <section className="panel team-presets">
+      <span className="fx-eyebrow">QUICK SWAP</span>
       <h3>Team presets</h3>
       <div className="preset-list">
         {presets.map((p, i) => {

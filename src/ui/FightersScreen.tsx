@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { checkEvolve, moveTeamMember, power, toggleTeamMember, unitName } from '../game/progression';
+import { checkEvolve, moveTeamMember, power, teamUnits, toggleTeamMember, unitName } from '../game/progression';
 import { type EvolvePreview, type LevelPlan, applyTeamLevels, autoFillTeam, planTeamLevels, previewEvolveAll, toggleLock } from '../game/teamTools';
 import { type Role, getFamily, roleFor } from '../game/roster';
 import type { SaveData } from '../game/types';
@@ -174,9 +174,52 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
   };
 
   const shown = showAll ? units : units.slice(0, INITIAL_SHOWN);
+  const teamPower = teamUnits(save).reduce((sum, u) => sum + power(u.familyId, u.star, u.level), 0);
+  const readyToEvolve = save.units.filter((u) => checkEvolve(save, u.uid).ok).length;
 
   return (
-    <div className="fighters">
+    <div className="fighters fx">
+      <header className="fx-hero">
+        <svg className="fx-hero-bg" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="fx-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#5d4f7c" />
+              <stop offset="0.65" stopColor="#a8798a" />
+              <stop offset="1" stopColor="#d9a483" />
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="240" fill="url(#fx-sky)" />
+          <rect x="860" y="58" width="22" height="22" fill="#f3d9a8" />
+          <path d="M0 150 L90 108 L170 130 L260 92 L350 128 L440 100 L540 136 L640 96 L730 126 L830 104 L930 134 L1030 98 L1120 124 L1200 110 V240 H0Z" fill="#6c5878" />
+          <path d="M0 176 L120 150 L240 166 L360 146 L480 168 L600 150 L720 168 L840 148 L960 166 L1080 150 L1200 162 V240 H0Z" fill="#4f5d63" />
+          <rect y="192" width="1200" height="48" fill="#547463" />
+          <rect y="192" width="1200" height="4" fill="#6f8f6c" />
+          <g fill="#3e5a4c">
+            <rect x="90" y="166" width="12" height="26" /><rect x="82" y="150" width="28" height="18" />
+            <rect x="1090" y="164" width="12" height="28" /><rect x="1081" y="146" width="30" height="20" />
+            <rect x="330" y="172" width="10" height="20" /><rect x="324" y="160" width="22" height="14" />
+            <rect x="860" y="172" width="10" height="20" /><rect x="854" y="160" width="22" height="14" />
+          </g>
+          <g fill="#7d6a53">
+            <rect x="580" y="160" width="6" height="32" /><rect x="614" y="160" width="6" height="32" />
+            <rect x="572" y="155" width="56" height="6" />
+          </g>
+          <g fill="#c9b27e">
+            <rect x="470" y="182" width="4" height="10" /><rect x="468" y="178" width="8" height="5" />
+            <rect x="726" y="182" width="4" height="10" /><rect x="724" y="178" width="8" height="5" />
+          </g>
+        </svg>
+        <div className="fx-hero-text">
+          <span className="fx-eyebrow">YOUR ROSTER</span>
+          <h2>The Barracks</h2>
+          <p>Pick your five, gear them up and grow them stronger.</p>
+        </div>
+        <ul className="fx-stats" aria-label="Roster summary">
+          <li><small>Fighters</small><b>{save.units.length}/{cap}</b></li>
+          <li><small>Team power</small><b>{teamPower.toLocaleString()}</b></li>
+          <li className={readyToEvolve ? 'ready' : ''}><small>Can evolve</small><b>{readyToEvolve}</b></li>
+        </ul>
+      </header>
       <TeamArena save={save} onOpen={onOpen} onMove={(from, to) => update((s) => moveTeamMember(s, from, to))} onRemove={toggle} />
       <div className="team-tools">
         <button className="btn small" onClick={autoFill}>Auto-fill team</button>
@@ -184,9 +227,12 @@ export function FightersScreen({ save, update, toast, onOpen }: Props) {
       </div>
       <TeamPresets save={save} update={update} toast={toast} />
 
-      <div className="section-head">
-        <h2>Collection ({save.units.length}/{cap})</h2>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div className="section-head fx-section-head">
+        <div>
+          <span className="fx-eyebrow">EVERY FIGHTER YOU OWN</span>
+          <h2>Collection ({save.units.length}/{cap})</h2>
+        </div>
+        <div className="fx-head-actions">
           <button className="btn small" onClick={openEvolvePlan}>Evolve All</button>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort fighters">
             <option value="power">Power</option>

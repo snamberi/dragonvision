@@ -50,7 +50,10 @@ export function TeamArena({ save, onOpen, onMove, onRemove, title = 'Your Team' 
   return (
     <section className="team-arena">
       <div className="arena-head">
-        <h2>{title}</h2>
+        <div>
+          <span className="fx-eyebrow">FORMATION</span>
+          <h2>{title}</h2>
+        </div>
         <span className="arena-power">
           {count}/{MAX_TEAM_SIZE} · Power {teamPower.toLocaleString()}
         </span>

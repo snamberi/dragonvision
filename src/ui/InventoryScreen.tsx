@@ -57,7 +57,7 @@ export function InventoryScreen({ save, update }: Props) {
   };
 
   return (
-    <div className="inventory"><div className="inventory-mural"><PixelBackdrop room/><div><small>YOUR COLLECTION</small><h2>THE VAULT</h2><p>Equipment, treasures &amp; relics from your journey.</p></div></div>
+    <div className="inventory fx fx-inv"><div className="inventory-mural"><PixelBackdrop room/><div><small>YOUR COLLECTION</small><h2>THE VAULT</h2><p>Equipment, treasures &amp; relics from your journey.</p></div></div>
       <div className="purse">
         <span className="coin"><PixelIcon kind="coin" size={16} /> {save.coins.toLocaleString()}</span>
         <span className="gem"><PixelIcon kind="gem" size={16} /> {save.gems.toLocaleString()}</span>
