@@ -3075,3 +3075,23 @@ button, a, select, input, label { touch-action:manipulation; -webkit-tap-highlig
 .preset-row .preset-members { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; }
 .preset-name { display: flex; gap: 6px; align-items: center; }
 .preset-name input { width: 9em; }
+
+/* Gear compare and bulk salvage */
+.gear-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  padding: 4px 8px 6px;
+}
+.gear-compare .delta-up {
+  color: #6fe08a;
+}
+.gear-compare .delta-down {
+  color: #ff7a6b;
+}
+.salvage-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
