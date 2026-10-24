@@ -1,5 +1,5 @@
 import { type CSSProperties, type ReactNode, useEffect, useId, useState } from 'react';
-import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, towerUrl, upgradesHouseUrl, dungeonUrl, raidUrl, climbUrl, journalUrl } from '../art/buildings';
+import { shopUrl, armoryUrl, boardUrl, colosseumUrl, dojoUrl, gateUrl, hallUrl, gravityUrl, labUrl, portUrl, shrineUrl, tentUrl, eventTentUrl, towerUrl, upgradesHouseUrl, dungeonUrl, raidUrl, climbUrl, journalUrl, type Light } from '../art/buildings';
 import { ACHIEVEMENTS, achievementState } from '../game/achievements';
 import { BOUNTIES, bountyProgress } from '../game/bounty';
 import { attemptsLeft, bossProgress } from '../game/worldBoss';
@@ -110,26 +110,28 @@ export function CityScreen({ save, onOpen }: Props) {
     return st.complete && !st.claimed;
   }).length;
 
+  // Dawn and day share daylight; dusk and night relight windows, lamps and magic.
+  const light: Light = phase === 'dawn' ? 'day' : phase;
   const spots: Spot[] = [
-    { id: 'summon', name: 'Summoning Shrine', art: shrineUrl(), badge: save.spins > 0 ? `${save.spins} ORBS` : undefined },
-    { id: 'shop', name: 'Shop', art: shopUrl(), badge: marketFresh(save) ? 'NEW' : undefined },
-    { id: 'fortune', name: 'Fortune Teller', art: tentUrl(), badge: fortuneReady(save) ? 'FREE' : undefined },
-    { id: 'dojo', name: 'Training Dojo', art: dojoUrl(), badge: dojoReady > 0 ? `+${dojoReady} LV` : undefined },
-    { id: 'fusion', name: 'Fusion Lab', art: labUrl(), badge: spares > 0 ? `${spares} SPARE` : undefined },
-    { id: 'gravity', name: 'Gravity Chamber', art: gravityUrl() },
-    { id: 'port', name: 'Expedition Port', art: portUrl(), badge: tripsBack > 0 ? `${tripsBack} BACK` : undefined },
-    { id: 'bounty', name: 'Bounty Board', art: boardUrl(), badge: bountiesReady > 0 ? `${bountiesReady} DONE` : undefined },
-    { id: 'armory', name: 'Armory', art: armoryUrl() },
-    { id: 'colosseum', name: 'Colosseum', art: colosseumUrl(), badge: attemptsLeft(save) > 0 && bossProgress(save) < 1 ? 'BOSS' : undefined },
-    { id: 'gate', name: 'Survival Gate', art: gateUrl(), badge: save.survivalBest > 0 ? `BEST ${save.survivalBest}` : undefined },
-    { id: 'hall', name: 'Hall of Legends', art: hallUrl(), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
-    { id: 'tower', name: 'Rival Tower', art: towerUrl(), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
-    { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl() },
-    { id: 'dungeon', name: 'Daily Dungeon', art: dungeonUrl(), badge: save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0 ? 'OPEN' : undefined },
-    { id: 'raid', name: 'Boss Raid', art: raidUrl(), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage / 1000).toFixed(0)}K` : undefined },
-    { id: 'climb', name: 'Infinite Climb', art: climbUrl(), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
-    { id: 'journal', name: "Collector's Journal", art: journalUrl() },
-    { id: 'event', name: ev.name, art: tentUrl(), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
+    { id: 'summon', name: 'Summoning Shrine', art: shrineUrl(light), badge: save.spins > 0 ? `${save.spins} ORBS` : undefined },
+    { id: 'shop', name: 'Shop', art: shopUrl(light), badge: marketFresh(save) ? 'NEW' : undefined },
+    { id: 'fortune', name: 'Fortune Teller', art: tentUrl(light), badge: fortuneReady(save) ? 'FREE' : undefined },
+    { id: 'dojo', name: 'Training Dojo', art: dojoUrl(light), badge: dojoReady > 0 ? `+${dojoReady} LV` : undefined },
+    { id: 'fusion', name: 'Fusion Lab', art: labUrl(light), badge: spares > 0 ? `${spares} SPARE` : undefined },
+    { id: 'gravity', name: 'Gravity Chamber', art: gravityUrl(light) },
+    { id: 'port', name: 'Expedition Port', art: portUrl(light), badge: tripsBack > 0 ? `${tripsBack} BACK` : undefined },
+    { id: 'bounty', name: 'Bounty Board', art: boardUrl(light), badge: bountiesReady > 0 ? `${bountiesReady} DONE` : undefined },
+    { id: 'armory', name: 'Armory', art: armoryUrl(light) },
+    { id: 'colosseum', name: 'Colosseum', art: colosseumUrl(light), badge: attemptsLeft(save) > 0 && bossProgress(save) < 1 ? 'BOSS' : undefined },
+    { id: 'gate', name: 'Survival Gate', art: gateUrl(light), badge: save.survivalBest > 0 ? `BEST ${save.survivalBest}` : undefined },
+    { id: 'hall', name: 'Hall of Legends', art: hallUrl(light), badge: achievementsReady > 0 ? `${achievementsReady} NEW` : undefined },
+    { id: 'tower', name: 'Rival Tower', art: towerUrl(light), badge: save.towerFloor > 0 ? `${save.towerFloor}F` : undefined },
+    { id: 'upgrades', name: 'Upgrades House', art: upgradesHouseUrl(light) },
+    { id: 'dungeon', name: 'Daily Dungeon', art: dungeonUrl(light), badge: save.dungeon?.cleared === false && (save.dungeon?.attempts ?? 0) > 0 ? 'OPEN' : undefined },
+    { id: 'raid', name: 'Boss Raid', art: raidUrl(light), badge: save.raid?.totalDamage ? `${(save.raid.totalDamage / 1000).toFixed(0)}K` : undefined },
+    { id: 'climb', name: 'Infinite Climb', art: climbUrl(light), badge: save.climbBest ? `BEST ${save.climbBest}` : undefined },
+    { id: 'journal', name: "Collector's Journal", art: journalUrl(light) },
+    { id: 'event', name: ev.name, art: eventTentUrl(light), badge: evProgress.cleared < EVENT_STAGES ? `${formatTimeLeft(eventTimeLeft())} LEFT` : `${evProgress.currency} TOKENS` },
   ];
   const byId = new Map(spots.map((s) => [s.id, s]));
   const pending = pendingBadges(save);

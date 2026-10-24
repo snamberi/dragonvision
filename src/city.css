@@ -43,11 +43,11 @@
 
 /* Buildings: same anatomy as Home's spots — art, a dark label chip with ↗, a parchment badge. */
 .vc-spot {position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;background:none;border:0;padding:0;margin:0;transform:translate(-50%,-100%);cursor:pointer;color:#fff0d0;overflow:visible;box-shadow:none;}
-.vc-art {display:block;width:100%;max-width:190px;height:auto;max-height:170px;object-fit:contain;object-position:bottom;image-rendering:pixelated;filter:drop-shadow(5px 8px 0 #20343333);transition:filter .18s,translate .18s;}
+.vc-art {display:block;width:100%;max-width:190px;height:auto;max-height:170px;object-fit:contain;object-position:bottom;image-rendering:pixelated;transition:filter .18s,translate .18s;}
 .vc-hero-spot .vc-art {max-width:300px;max-height:250px;}
 .vc-event-spot .vc-art {max-width:190px;}
 .vc-spot:hover .vc-art,.vc-spot:focus-visible .vc-art {filter:drop-shadow(0 0 8px #ffe6b960) brightness(1.1);}
-.vc-spot.has-badge .vc-art {filter:drop-shadow(5px 8px 0 #20343333) drop-shadow(0 0 10px #fbd08440);}
+.vc-spot.has-badge .vc-art {filter:drop-shadow(0 0 10px #fbd08440);}
 @media (hover:hover) {.vc-spot:hover .vc-art {translate:0 -4px;}}
 .vc-label {display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;min-height:29px;font:10px/1.55 var(--pixel);padding:7px 10px;background:#303038ee;border:1px solid #b4a183;box-shadow:2px 3px #20343366;text-align:center;}
 .vc-label i {font:18px/1 var(--body);font-style:normal;color:#dcb983;opacity:.75;}

@@ -18,7 +18,7 @@
 .qs-status {position:absolute;z-index:4;right:24px;top:24px;display:grid;gap:5px;padding:12px 17px;min-width:150px;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #202b324d;text-align:left;}
 .qs-status small {font:11px var(--body);letter-spacing:1.5px;color:#d6b895;text-transform:uppercase;}
 .qs-status strong {font:12px/1.5 var(--pixel);color:#fff1cf;}
-.qs-building {position:absolute;z-index:2;left:50%;bottom:6%;width:min(300px,42%);transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(5px 8px 0 #20343333);}
+.qs-building {position:absolute;z-index:2;left:50%;bottom:6%;width:min(300px,42%);transform:translateX(-50%);image-rendering:pixelated;}
 .qs-figure {position:absolute;z-index:3;left:calc(50% + min(170px,23%));bottom:7%;filter:drop-shadow(3px 5px 0 #20343344);}
 .qs-figure:before {content:'';position:absolute;left:50%;bottom:2px;width:64px;height:10px;translate:-50% 0;background:#203c3699;border-radius:50%;z-index:-1;}
 
