@@ -1,0 +1,105 @@
+/* Vision City, drawn in the same warm pixel language as Home: framed scenes, label chips, parchment badges. */
+.vc {display:flex;flex-direction:column;gap:22px;}
+.vc-eyebrow {display:block;font:12px/1.2 var(--body);letter-spacing:2px;color:#e2bc85;}
+
+/* Scenes share Home's frame: a thin lilac border, a hard drop shadow and a soft inner vignette. */
+.vc-hero,.vc-street {position:relative;isolation:isolate;width:100%;overflow:hidden;border:2px solid #92859a;background:#547463;box-shadow:0 4px #100c20;}
+.vc-hero {min-height:520px;max-height:760px;}
+.vc-hero:after,.vc-street:after {content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 95px #14282c44;z-index:3;}
+.vc-art-bg {position:absolute;inset:0;width:100%;height:100%;}
+
+/* Light follows the player's clock. */
+.vc-tint {position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.5s ease;}
+.vc.time-dawn .vc-tint {opacity:1;background:linear-gradient(180deg,#ff9fb033,#ffd28a1f 45%,transparent);mix-blend-mode:soft-light;}
+.vc.time-dusk .vc-tint {opacity:1;background:linear-gradient(180deg,#6b3fa833,#ff8a4a26 55%,#ff8a4a14);mix-blend-mode:multiply;}
+.vc.time-night .vc-tint {opacity:1;background:linear-gradient(180deg,#0b0f2b99,#141a3a8c 60%,#1a124080);mix-blend-mode:multiply;}
+.vc-lit,.vc-glow {transition:opacity 1.5s ease;}
+.vc-lit {opacity:.25;}
+.vc-glow {opacity:0;}
+.vc.time-dusk .vc-lit,.vc.time-night .vc-lit {opacity:1;}
+.vc.time-dusk .vc-glow {opacity:.12;}
+.vc.time-night .vc-glow {opacity:.22;}
+.vc.time-day .vc-window {opacity:0;}
+
+/* Welcome header and the "something is waiting" card mirror Home's welcome and next-adventure card. */
+.vc-welcome {position:absolute;z-index:4;left:27px;right:27px;top:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;pointer-events:none;}
+.vc-welcome h2 {font:clamp(12px,1.4vw,18px)/1.7 var(--pixel);color:#fff0cf;margin:10px 0 3px;text-shadow:2px 3px #302c43;}
+.vc-welcome p {font-size:20px;margin:0;color:#ddd1c8;text-shadow:1px 2px #39384a;max-width:46ch;}
+.vc-next {pointer-events:auto;flex:none;display:flex;align-items:center;gap:13px;padding:12px 17px;background:#22243bd9;border:1px solid #b4a480;box-shadow:3px 4px #202b324d;cursor:pointer;color:inherit;}
+.vc-next>span {text-align:left;display:grid;gap:5px;}
+.vc-next small {font:11px var(--body);letter-spacing:1.5px;color:#d6b895;}
+.vc-next strong {font:12px var(--pixel);color:#fff1cf;}
+.vc-next>b {font-size:25px;color:#efd398;}
+.vc-next:hover,.vc-next:focus-visible {background:#3c3547;border-color:#ffe6ac;}
+.vc-note {position:absolute;z-index:4;bottom:16px;left:22px;font:18px/1.3 var(--body);color:#d2d4bc;text-shadow:1px 2px #345348;pointer-events:none;}
+.vc-note span {margin-right:8px;color:#e9c789;}
+
+/* Districts: a parchment-trimmed header over each illustrated street. */
+.vc-district {display:flex;flex-direction:column;}
+.vc-district-head {display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:16px;row-gap:4px;padding:14px 20px 12px;background:linear-gradient(110deg,#403546,#292536);border:2px solid #92859a;border-bottom:0;box-shadow:inset 4px 0 var(--accent);}
+.vc-district-head .vc-eyebrow {grid-column:1/-1;color:var(--accent);}
+.vc-district-head h3 {margin:0;font:13px/1.6 var(--pixel);color:#fff0cf;text-shadow:2px 2px #1f1b2e;}
+.vc-district-head p {margin:0;font-size:19px;color:#cfc3b8;}
+
+/* Buildings: same anatomy as Home's spots — art, a dark label chip with ↗, a parchment badge. */
+.vc-spot {position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;background:none;border:0;padding:0;margin:0;transform:translate(-50%,-100%);cursor:pointer;color:#fff0d0;overflow:visible;box-shadow:none;}
+.vc-art {display:block;width:100%;max-width:190px;height:auto;max-height:170px;object-fit:contain;object-position:bottom;image-rendering:pixelated;filter:drop-shadow(5px 8px 0 #20343333);transition:filter .18s,translate .18s;}
+.vc-hero-spot .vc-art {max-width:300px;max-height:250px;}
+.vc-event-spot .vc-art {max-width:190px;}
+.vc-spot:hover .vc-art,.vc-spot:focus-visible .vc-art {filter:drop-shadow(0 0 8px #ffe6b960) brightness(1.1);}
+.vc-spot.has-badge .vc-art {filter:drop-shadow(5px 8px 0 #20343333) drop-shadow(0 0 10px #fbd08440);}
+@media (hover:hover) {.vc-spot:hover .vc-art {translate:0 -4px;}}
+.vc-label {display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;min-height:29px;font:10px/1.55 var(--pixel);padding:7px 10px;background:#303038ee;border:1px solid #b4a183;box-shadow:2px 3px #20343366;text-align:center;}
+.vc-label i {font:18px/1 var(--body);font-style:normal;color:#dcb983;opacity:.75;}
+.vc-hero-spot .vc-label {font-size:11px;background:#674c3e;border-color:#d4b484;box-shadow:3px 3px #453943;}
+.vc-spot:hover .vc-label,.vc-spot:focus-visible .vc-label {border-color:#ffdfa3;color:#ffdfa3;}
+.vc-spot:focus-visible {outline:none;}
+.vc-spot:focus-visible .vc-label {outline:2px solid #ffdfa3;outline-offset:2px;}
+.vc-badge {position:absolute;top:0;right:-6px;z-index:3;padding:5px 7px;font:9px/1.4 var(--pixel);background:#ffe4a4;border:2px solid #785e49;color:#503c39;box-shadow:2px 2px #162f3255;white-space:nowrap;}
+.vc-event-spot .vc-badge {background:#ffd23f;}
+.vc-dot {flex:none;width:9px;height:9px;background:#ff5a5a;border:2px solid #fff0cf;box-shadow:0 0 6px #ff5a5a99;}
+
+/* Motion: the same small loops Home uses. */
+.vc-cloud {animation:vc-cloud 25s linear infinite alternate;}
+.vc-water {animation:vc-water 3.2s steps(6) infinite alternate;}
+.vc-butterfly {animation:vc-butterfly 7s steps(16) infinite alternate;}
+.vc-twinkle {animation:vc-twinkle 2.4s steps(2) infinite;}
+.vc-event-spot .vc-art {animation:vc-sway 3.2s ease-in-out infinite;}
+@keyframes vc-cloud {to{translate:35px 0;}}
+@keyframes vc-water {to{translate:5px 0;opacity:.5;}}
+@keyframes vc-butterfly {25%{translate:14px -8px;}60%{translate:28px 3px;}to{translate:52px -12px;}}
+@keyframes vc-twinkle {50%{opacity:.2;}}
+@keyframes vc-sway {50%{translate:0 -3px;}}
+
+@media(min-width:1700px) {.vc {max-width:1600px;margin:auto;width:100%;}}
+@media(max-width:1000px) and (min-width:701px) {
+ .vc-welcome {left:20px;right:20px;top:20px;gap:15px;}
+ .vc-welcome p {font-size:18px;}
+ .vc-next {padding:10px;gap:8px;}
+ .vc-label {font-size:9px;padding:6px 7px;gap:5px;}
+ .vc-badge {font-size:8px;padding:4px 5px;}
+}
+@media(max-width:700px) {
+ .vc {gap:16px;}
+ .vc-hero {min-height:0;max-height:none;}
+ .vc-welcome {left:16px;right:16px;top:17px;gap:13px;flex-direction:column;}
+ .vc-welcome .vc-eyebrow {font-size:10px;letter-spacing:1px;}
+ .vc-welcome h2 {font-size:12px;line-height:1.8;margin:8px 0 2px;}
+ .vc-welcome p {font-size:18px;}
+ .vc-next {gap:10px;padding:8px 12px;}
+ .vc-next small {font-size:10px;}
+ .vc-next strong {font-size:10px;}
+ .vc-note {font-size:15px;bottom:12px;left:13px;max-width:52%;}
+ .vc-district-head {padding:12px 14px 10px;grid-template-columns:1fr;}
+ .vc-district-head h3 {font-size:11px;}
+ .vc-district-head p {font-size:17px;}
+ .vc-art {max-width:150px;max-height:130px;}
+ .vc-hero-spot .vc-art {max-width:230px;max-height:200px;}
+ .vc-label {font-size:9px;line-height:1.5;gap:5px;padding:6px 7px;min-height:30px;}
+ .vc-label i {font-size:15px;}
+ .vc-badge {font-size:8px;right:-4px;top:-6px;padding:4px;}
+}
+@media(prefers-reduced-motion:reduce) {
+ .vc-cloud,.vc-water,.vc-butterfly,.vc-twinkle,.vc-event-spot .vc-art {animation:none!important;}
+ .vc-tint,.vc-lit,.vc-glow,.vc-art {transition:none;}
+}

@@ -7,36 +7,6 @@
   --event-glow: #ffb02e;
 }
 
-/* --- Day/night tint over the city map (purely visual; buildings stay clickable) --- */
-.city-sky-tint {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: background 1.2s ease, opacity 1.2s ease;
-  opacity: 0;
-}
-.city-map.time-dawn .city-sky-tint { opacity: 1; background: linear-gradient(180deg, #ff9fb066 0%, #ffd28a33 45%, transparent 100%); mix-blend-mode: soft-light; }
-.city-map.time-day .city-sky-tint { opacity: 0; }
-.city-map.time-dusk .city-sky-tint { opacity: 1; background: linear-gradient(180deg, #6b3fa866 0%, #ff8a4a40 55%, #ff8a4a1f 100%); mix-blend-mode: multiply; }
-.city-map.time-night .city-sky-tint { opacity: 1; background: radial-gradient(ellipse at 50% -20%, #3b4a9a55 0%, transparent 60%), linear-gradient(180deg, #0b0f2bcc 0%, #141a3ab3 60%, #1a1240a6 100%); mix-blend-mode: multiply; }
-
-/* Lit windows: at night buildings glow warm from inside. */
-.city-map.time-night .building-art { filter: brightness(.82) drop-shadow(0 0 6px #ffcf6a88) drop-shadow(0 0 16px #ffb02e44); }
-.city-map.time-dusk .building-art { filter: brightness(.95) drop-shadow(0 0 5px #ffcf6a55); }
-.city-map.time-night .building-name { color: #ffe6b3; text-shadow: 0 0 6px #ffb02e99, 2px 2px var(--event-ink); }
-.city-map.time-night .city-location span { text-shadow: 0 0 8px #ffd23f88, 2px 2px var(--event-ink); }
-
-/* Festival tent on the plaza. */
-.city-map .building.event-building .building-art { animation: event-sway 3.2s ease-in-out infinite; }
-.city-map .building.event-building .badge { background: var(--event-gold); color: var(--event-ink); }
-@keyframes event-sway { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .city-sky-tint { transition: none; }
-  .city-map .building.event-building .building-art { animation: none; }
-}
-
 /* --- Home banner --- */
 .home-event-banner {
   position: absolute;
