@@ -37,10 +37,10 @@ import { bossStage, recordBossAttempt } from '../game/worldBoss';
 import { type SideMode, isSideMode, prepareSideBattle, settleSideBattle, sideSquad, sideStage } from '../game/sideModes';
 import { classEdge, getFamily } from '../game/roster';
 import { applyTowerWin, towerRewards, towerStage } from '../game/tower';
-import { FINAL_STAGE, type Rewards, applyRewards, getStage, rewardsFor, withDailyBoost } from '../game/stages';
+import { FINAL_STAGE, type Rewards, applyRewards, getStage, isUnlocked, rewardsFor, withDailyBoost } from '../game/stages';
 import type { SaveData } from '../game/types';
 import type { Updater } from './App';
-import { type Run, nextInRun } from './run';
+import { type Run, newRun, nextInRun } from './run';
 import { Portrait, Sprite, Stars } from './Sprite';
 import { GearCard } from './GearCard';
 import { sfx } from '../audio/sound';
@@ -66,6 +66,25 @@ interface Props {
 const STEP_MS = 1500;
 const SPEEDS = [1, 2, 4] as const;
 const SPEED_KEY = 'dragonvision.speed';
+
+const AUTO_KEY = 'dragonvision.auto';
+
+/** The player's last Auto choice for single battles. */
+function loadAuto(): boolean {
+  try {
+    return localStorage.getItem(AUTO_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function saveAuto(on: boolean) {
+  try {
+    localStorage.setItem(AUTO_KEY, on ? '1' : '0');
+  } catch {
+    // Auto just won't be remembered.
+  }
+}
 
 function loadSpeed(): number {
   try {
@@ -138,7 +157,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const [pending, setPending] = useState<ActionKind | null>(null);
-  const [auto, setAuto] = useState(run.mode !== 'single');
+  const [auto, setAuto] = useState(() => run.mode !== 'single' || loadAuto());
   const [speed, setSpeed] = useState(() => (run.mode === 'single' ? loadSpeed() : Math.max(2, loadSpeed())));
   const [log, setLog] = useState<string[]>([]);
   const [rewards, setRewards] = useState<Rewards | null>(null);
@@ -151,6 +170,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
   const [actionMs, setActionMs] = useState(STEP_MS);
 
   const actor = nextActor(battle);
+  const storyStage = !mode && !towerFloor;
   const playerControls = battle.result === 'ongoing' && battle.turn === 'player' && !auto && !busy;
   const nameOf = (id: string) => battle.fighters.find((f) => f.id === id)?.name ?? '?';
 
@@ -249,7 +269,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
       gems: run.gems + earned.gems,
       spins: run.spins + earned.spins,
     };
-    const decision = nextInRun(total, stageNumber);
+    const decision = nextInRun(total, stageNumber, { walletCoins: save.coins + earned.coins, gearTemplateId: earned.gear?.templateId });
     setRunAfter('next' in decision ? { run: total, next: decision.next } : { run: total, stop: decision.stop });
   }, [busy, battle.result, battle.fighters, save, stage, stageNumber, towerFloor, update, run, mode, bossStart, wave, battle]);
 
@@ -486,7 +506,7 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
               {battle.result === 'ongoing' ? 'Retreat' : 'Leave'}
             </button>
           )}
-          <button className={`cmd auto ${auto ? 'on' : ''}`} onClick={() => setAuto((a) => !a)}>
+          <button className={`cmd auto ${auto ? 'on' : ''}`} onClick={() => { const next = !auto; setAuto(next); if (run.mode === 'single') saveAuto(next); }}>
             <span className="cmd-icon">»</span>Auto<small>{auto ? 'ON' : 'OFF'}</small>
           </button>
           <button className="cmd speed" onClick={cycleSpeed}>
@@ -619,9 +639,25 @@ export function BattleScreen({ save, stageNumber, towerFloor, mode, run, update,
                 </div>
               </div>
             )}
-            <button className="btn primary" onClick={onExit}>
-              Continue
-            </button>
+            {storyStage ? (
+              <div className="button-row result-actions">
+                <button className="btn" onClick={() => onContinue(stageNumber, newRun('single'))}>
+                  Retry
+                </button>
+                {stageNumber < FINAL_STAGE && isUnlocked(save, stageNumber + 1) && (
+                  <button className="btn primary" onClick={() => onContinue(stageNumber + 1, newRun('single'))}>
+                    Next stage
+                  </button>
+                )}
+                <button className="btn ghost" onClick={onExit}>
+                  Back to map
+                </button>
+              </div>
+            ) : (
+              <button className="btn primary" onClick={onExit}>
+                Continue
+              </button>
+            )}
           </div>
         </div>
       )}
