@@ -13,8 +13,8 @@ export const DISCORD_URL = 'https://discord.gg/5uGK5HDS8e';
 
 export const SOCIAL_LINKS: SocialLink[] = [
   { id: 'discord', label: 'Discord', url: DISCORD_URL },
-  { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@courtvision.game' },
-  { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/courtvision.game/' },
+  { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@ninefoldvision' },
+  { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/ninefoldvision/' },
   { id: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@NineFoldVision' },
   { id: 'reddit', label: 'Reddit', url: 'https://www.reddit.com/r/NineFoldVision/' },
 ];
